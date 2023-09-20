@@ -8,7 +8,8 @@ indent_size = 2
 indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
-
+ij_typescript_force_semicolon_style = true
+ij_javascript_force_semicolon_style = true
 # Markdown Files
 [*.md]
 trim_trailing_whitespace = false

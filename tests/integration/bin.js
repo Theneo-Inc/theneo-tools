@@ -2,4 +2,4 @@
 'use strict';
 
 require('ts-node/register');
-require('../../src/cli/bin');
+require('../../src/bin');

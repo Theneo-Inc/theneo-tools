@@ -4,7 +4,7 @@ import * as yamlParser from 'js-yaml';
 import { parse as tomlParser } from 'toml';
 import { createDirectorySync } from '../utils/file';
 import { Err, Ok, Result } from 'ts-results';
-import { Profile, TheneoConfig } from '../config';
+import { ProfileConfig, TheneoConfig } from '../config';
 
 export const Json = 'json';
 export const Yaml = 'yaml';
@@ -43,7 +43,7 @@ export class ConfigManager {
     }
   }
 
-  public getProfile(profileName: string): Result<Profile, Error> {
+  public getProfile(profileName: string): Result<ProfileConfig, Error> {
     if (this.config === null) {
       return Err(ErrorConfigIsEmpty);
     }
@@ -54,7 +54,7 @@ export class ConfigManager {
     return Ok(profile);
   }
 
-  public setProfile(profileName: string, profile: Profile): void {
+  public setProfile(profileName: string, profile: ProfileConfig): void {
     if (this.config === null) {
       this.config = {
         profiles: {

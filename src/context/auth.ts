@@ -1,5 +1,9 @@
 import { configManager } from '../config-manager';
-import { DEFAULT_PROFILE } from '../consts';
+import {
+  DEFAULT_PROFILE,
+  DEFAULT_THENEO_API_BASE_URL,
+  DEFAULT_THENEO_APP_BASE_URL,
+} from '../consts';
 import { Result } from 'ts-results';
 import { Profile } from '../config';
 
@@ -12,7 +16,19 @@ export function setApiKeyAndSave(
   return configManager.save();
 }
 
-export function getProfile(profile?: string): Result<Profile, Error> {
-  profile = profile ?? DEFAULT_PROFILE;
-  return configManager.getProfile(profile);
+export function getProfile(profileName?: string): Result<Profile, Error> {
+  profileName = profileName ?? DEFAULT_PROFILE;
+  return configManager.getProfile(profileName).map(profile => {
+    return {
+      token: process.env.THENEO_API_KEY ?? profile.token,
+      apiUrl:
+        process.env.THENEO_API_URL ??
+        profile.apiUrl ??
+        DEFAULT_THENEO_API_BASE_URL,
+      appUrl:
+        process.env.THENEO_APP_URL ??
+        profile.appUrl ??
+        DEFAULT_THENEO_APP_BASE_URL,
+    };
+  });
 }

@@ -4,7 +4,6 @@ import { initializeProgram } from './commands';
 
 function runCli() {
   const program = initializeProgram();
-  console.debug(process.argv);
   program.parse(process.argv);
 
   // If no command is provided, display help

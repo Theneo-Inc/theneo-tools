@@ -1,8 +1,6 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
-import { DEFAULT_THENEO_API_BASE_URL } from '../../consts';
 import Table from 'cli-table';
-import { log } from '@clack/prompts';
 import { queryUserWorkspaces } from '../../api/workspace';
 import { Workspace } from '../../api/schema/workspace';
 
@@ -15,11 +13,11 @@ export function initWorkspaceListCommand() {
       .action(async (options: { json: boolean }) => {
         const profile = getProfile().unwrap();
         const projectsResult = await queryUserWorkspaces(
-          profile.apiUrl ?? DEFAULT_THENEO_API_BASE_URL,
+          profile.apiUrl,
           profile.token
         );
         if (projectsResult.err) {
-          log.error(projectsResult.val.message);
+          console.error(projectsResult.val.message);
           process.exit(1);
         }
         if (options.json) {

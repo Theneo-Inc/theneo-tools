@@ -1,6 +1,5 @@
 import { ConfigManager, Yaml } from './config-manager';
 import { THENEO_CLI_CONFIG_NAME, THENEO_CONFIG_DIR } from '../consts';
-import { log } from '@clack/prompts';
 
 export function initConfigManager(): ConfigManager {
   const configManager = new ConfigManager(
@@ -9,7 +8,7 @@ export function initConfigManager(): ConfigManager {
     Yaml
   );
   configManager.readInConfig().mapErr(err => {
-    log.error(err.message);
+    console.error(err.message);
     process.exit(1);
   });
 

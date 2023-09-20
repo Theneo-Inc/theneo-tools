@@ -1,48 +1,37 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
 import { createProject, importProjectDocumentFile } from '../../api/project';
-import { DEFAULT_THENEO_API_BASE_URL } from '../../consts';
-import { cancel, isCancel, log, select, spinner, text } from '@clack/prompts';
 import { queryUserWorkspaces } from '../../api/workspace';
 import { Workspace } from '../../api/schema/workspace';
 import { CreateProjectSchema } from '../../api/schema/project';
 import { readFile } from 'fs/promises';
 import { checkDocumentationFile, getAbsoluteFilePath } from '../../utils/file';
-
-interface SelectOption {
-  value: string;
-  label: string;
-  hint?: string;
-}
+import { input, select } from '@inquirer/prompts';
+import { createSpinner } from 'nanospinner';
 
 async function getWorkspaceId(workspaces: Workspace[]): Promise<string> {
   if (workspaces.length === 0) {
-    log.error('No workspaces found.');
+    console.error('No workspaces found.');
     process.exit(1);
   }
   if (workspaces.length === 1) {
     const workspace = workspaces[0]!;
-    log.info(`Using default workspace: ${workspace.name}`);
+    console.info(`Using default workspace: ${workspace.name}`);
     return workspace.workspaceId;
   }
 
-  const workspaceId = await select<SelectOption[], string>({
+  return select({
     message: 'Pick a workspace.',
-    options: workspaces.map(ws => {
+    choices: workspaces.map(ws => {
       if (ws.isDefault) {
-        return { value: ws.workspaceId, label: ws.name, hint: 'default' };
+        return { value: ws.workspaceId, name: ws.name, description: 'default' };
       }
-      return { value: ws.workspaceId, label: ws.name };
+      return { value: ws.workspaceId, name: ws.name };
     }),
   });
-  if (isCancel(workspaceId)) {
-    cancel('Operation cancelled.');
-    process.exit(0);
-  }
-  return workspaceId;
 }
 
-function getCreatePorjectRequestData(projectName: string, workspaceId: string) {
+function getCreateProjectRequestData(projectName: string, workspaceId: string) {
   const requestData: CreateProjectSchema = {
     name: projectName,
     workspaceId: workspaceId,
@@ -76,70 +65,62 @@ export function initProjectCreateCommand() {
   return new Command('create').action(async () => {
     const profile = getProfile().unwrap();
     const workspacesPromise = queryUserWorkspaces(
-      profile.apiUrl ?? DEFAULT_THENEO_API_BASE_URL,
+      profile.apiUrl,
       profile.token
     );
-    const projectName = await text({
-      message: 'Project Name',
-      validate(value) {
+    const projectName = await input({
+      message: 'Project Name:',
+      validate: value => {
         if (value.length === 0) return 'Name is required!';
-        return undefined;
+        return true;
       },
     });
-    if (isCancel(projectName)) {
-      cancel('Operation cancelled.');
-      process.exit(0);
-    }
-    const s = spinner();
-    s.start();
+    const spinner = createSpinner().start();
+    spinner.start();
     const workspacesResult = await workspacesPromise;
-    s.stop();
+    spinner.reset();
     if (workspacesResult.err) {
-      log.error(workspacesResult.val.message);
+      console.error(workspacesResult.val.message);
       process.exit(1);
     }
     const workspaceId = await getWorkspaceId(workspacesResult.val);
-    const specFileName = await text({
-      message: 'API Spec file name',
-      validate(value) {
+    const specFileName = await input({
+      message: 'API file name (eg: openapi.yml) : ',
+      validate: value => {
         if (value.length === 0) return 'File is required!';
-        return undefined;
+        return true;
       },
     });
-    if (isCancel(specFileName)) {
-      cancel('Operation cancelled.');
-      process.exit(0);
-    }
 
-    s.start('creating project\n');
+    spinner.start({ text: 'creating project' });
     const absoluteFilePath = getAbsoluteFilePath(specFileName);
     const isValidRes = await checkDocumentationFile(absoluteFilePath);
     if (isValidRes.err) {
-      log.error(isValidRes.val);
+      console.error(isValidRes.val);
       process.exit(1);
     }
 
-    const requestData = getCreatePorjectRequestData(projectName, workspaceId);
+    const requestData = getCreateProjectRequestData(projectName, workspaceId);
     const projectsResult = await createProject(
-      profile.apiUrl ?? DEFAULT_THENEO_API_BASE_URL,
+      profile.apiUrl,
       profile.token,
       requestData
     );
     if (projectsResult.err) {
-      log.error(projectsResult.val.message);
+      console.error(projectsResult.val.message);
       process.exit(1);
     }
     const file = await readFile(absoluteFilePath);
     const importResult = await importProjectDocumentFile(
-      profile.apiUrl ?? DEFAULT_THENEO_API_BASE_URL,
+      profile.apiUrl,
       profile.token,
-      projectsResult.val,
-      file
+      file,
+      projectsResult.val
     );
     if (importResult.err) {
-      log.error(importResult.val.message);
+      console.error(importResult.val.message);
       process.exit(1);
     }
-    s.stop('project created: ' + importResult.val);
+    spinner.success({ text: 'project created successfully' });
   });
 }

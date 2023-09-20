@@ -1,6 +1,6 @@
 import { Command } from 'commander';
-import { isCancel, cancel, text, outro } from '@clack/prompts';
 import { setApiKeyAndSave } from '../context/auth';
+import { password } from '@inquirer/prompts';
 
 export function initLogin(program: Command): Command {
   return (
@@ -11,29 +11,21 @@ export function initLogin(program: Command): Command {
       .action(async (options: { token: string }) => {
         let token = options.token;
         if (!token) {
-          const tokenInput = await text({
-            message: 'Input Theneo API Token',
-            placeholder: 'xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxx',
-            validate(value) {
+          token = await password({
+            message: 'Input Theneo API Token:',
+            mask: true,
+            validate: value => {
               if (value.length === 0) return 'Value is required!';
-              return undefined;
+              return true;
             },
           });
-          if (isCancel(tokenInput)) {
-            cancel('Operation cancelled.');
-            process.exit(0);
-          }
-
-          token = tokenInput;
         }
         const result = setApiKeyAndSave(token);
 
         // Save the token to the config file
         if (result.err) {
-          cancel(`Token saved failed. \n ${result.val.message}`);
-          return;
+          console.log(`Token saving failed. \n ${result.val.message}`);
         }
-        outro('Token saved successfully.');
       })
   );
 }

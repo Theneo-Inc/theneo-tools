@@ -12,15 +12,9 @@ import FormData from 'form-data';
 
 export async function queryProjectList(
   baseUrl: string,
-  apiKey: string,
-  page: number,
-  limit: number
+  apiKey: string
 ): Promise<Result<Project[], Error>> {
   const urlPath = new URL(`${baseUrl}/project/api-client`);
-  urlPath.searchParams.set('limit', limit.toString());
-  urlPath.searchParams.set('page', page.toString());
-  urlPath.searchParams.set('sortBy', 'createdAt:desc');
-  urlPath.searchParams.set('populate', 'company_id');
 
   try {
     const result = await axios.get<ResponseSchema<ProjectSchema[]>>(
@@ -83,10 +77,22 @@ export async function createProject(
 export async function importProjectDocumentFile(
   baseUrl: string,
   apiKey: string,
-  projectId: string,
-  content: Buffer
+  content: Buffer,
+  projectId: string | null = null,
+  projectKey: string | null = null
 ): Promise<Result<string, Error>> {
-  const urlPath = new URL(`${baseUrl}/project/${projectId}/import/api-client`);
+  if (!projectId && !projectKey) {
+    return Err(new Error('projectId and projectSlug are required'));
+  }
+
+  const urlPath = new URL(`${baseUrl}/project/import/api-client`);
+  if (projectId !== null) {
+    urlPath.searchParams.set('id', projectId);
+  }
+  if (projectKey !== null) {
+    urlPath.searchParams.set('slug', projectKey);
+  }
+
   const bodyFormData = new FormData();
   bodyFormData.append('file', content);
 

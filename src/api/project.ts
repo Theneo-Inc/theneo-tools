@@ -3,6 +3,7 @@ import {
   convertProject,
   CreateProjectSchema,
   ProjectSchema,
+  PublishProjectResponse,
 } from './schema/project';
 import axios from 'axios';
 import { Project } from '../models/project';
@@ -78,20 +79,13 @@ export async function importProjectDocumentFile(
   baseUrl: string,
   apiKey: string,
   content: Buffer,
-  projectId: string | null = null,
-  projectKey: string | null = null
+  projectId: string | null = null
 ): Promise<Result<string, Error>> {
-  if (!projectId && !projectKey) {
+  if (!projectId) {
     return Err(new Error('projectId and projectSlug are required'));
   }
 
-  const urlPath = new URL(`${baseUrl}/project/import/api-client`);
-  if (projectId !== null) {
-    urlPath.searchParams.set('id', projectId);
-  }
-  if (projectKey !== null) {
-    urlPath.searchParams.set('slug', projectKey);
-  }
+  const urlPath = new URL(`${baseUrl}/project/${projectId}/import/api-client`);
 
   const bodyFormData = new FormData();
   bodyFormData.append('file', content);
@@ -105,6 +99,38 @@ export async function importProjectDocumentFile(
           ...getCommonHeaders(apiKey),
           ...bodyFormData.getHeaders(),
         },
+      }
+    );
+
+    if (result.status !== 200) {
+      return Err(new Error('API returned status code ' + result.status));
+    }
+    const projectId = result.data.data;
+    if (projectId === undefined) {
+      return Err(
+        new Error('No data returned from API: message' + result.data.message)
+      );
+    }
+    console.assert(result.data.message === 'Success');
+    return Ok(projectId);
+  } catch (error) {
+    return Err(error as Error);
+  }
+}
+
+export async function publishProject(
+  baseUrl: string,
+  apiKey: string,
+  projectId: string
+): Promise<Result<PublishProjectResponse, Error>> {
+  const urlPath = new URL(`${baseUrl}/publish/${projectId}/api-client`);
+
+  try {
+    const result = await axios.post<ResponseSchema<PublishProjectResponse>>(
+      urlPath.toString(),
+      {},
+      {
+        headers: getCommonHeaders(apiKey),
       }
     );
 

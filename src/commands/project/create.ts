@@ -1,15 +1,19 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
-import { createProject, importProjectDocumentFile } from '../../api/project';
+import {
+  createProject,
+  importProjectDocumentFile,
+  publishProject,
+} from '../../api/project';
 import { queryUserWorkspaces } from '../../api/workspace';
 import { Workspace } from '../../api/schema/workspace';
 import { CreateProjectSchema } from '../../api/schema/project';
 import { readFile } from 'fs/promises';
 import { checkDocumentationFile, getAbsoluteFilePath } from '../../utils/file';
-import { input, select } from '@inquirer/prompts';
+import { input, select, confirm } from '@inquirer/prompts';
 import { createSpinner } from 'nanospinner';
 
-async function getWorkspaceId(workspaces: Workspace[]): Promise<string> {
+async function getWorkspace(workspaces: Workspace[]): Promise<Workspace> {
   if (workspaces.length === 0) {
     console.error('No workspaces found.');
     process.exit(1);
@@ -17,16 +21,16 @@ async function getWorkspaceId(workspaces: Workspace[]): Promise<string> {
   if (workspaces.length === 1) {
     const workspace = workspaces[0]!;
     console.info(`Using default workspace: ${workspace.name}`);
-    return workspace.workspaceId;
+    return workspace;
   }
 
   return select({
     message: 'Pick a workspace.',
     choices: workspaces.map(ws => {
       if (ws.isDefault) {
-        return { value: ws.workspaceId, name: ws.name, description: 'default' };
+        return { value: ws, name: ws.name, description: 'default' };
       }
-      return { value: ws.workspaceId, name: ws.name };
+      return { value: ws, name: ws.name };
     }),
   });
 }
@@ -83,7 +87,7 @@ export function initProjectCreateCommand() {
       console.error(workspacesResult.val.message);
       process.exit(1);
     }
-    const workspaceId = await getWorkspaceId(workspacesResult.val);
+    const workspace = await getWorkspace(workspacesResult.val);
     const specFileName = await input({
       message: 'API file name (eg: openapi.yml) : ',
       validate: value => {
@@ -100,7 +104,10 @@ export function initProjectCreateCommand() {
       process.exit(1);
     }
 
-    const requestData = getCreateProjectRequestData(projectName, workspaceId);
+    const requestData = getCreateProjectRequestData(
+      projectName,
+      workspace.workspaceId
+    );
     const projectsResult = await createProject(
       profile.apiUrl,
       profile.token,
@@ -122,5 +129,26 @@ export function initProjectCreateCommand() {
       process.exit(1);
     }
     spinner.success({ text: 'project created successfully' });
+
+    const shouldPublish = await confirm({
+      message: 'What to publish the project?',
+    });
+    if (shouldPublish) {
+      spinner.reset();
+      spinner.start({ text: 'publishing project' });
+      spinner.spin();
+      const publishResult = await publishProject(
+        profile.apiUrl,
+        profile.token,
+        projectsResult.val
+      );
+      if (publishResult.err) {
+        console.error(publishResult.val.message);
+        process.exit(1);
+      }
+      spinner.success({
+        text: `project published successfully! link: ${profile.appUrl}/${publishResult.val.companySlug}/${publishResult.val.projectKey}`,
+      });
+    }
   });
 }

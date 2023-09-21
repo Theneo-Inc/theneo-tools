@@ -61,3 +61,9 @@ export interface CreateProjectSchema {
     };
   };
 }
+
+export interface PublishProjectResponse {
+  projectKey: string;
+  baseUrlRequired: boolean;
+  companySlug: string;
+}

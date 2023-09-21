@@ -11,6 +11,8 @@ npm install @theneo/cli
 ## Usage
 
 ```bash
+theneo help
+
 Usage: theneo [options] [command]
 
 A CLI for the Theneo application
@@ -43,5 +45,15 @@ theneo project create
 ### Update api documentation from api spec file
 
 ```bash
-theneo project import --file <file> --project <project-key>
+theneo project import --file <file> --project <project-key> --publish
 ```
+### Publish document
+```bash
+theneo project publish --project <project-key>
+```
+
+### Delete project
+```bash
+theneo project delete --project <project-key>
+```
+

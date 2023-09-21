@@ -1,6 +1,5 @@
 import { Profile } from '../../config';
 import { Project } from '../../models/project';
-import { createSpinner } from 'nanospinner';
 import { queryProjectList } from '../../api/project';
 import { select } from '@inquirer/prompts';
 
@@ -10,9 +9,7 @@ export async function getProject(
     project: string | undefined;
   }
 ): Promise<Project> {
-  const spinner = createSpinner('fetching project list').start();
   const projectsList = await queryProjectList(profile.apiUrl, profile.token);
-  spinner.stop();
   if (projectsList.err) {
     console.error(projectsList.val.message);
     process.exit(1);
@@ -26,7 +23,7 @@ export async function getProject(
   }
   if (!options.project) {
     return select({
-      message: 'Pick a project to update.',
+      message: 'Select project:',
       choices: projects.map((project, index) => {
         return {
           value: project,

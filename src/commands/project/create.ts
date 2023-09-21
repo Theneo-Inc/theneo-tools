@@ -15,6 +15,7 @@ import { createSpinner } from 'nanospinner';
 
 export function initProjectCreateCommand() {
   return new Command('create')
+    .description('Create new project')
     .option('--name <name>', 'Project name')
     .option(
       '--workspace <workspace>',

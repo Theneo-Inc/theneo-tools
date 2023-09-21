@@ -9,6 +9,7 @@ import { getProject } from './common';
 
 export function initProjectImportCommand() {
   return new Command('import')
+    .description('Update theneo project with a updated API file')
     .option('--project <project>', 'Specify the project key to import')
     .option('-f, --file <file>', 'Specify the file to import')
     .option('--publish', 'Automatically publish the project', false)
@@ -29,9 +30,7 @@ export function initProjectImportCommand() {
               return true;
             },
           }));
-        const spinner = createSpinner(
-          "updating project's documentation file"
-        ).start();
+
         const absoluteFilePath = getAbsoluteFilePath(specFileName);
         const isValidRes = await checkDocumentationFile(absoluteFilePath);
         if (isValidRes.err) {
@@ -40,6 +39,9 @@ export function initProjectImportCommand() {
         }
 
         const file = await readFile(absoluteFilePath);
+        const spinner = createSpinner(
+          "updating project's documentation file"
+        ).start();
         const importResult = await importProjectDocumentFile(
           profile.apiUrl,
           profile.token,

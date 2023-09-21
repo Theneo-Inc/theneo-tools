@@ -2,6 +2,8 @@ import { Command } from 'commander';
 import { initProjectListCommand } from './list';
 import { initProjectCreateCommand } from './create';
 import { initProjectImportCommand } from './import';
+import { initProjectDeleteCommand } from './delete';
+import { initProjectPublishCommand } from './publish';
 
 export function initProjectCommand(program: Command): Command {
   return program
@@ -9,5 +11,7 @@ export function initProjectCommand(program: Command): Command {
     .description("Theneo's project related commands")
     .addCommand(initProjectListCommand())
     .addCommand(initProjectCreateCommand())
-    .addCommand(initProjectImportCommand());
+    .addCommand(initProjectImportCommand())
+    .addCommand(initProjectDeleteCommand())
+    .addCommand(initProjectPublishCommand());
 }

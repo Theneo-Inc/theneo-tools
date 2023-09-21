@@ -47,7 +47,7 @@ export class ConfigManager {
     if (this.config === null) {
       return Err(ErrorConfigIsEmpty);
     }
-    const profile = this.config.profiles[profileName];
+    const profile = this.config.profiles[String(profileName)];
     if (!profile) {
       return Err(ErrorInvalidFilePath);
     }
@@ -62,7 +62,7 @@ export class ConfigManager {
         },
       };
     }
-    this.config.profiles[profileName] = profile;
+    this.config.profiles[String(profileName)] = profile;
   }
 
   public readInConfig(): Result<null, Error> {

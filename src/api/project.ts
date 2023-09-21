@@ -11,6 +11,9 @@ import { getCommonHeaders } from './base/headers';
 import { ResponseSchema } from './schema/base';
 import FormData from 'form-data';
 
+const WRONG_STATUS_CODE_ERROR = 'API returned status code: ';
+const EMPTY_RESPONSE_ERROR = 'No data returned from API! message:';
+
 export async function queryProjectList(
   baseUrl: string,
   apiKey: string
@@ -26,14 +29,12 @@ export async function queryProjectList(
     );
 
     if (result.status !== 200) {
-      return Err(new Error('API returned status code ' + result.status));
+      return Err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
     }
 
     const data = result.data.data;
     if (data === undefined) {
-      return Err(
-        new Error('No data returned from API: message' + result.data.message)
-      );
+      return Err(new Error(EMPTY_RESPONSE_ERROR + result.data.message));
     }
     const projects = data.map(project => convertProject(project));
     console.assert(result.data.message === 'Success');
@@ -60,16 +61,14 @@ export async function createProject(
     );
 
     if (result.status !== 200) {
-      return Err(new Error('API returned status code ' + result.status));
+      return Err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
     }
-    const projectId = result.data.data;
-    if (projectId === undefined) {
-      return Err(
-        new Error('No data returned from API: message' + result.data.message)
-      );
+    const data = result.data.data;
+    if (data === undefined) {
+      return Err(new Error(EMPTY_RESPONSE_ERROR + result.data.message));
     }
     console.assert(result.data.message === 'Success');
-    return Ok(projectId);
+    return Ok(data);
   } catch (error) {
     return Err(error as Error);
   }
@@ -103,16 +102,14 @@ export async function importProjectDocumentFile(
     );
 
     if (result.status !== 200) {
-      return Err(new Error('API returned status code ' + result.status));
+      return Err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
     }
-    const projectId = result.data.data;
-    if (projectId === undefined) {
-      return Err(
-        new Error('No data returned from API: message' + result.data.message)
-      );
+    const data = result.data.data;
+    if (data === undefined) {
+      return Err(new Error(EMPTY_RESPONSE_ERROR + result.data.message));
     }
     console.assert(result.data.message === 'Success');
-    return Ok(projectId);
+    return Ok(data);
   } catch (error) {
     return Err(error as Error);
   }
@@ -135,16 +132,40 @@ export async function publishProject(
     );
 
     if (result.status !== 200) {
-      return Err(new Error('API returned status code ' + result.status));
+      return Err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
     }
-    const projectId = result.data.data;
-    if (projectId === undefined) {
-      return Err(
-        new Error('No data returned from API: message' + result.data.message)
-      );
+    const data = result.data.data;
+    if (data === undefined) {
+      return Err(new Error(EMPTY_RESPONSE_ERROR + result.data.message));
     }
     console.assert(result.data.message === 'Success');
-    return Ok(projectId);
+    return Ok(data);
+  } catch (error) {
+    return Err(error as Error);
+  }
+}
+
+export async function deleteProject(
+  baseUrl: string,
+  apiKey: string,
+  projectId: string
+): Promise<Result<null, Error>> {
+  const urlPath = new URL(`${baseUrl}/project/${projectId}/api-client`);
+
+  try {
+    const result = await axios.delete<ResponseSchema<null>>(
+      urlPath.toString(),
+      {
+        headers: getCommonHeaders(apiKey),
+      }
+    );
+
+    if (result.status !== 200) {
+      return Err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
+    }
+
+    console.assert(result.data.message === 'Success');
+    return Ok(null);
   } catch (error) {
     return Err(error as Error);
   }

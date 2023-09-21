@@ -1,20 +1,17 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
-import { input, select } from '@inquirer/prompts';
+import { input } from '@inquirer/prompts';
 import { createSpinner } from 'nanospinner';
 import { checkDocumentationFile, getAbsoluteFilePath } from '../../utils/file';
-import {
-  importProjectDocumentFile,
-  publishProject,
-  queryProjectList,
-} from '../../api/project';
+import { importProjectDocumentFile, publishProject } from '../../api/project';
 import { readFile } from 'fs/promises';
+import { getProject } from './common';
 
 export function initProjectImportCommand() {
   return new Command('import')
-    .option('--project <project>', 'specify the project key to import')
-    .option('-f, --file <file>', 'specify the file to import')
-    .option('--publish', 'automatically publish the project', false)
+    .option('--project <project>', 'Specify the project key to import')
+    .option('-f, --file <file>', 'Specify the file to import')
+    .option('--publish', 'Automatically publish the project', false)
     .action(
       async (options: {
         file: string | undefined;
@@ -22,45 +19,7 @@ export function initProjectImportCommand() {
         publish: boolean;
       }) => {
         const profile = getProfile().unwrap();
-        const spinner = createSpinner('fetching project list').start();
-        const projectsList = await queryProjectList(
-          profile.apiUrl,
-          profile.token
-        );
-        spinner.stop();
-        let projectId: string | null = null;
-        if (projectsList.err) {
-          console.error(projectsList.val.message);
-          process.exit(1);
-        }
-        const projects = projectsList.val;
-        if (projects.length === 0) {
-          console.error(
-            'No project found! first create project using `theneo project create` command'
-          );
-          process.exit(1);
-        }
-        if (!options.project) {
-          projectId = await select({
-            message: 'Pick a workspace.',
-            choices: projects.map((project, index) => {
-              return {
-                value: project.id,
-                name: `${index}. ${project.name}`,
-                description: project.key,
-              };
-            }),
-          });
-        } else {
-          const project = projectsList.val.find(
-            project => project.key === options.project
-          );
-          if (!project) {
-            console.error('No project found with this key!');
-            process.exit(1);
-          }
-          projectId = project.id;
-        }
+        const project = await getProject(profile, options);
         const specFileName =
           options.file ??
           (await input({
@@ -70,8 +29,9 @@ export function initProjectImportCommand() {
               return true;
             },
           }));
-
-        spinner.start({ text: 'updating project' });
+        const spinner = createSpinner(
+          "updating project's documentation file"
+        ).start();
         const absoluteFilePath = getAbsoluteFilePath(specFileName);
         const isValidRes = await checkDocumentationFile(absoluteFilePath);
         if (isValidRes.err) {
@@ -84,7 +44,7 @@ export function initProjectImportCommand() {
           profile.apiUrl,
           profile.token,
           file,
-          projectId
+          project.id
         );
         if (importResult.err) {
           console.error(importResult.val.message);
@@ -96,7 +56,7 @@ export function initProjectImportCommand() {
           const publishResult = await publishProject(
             profile.apiUrl,
             profile.token,
-            projectId
+            project.id
           );
           if (publishResult.err) {
             console.error(publishResult.val.message);

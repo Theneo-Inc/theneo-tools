@@ -1,7 +1,13 @@
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'node', 'prettier'],
+  plugins: [
+    '@typescript-eslint',
+    'node',
+    'prettier',
+    "security",
+    "sonarjs",
+  ],
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.json'],
@@ -13,6 +19,8 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:prettier/recommended',
+    "plugin:security/recommended",
+    "plugin:sonarjs/recommended"
   ],
   rules: {
     'no-process-exit': 'off',
@@ -23,7 +31,7 @@ module.exports = {
     'node/no-missing-require': 'off',
     'node/shebang': 'off',
     '@typescript-eslint/no-use-before-define': 'off',
-    quotes: ['warn', 'single', { avoidEscape: true }],
+    quotes: ['warn', 'single', {avoidEscape: true}],
     'node/no-unpublished-import': 'off',
     '@typescript-eslint/no-unsafe-assignment': 'off',
     '@typescript-eslint/no-var-requires': 'off',
@@ -31,5 +39,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-unsafe-member-access': 'off',
     '@typescript-eslint/restrict-template-expressions': 'off',
+    "security/detect-non-literal-fs-filename": 'off',
+    "security/detect-non-literal-require": 'off',
   },
 };

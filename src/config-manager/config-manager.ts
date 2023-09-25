@@ -9,7 +9,6 @@ import { ProfileConfig, TheneoConfig } from '../config';
 export const Json = 'json';
 export const Yaml = 'yaml';
 export const Toml = 'toml';
-export const Unknown = '';
 
 export const ErrorInvalidFilePath = new Error('invalid file path or file name');
 export const ErrorNoFileType = new Error('invalid file type');
@@ -35,17 +34,13 @@ export class ConfigManager {
   private readonly configFilePath: string;
   private fileType: string | undefined;
 
-  constructor(
-    public fileName: string,
-    public configDir: string,
-    fileType?: string
-  ) {
+  constructor(fileName: string, configDir: string, fileType?: string) {
     createDirectorySync(configDir);
-    this.configFilePath = path.join(configDir, this.fileName);
+    this.configFilePath = path.join(configDir, fileName);
     if (fileType) {
       this.fileType = fileType;
     } else {
-      const [, fileExtension] = this.fileName.split('.');
+      const [, fileExtension] = fileName.split('.');
       this.fileType = fileExtension;
     }
   }
@@ -106,7 +101,7 @@ export class ConfigManager {
     }
     this.fileType = FileTypeMapping().get(this.fileType);
     // move everything from the kvCache to the config object
-    if (this.config === null) {
+    if (!this.config) {
       return Err(ErrorConfigIsEmpty);
     }
 

@@ -41,5 +41,6 @@ module.exports = {
     '@typescript-eslint/restrict-template-expressions': 'off',
     "security/detect-non-literal-fs-filename": 'off',
     "security/detect-non-literal-require": 'off',
+    "no-constant-condition": "warn",
   },
 };

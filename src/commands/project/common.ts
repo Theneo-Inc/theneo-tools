@@ -1,6 +1,6 @@
 import { Profile } from '../../config';
 import { Project } from '../../models/project';
-import { queryProjectList } from '../../api/project';
+import { queryProjectList } from '../../api/requests/project';
 import { select } from '@inquirer/prompts';
 
 export async function getProject(

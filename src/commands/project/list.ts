@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { queryProjectList } from '../../api/project';
+import { queryProjectList } from '../../api/requests/project';
 import { getProfile } from '../../context/auth';
 import Table from 'cli-table';
 import { Project } from '../../models/project';
@@ -26,7 +26,7 @@ export function initProjectListCommand() {
         console.log(JSON.stringify(projectsResult.val, null, 2));
       } else {
         const table = new Table({
-          head: ['#', 'key', 'Name', 'Company', 'Url', 'ID'],
+          head: ['#', 'Key', 'Name', 'Company', 'URL', 'Public', 'ID'],
           rows: projectsResult.val.map((project: Project, index: number) =>
             getProjectRow(index, project, profile.appUrl)
           ),
@@ -48,6 +48,7 @@ function getProjectRow(
     project.name,
     project.company.name,
     `${appUrl}/${project.company.slug}/${project.key}`,
+    project.isPublic ? 'YES' : 'NO',
     String(project.id),
   ];
 }

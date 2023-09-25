@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
 import { getProject } from './common';
-import { publishProject } from '../../api/project';
+import { publishProject } from '../../api/requests/project';
 import { createSpinner } from 'nanospinner';
 
 export function initProjectPublishCommand() {

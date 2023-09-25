@@ -4,11 +4,12 @@ import {
   CreateProjectSchema,
   ProjectSchema,
   PublishProjectResponse,
-} from './schema/project';
+  PublishProjectSchema,
+} from '../schema/project';
 import axios from 'axios';
-import { Project } from '../models/project';
+import { Project } from '../../models/project';
 import { getCommonHeaders } from './base/headers';
-import { ResponseSchema } from './schema/base';
+import { ResponseSchema } from '../schema/base';
 import FormData from 'form-data';
 
 const WRONG_STATUS_CODE_ERROR = 'API returned status code: ';
@@ -166,6 +167,56 @@ export async function deleteProject(
 
     console.assert(result.data.message === 'Success');
     return Ok(null);
+  } catch (error) {
+    return Err(error as Error);
+  }
+}
+
+export async function completeProjectCreation(
+  baseUrl: string,
+  apiKey: string,
+  projectId: string,
+  requestData: {
+    shouldOverride?: boolean;
+    isProjectPublic: boolean;
+  }
+) {
+  const urlPath = new URL(
+    `${baseUrl}/project/${projectId}/create/complete/api-client`
+  );
+
+  try {
+    const result = await axios.post<null>(urlPath.toString(), requestData, {
+      headers: getCommonHeaders(apiKey),
+    });
+
+    if (result.status !== 200) {
+      return Err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
+    }
+
+    return Ok(null);
+  } catch (error) {
+    return Err(error as Error);
+  }
+}
+
+export async function getDescriptionGenerationStatus(
+  baseUrl: string,
+  apiKey: string,
+  projectId: string
+): Promise<Result<PublishProjectSchema, Error>> {
+  const urlPath = new URL(`${baseUrl}/project/${projectId}/status/api-client`);
+
+  try {
+    const result = await axios.get<PublishProjectSchema>(urlPath.toString(), {
+      headers: getCommonHeaders(apiKey),
+    });
+
+    if (result.status !== 200) {
+      return Err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
+    }
+
+    return Ok(result.data);
   } catch (error) {
     return Err(error as Error);
   }

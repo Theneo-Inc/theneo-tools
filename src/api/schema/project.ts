@@ -4,7 +4,7 @@ export interface CompanySchema {
   _id: string;
   name: string;
   slug: string;
-  corporateID: string;
+  corporateId: string;
   createdAt: Date;
   updatedAt: Date;
   v: number;
@@ -15,7 +15,8 @@ export interface ProjectSchema {
   _id: string;
   name: string;
   key: string;
-  companyID: string;
+  isPublic: boolean;
+  companyId: string;
   createdAt: Date;
   company: CompanySchema;
 }
@@ -66,4 +67,20 @@ export interface PublishProjectResponse {
   projectKey: string;
   baseUrlRequired: boolean;
   companySlug: string;
+}
+
+export enum CreatedProjectStatusEnum {
+  Created = 'CREATED',
+  Started = 'STARTED',
+  Finished = 'FINISHED',
+  Error = 'ERROR',
+  CREATED_WITHOUT_AI_GENERATION = 'CREATED_WITHOUT_AI_GENERATION',
+}
+
+export interface PublishProjectSchema {
+  key: string;
+  name: string;
+  updatedAt: string;
+  creationStatus: CreatedProjectStatusEnum;
+  descriptionGenerationProgress: number;
 }

@@ -1,16 +1,17 @@
 import { Err, Ok, Result } from 'ts-results';
 import axios from 'axios';
 import { getCommonHeaders } from './base/headers';
-import { Workspace } from './schema/workspace';
+import { Workspace } from '../schema/workspace';
 
 export async function queryUserWorkspaces(
   baseUrl: string,
-  apiKey: string
+  apiKey: string,
+  role?: string
 ): Promise<Result<Workspace[], Error>> {
-  const urlPath = new URL(
-    `${baseUrl}/users/workspaces/api-client?permission=editor`
-  );
-
+  const urlPath = new URL(`${baseUrl}/users/workspaces/api-client`);
+  if (role) {
+    urlPath.searchParams.append('permission', role);
+  }
   try {
     const result = await axios.get<Workspace[]>(urlPath.toString(), {
       headers: getCommonHeaders(apiKey),

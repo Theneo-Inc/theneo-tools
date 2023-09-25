@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
-import { deleteProject } from '../../api/project';
+import { deleteProject } from '../../api/requests/project';
 import { getProject } from './common';
 
 export function initProjectDeleteCommand() {

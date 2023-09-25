@@ -1,17 +1,163 @@
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { getProfile } from '../../context/auth';
 import {
+  completeProjectCreation,
   createProject,
+  getDescriptionGenerationStatus,
   importProjectDocumentFile,
   publishProject,
-} from '../../api/project';
-import { queryUserWorkspaces } from '../../api/workspace';
-import { Workspace } from '../../api/schema/workspace';
-import { CreateProjectSchema } from '../../api/schema/project';
+} from '../../api/requests/project';
+import { queryUserWorkspaces } from '../../api/requests/workspace';
+import { UserRole, Workspace } from '../../api/schema/workspace';
+import {
+  CreatedProjectStatusEnum,
+  CreateProjectSchema,
+} from '../../api/schema/project';
 import { readFile } from 'fs/promises';
 import { checkDocumentationFile, getAbsoluteFilePath } from '../../utils/file';
 import { input, select, confirm } from '@inquirer/prompts';
-import { createSpinner } from 'nanospinner';
+import { createSpinner, Spinner } from 'nanospinner';
+import { Profile } from '../../config';
+
+async function getDocumentationFileLocation(options: CreateCommandOptions) {
+  const specFileName =
+    options.file ??
+    (await input({
+      message: 'API file path to import (eg: docs/openapi.yml) :',
+      validate: value => {
+        if (value.length === 0) return 'File is required!';
+        return true;
+      },
+    }));
+
+  const absoluteFilePath = getAbsoluteFilePath(specFileName);
+  const isValidRes = await checkDocumentationFile(absoluteFilePath);
+  if (isValidRes.err) {
+    console.error(isValidRes.val);
+    process.exit(1);
+  }
+  return absoluteFilePath;
+}
+
+enum DescriptionGenerationType {
+  FILl = 'fill',
+  OVERWRITE = 'overwrite',
+  NO_GENERATION = 'no generation',
+}
+
+async function getShouldBePublic(
+  options: CreateCommandOptions,
+  isInteractive: boolean
+): Promise<boolean> {
+  if (isInteractive) {
+    return confirm({
+      message: 'Documentation should be public?',
+      default: false,
+    });
+  }
+  return options.publish;
+}
+
+interface CreateCommandOptions {
+  name: string | undefined;
+  workspace: string | undefined;
+  file: string | undefined;
+  publish: boolean;
+  public: boolean;
+  generateDescription: DescriptionGenerationType;
+  profile: string | undefined;
+}
+
+async function getDescriptionGenerationType(
+  options: CreateCommandOptions,
+  isInteractive: boolean
+): Promise<DescriptionGenerationType> {
+  if (isInteractive) {
+    return select<DescriptionGenerationType>({
+      message: 'Select description generation option type with AI',
+      choices: [
+        {
+          name: "Don't generate descriptions",
+          value: DescriptionGenerationType.NO_GENERATION,
+        },
+        {
+          name: 'Fill empty descriptions',
+          value: DescriptionGenerationType.FILl,
+        },
+        {
+          name: 'Overwrite descriptions',
+          value: DescriptionGenerationType.OVERWRITE,
+        },
+      ],
+    });
+  }
+  return options.generateDescription;
+}
+
+function getDescriptionGenerationOption() {
+  return new Option(
+    '--generate-description',
+    'Should descriptions be updated using AI? options are (fill-empty, overwrite-all, no)'
+  )
+    .default('no')
+    .choices(['fill-empty', 'overwrite-all', 'no'])
+    .argParser((value, previous) => {
+      if (value === 'fill-empty') {
+        return DescriptionGenerationType.FILl;
+      }
+      if (value === 'overwrite-all') {
+        return DescriptionGenerationType.OVERWRITE;
+      }
+      if (value === 'no') {
+        return DescriptionGenerationType.NO_GENERATION;
+      }
+      return previous;
+    });
+}
+
+function sleep(time: number) {
+  return new Promise(resolve => setTimeout(resolve, time));
+}
+
+async function waitForDescriptionGeneration(
+  spinner: Spinner,
+  profile: Profile,
+  projectId: string
+): Promise<boolean> {
+  spinner.reset();
+  spinner.start({ text: 'Generating descriptions' });
+  while (true) {
+    const generateDescriptionsResult = await getDescriptionGenerationStatus(
+      profile.apiUrl,
+      profile.token,
+      projectId
+    );
+    if (generateDescriptionsResult.err) {
+      console.error(generateDescriptionsResult.val.message);
+      process.exit(1);
+    }
+    if (
+      generateDescriptionsResult.val.creationStatus ===
+      CreatedProjectStatusEnum.Finished
+    ) {
+      spinner.success({ text: 'Description  generation finished' });
+      return true;
+    }
+    if (
+      generateDescriptionsResult.val.creationStatus ===
+      CreatedProjectStatusEnum.Error
+    ) {
+      spinner.error({ text: 'Description Generation Errored' });
+      return false;
+    }
+    spinner.update({
+      text:
+        'Generating descriptions ' +
+        generateDescriptionsResult.val.descriptionGenerationProgress,
+    });
+    await sleep(5000);
+  }
+}
 
 export function initProjectCreateCommand() {
   return new Command('create')
@@ -25,115 +171,119 @@ export function initProjectCreateCommand() {
       '-f, --file <file>',
       'API file path to import (eg: docs/openapi.yml)'
     )
-    .option('--publish', 'Publish the project after creation')
+    .option('--publish', 'Publish the project after creation', false)
     .option(
-      '--noPublish',
-      'Do not publish the project after creation, useful for pipeline'
+      '--public',
+      'Make published documentation public, default private',
+      false
     )
+
+    .addOption(getDescriptionGenerationOption())
     .option(
       '--profile <string>',
       'Use a specific profile from your config file.'
     )
-    .action(
-      async (options: {
-        name: string | undefined;
-        workspace: string | undefined;
-        file: string | undefined;
-        publish: boolean | undefined;
-        noPublish: boolean | undefined;
-        profile: string | undefined;
-      }) => {
-        validateOptions(options);
+    .action(async (options: CreateCommandOptions) => {
+      validateOptions(options);
+      const isInteractive = options.name === undefined;
 
-        const profile = getProfile(options.profile);
-        const workspacesPromise = queryUserWorkspaces(
-          profile.apiUrl,
-          profile.token
-        );
-        const projectName =
-          options.name ??
-          (await input({
-            message: 'Project Name:',
-            validate: value => {
-              if (value.length === 0) return 'Name is required!';
-              return true;
-            },
-          }));
-        const spinner = createSpinner().start();
-        spinner.start();
-        const workspacesResult = await workspacesPromise;
-        spinner.reset();
-        if (workspacesResult.err) {
-          console.error(workspacesResult.val.message);
-          process.exit(1);
-        }
-        const workspace = await getWorkspace(
-          workspacesResult.val,
-          options.workspace
-        );
-        const specFileName =
-          options.file ??
-          (await input({
-            message: 'API file path to import (eg: docs/openapi.yml) :',
-            validate: value => {
-              if (value.length === 0) return 'File is required!';
-              return true;
-            },
-          }));
-
-        spinner.start({ text: 'creating project' });
-        const absoluteFilePath = getAbsoluteFilePath(specFileName);
-        const isValidRes = await checkDocumentationFile(absoluteFilePath);
-        if (isValidRes.err) {
-          console.error(isValidRes.val);
-          process.exit(1);
-        }
-
-        const requestData = getCreateProjectRequestData(
-          projectName,
-          workspace.workspaceId
-        );
-        const projectsResult = await createProject(
-          profile.apiUrl,
-          profile.token,
-          requestData
-        );
-        if (projectsResult.err) {
-          console.error(projectsResult.val.message);
-          process.exit(1);
-        }
-        const file = await readFile(absoluteFilePath);
-        const importResult = await importProjectDocumentFile(
-          profile.apiUrl,
-          profile.token,
-          file,
-          projectsResult.val
-        );
-        if (importResult.err) {
-          console.error(importResult.val.message);
-          process.exit(1);
-        }
-        spinner.success({ text: 'project created successfully' });
-        const shouldPublish = await getShouldPublish(options);
-        if (shouldPublish) {
-          spinner.reset();
-          spinner.start({ text: 'publishing project' });
-          spinner.spin();
-          const publishResult = await publishProject(
-            profile.apiUrl,
-            profile.token,
-            projectsResult.val
-          );
-          if (publishResult.err) {
-            console.error(publishResult.val.message);
-            process.exit(1);
-          }
-          spinner.success({
-            text: `project published successfully! link: ${profile.appUrl}/${publishResult.val.companySlug}/${publishResult.val.projectKey}`,
-          });
-        }
+      const profile = getProfile(options.profile);
+      const workspacesPromise = queryUserWorkspaces(
+        profile.apiUrl,
+        profile.token,
+        UserRole.EDITOR
+      );
+      const projectName =
+        options.name ??
+        (await input({
+          message: 'Project Name:',
+          validate: value => {
+            if (value.length === 0) return 'Name is required!';
+            return true;
+          },
+        }));
+      const spinner = createSpinner().start();
+      spinner.start();
+      const workspacesResult = await workspacesPromise;
+      spinner.reset();
+      if (workspacesResult.err) {
+        console.error(workspacesResult.val.message);
+        process.exit(1);
       }
-    );
+      const workspace = await getWorkspace(
+        workspacesResult.val,
+        options.workspace
+      );
+      const absoluteFilePath = await getDocumentationFileLocation(options);
+      const requestData = getCreateProjectRequestData(
+        projectName,
+        workspace.workspaceId
+      );
+
+      const isPublic = await getShouldBePublic(options, isInteractive);
+      const descriptionGeneration = await getDescriptionGenerationType(
+        options,
+        isInteractive
+      );
+
+      spinner.start({ text: 'creating project' });
+      const projectResult = await createProject(
+        profile.apiUrl,
+        profile.token,
+        requestData
+      );
+      if (projectResult.err) {
+        console.error(projectResult.val.message);
+        process.exit(1);
+      }
+      const file = await readFile(absoluteFilePath);
+      const importResult = await importProjectDocumentFile(
+        profile.apiUrl,
+        profile.token,
+        file,
+        projectResult.val
+      );
+      if (importResult.err) {
+        console.error(importResult.val.message);
+        process.exit(1);
+      }
+      spinner.success({ text: 'project created successfully' });
+      await completeProjectCreation(
+        profile.apiUrl,
+        profile.token,
+        projectResult.val,
+        {
+          isProjectPublic: isPublic,
+          shouldOverride:
+            descriptionGeneration === DescriptionGenerationType.OVERWRITE
+              ? true
+              : descriptionGeneration === DescriptionGenerationType.FILl
+              ? false
+              : undefined,
+        }
+      );
+      if (descriptionGeneration !== DescriptionGenerationType.NO_GENERATION) {
+        await waitForDescriptionGeneration(spinner, profile, projectResult.val);
+      }
+      const shouldPublish = await getShouldPublish(options, isInteractive);
+      if (shouldPublish) {
+        spinner.reset();
+        spinner.start({ text: 'publishing project' });
+        spinner.spin();
+        const publishResult = await publishProject(
+          profile.apiUrl,
+          profile.token,
+          projectResult.val
+        );
+        if (publishResult.err) {
+          console.error(publishResult.val.message);
+          process.exit(1);
+        }
+        spinner.success({
+          text: `project published successfully! link: ${profile.appUrl}/${publishResult.val.companySlug}/${publishResult.val.projectKey}`,
+        });
+      }
+    });
 }
 
 async function getWorkspace(
@@ -200,28 +350,20 @@ function getCreateProjectRequestData(projectName: string, workspaceId: string) {
   return requestData;
 }
 
-async function getShouldPublish(options: {
-  publish: boolean | undefined;
-  noPublish: boolean | undefined;
-}) {
-  if (options.publish === true) {
-    return true;
+async function getShouldPublish(
+  options: CreateCommandOptions,
+  isInteractive: boolean
+): Promise<boolean> {
+  if (isInteractive) {
+    return confirm({
+      message: 'Want to publish the project?',
+      default: true,
+    });
   }
-  if (options.noPublish === true) {
-    return false;
-  }
-  return confirm({
-    message: 'What to publish the project?',
-  });
+  return options.publish;
 }
 
-function validateOptions(options: {
-  name: string | undefined;
-  workspace: string | undefined;
-  file: string | undefined;
-  publish: boolean | undefined;
-  noPublish: boolean | undefined;
-}) {
+function validateOptions(options: CreateCommandOptions) {
   if (options.name !== undefined && options.name.length === 0) {
     console.error('--name flag cannot be empty');
     process.exit(1);
@@ -232,12 +374,6 @@ function validateOptions(options: {
   }
   if (options.file !== undefined && options.file.length === 0) {
     console.error('--file flag cannot be empty');
-    process.exit(1);
-  }
-  if (options.publish === true && options.noPublish === true) {
-    console.error(
-      '--publish and --noPublish flags cannot be used at the same time'
-    );
     process.exit(1);
   }
 }

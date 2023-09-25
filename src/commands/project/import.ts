@@ -3,7 +3,10 @@ import { getProfile } from '../../context/auth';
 import { input } from '@inquirer/prompts';
 import { createSpinner } from 'nanospinner';
 import { checkDocumentationFile, getAbsoluteFilePath } from '../../utils/file';
-import { importProjectDocumentFile, publishProject } from '../../api/project';
+import {
+  importProjectDocumentFile,
+  publishProject,
+} from '../../api/requests/project';
 import { readFile } from 'fs/promises';
 import { getProject } from './common';
 

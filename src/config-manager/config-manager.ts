@@ -16,7 +16,11 @@ export const ErrorNoFileType = new Error('invalid file type');
 export const ErrorUnrecognisedFormat = new Error(
   'this type of configuration format is not supported at the moment'
 );
-export const ErrorConfigIsEmpty = new Error('Config is empty');
+export const ErrorInvalidProfile = new Error('profile does not exists');
+
+export const ErrorConfigIsEmpty = new Error(
+  'need to authorize first, please run `theneo login` command'
+);
 
 export const FileTypeMapping = (): Map<string, string> => {
   const FileType: Map<string, string> = new Map();
@@ -40,22 +44,25 @@ export class ConfigManager {
     this.configFilePath = path.join(configDir, this.fileName);
     if (fileType) {
       this.fileType = fileType;
+    } else {
+      const [, fileExtension] = this.fileName.split('.');
+      this.fileType = fileExtension;
     }
   }
 
   public getProfile(profileName: string): Result<ProfileConfig, Error> {
-    if (this.config === null) {
+    if (!this.config) {
       return Err(ErrorConfigIsEmpty);
     }
     const profile = this.config.profiles[String(profileName)];
     if (!profile) {
-      return Err(ErrorInvalidFilePath);
+      return Err(ErrorInvalidProfile);
     }
     return Ok(profile);
   }
 
   public setProfile(profileName: string, profile: ProfileConfig): void {
-    if (this.config === null) {
+    if (!this.config) {
       this.config = {
         profiles: {
           [profileName]: profile,
@@ -66,13 +73,11 @@ export class ConfigManager {
   }
 
   public readInConfig(): Result<null, Error> {
-    const [, fileExtension] = this.fileName.split('.');
-    const fileType = this.fileType ?? fileExtension;
-    if (!fileType || fileType === '') {
+    if (!this.fileType) {
       return Err(ErrorNoFileType);
     }
     if (fs.existsSync(this.configFilePath)) {
-      this.fileType = FileTypeMapping().get(fileType);
+      this.fileType = FileTypeMapping().get(this.fileType);
       switch (this.fileType) {
         case Json:
           this.config = require(this.configFilePath) as TheneoConfig;
@@ -90,21 +95,16 @@ export class ConfigManager {
         default:
           return Err(ErrorUnrecognisedFormat);
       }
-    } else {
-      fs.writeFileSync(this.configFilePath, '');
     }
 
     return Ok(null);
   }
 
   public save(): Result<null, Error> {
-    const [, fileExtension] = this.fileName.split('.');
-    const fileType = this.fileType ?? fileExtension;
-    if (!fileType || fileType === '') {
+    if (!this.fileType) {
       return Err(ErrorNoFileType);
     }
-
-    this.fileType = FileTypeMapping().get(fileType);
+    this.fileType = FileTypeMapping().get(this.fileType);
     // move everything from the kvCache to the config object
     if (this.config === null) {
       return Err(ErrorConfigIsEmpty);

@@ -13,13 +13,18 @@ export function initProjectImportCommand() {
     .option('--project <project>', 'Specify the project key to import')
     .option('-f, --file <file>', 'Specify the file to import')
     .option('--publish', 'Automatically publish the project', false)
+    .option(
+      '--profile <string>',
+      'Use a specific profile from your config file.'
+    )
     .action(
       async (options: {
         file: string | undefined;
         project: string | undefined;
         publish: boolean;
+        profile: string | undefined;
       }) => {
-        const profile = getProfile().unwrap();
+        const profile = getProfile(options.profile);
         const project = await getProject(profile, options);
         const specFileName =
           options.file ??

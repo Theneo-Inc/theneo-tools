@@ -8,8 +8,12 @@ export function initProjectListCommand() {
   return new Command('list')
     .description('List projects')
     .option('--json', 'Output as JSON', false)
-    .action(async (options: { json: boolean }) => {
-      const profile = getProfile().unwrap();
+    .option(
+      '--profile <string>',
+      'Use a specific profile from your config file.'
+    )
+    .action(async (options: { json: boolean; profile: string | undefined }) => {
+      const profile = getProfile(options.profile);
       const projectsResult = await queryProjectList(
         profile.apiUrl,
         profile.token
@@ -22,7 +26,7 @@ export function initProjectListCommand() {
         console.log(JSON.stringify(projectsResult.val, null, 2));
       } else {
         const table = new Table({
-          head: ['#', 'ID', 'Name', 'Company', 'Url', 'Created At'],
+          head: ['#', 'key', 'Name', 'Company', 'Url', 'ID'],
           rows: projectsResult.val.map((project: Project, index: number) =>
             getProjectRow(index, project, profile.appUrl)
           ),
@@ -40,10 +44,10 @@ function getProjectRow(
 ): string[] {
   return [
     String(index),
-    project.id,
+    project.key,
     project.name,
     project.company.name,
     `${appUrl}/${project.company.slug}/${project.key}`,
-    String(project.createdAt),
+    String(project.id),
   ];
 }

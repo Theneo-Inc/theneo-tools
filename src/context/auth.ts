@@ -16,9 +16,9 @@ export function setApiKeyAndSave(
   return configManager.save();
 }
 
-export function getProfile(profileName?: string): Result<Profile, Error> {
+export function getProfile(profileName?: string): Profile {
   profileName = profileName ?? DEFAULT_PROFILE;
-  return configManager.getProfile(profileName).map(profile => {
+  const result = configManager.getProfile(profileName).map(profile => {
     return {
       token: process.env.THENEO_API_KEY ?? profile.token,
       apiUrl:
@@ -31,4 +31,9 @@ export function getProfile(profileName?: string): Result<Profile, Error> {
         DEFAULT_THENEO_APP_BASE_URL,
     };
   });
+  if (result.err) {
+    console.error(result.val.message);
+    process.exit(1);
+  }
+  return result.val;
 }

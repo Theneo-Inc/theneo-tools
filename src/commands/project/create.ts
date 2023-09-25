@@ -30,6 +30,10 @@ export function initProjectCreateCommand() {
       '--noPublish',
       'Do not publish the project after creation, useful for pipeline'
     )
+    .option(
+      '--profile <string>',
+      'Use a specific profile from your config file.'
+    )
     .action(
       async (options: {
         name: string | undefined;
@@ -37,10 +41,11 @@ export function initProjectCreateCommand() {
         file: string | undefined;
         publish: boolean | undefined;
         noPublish: boolean | undefined;
+        profile: string | undefined;
       }) => {
         validateOptions(options);
 
-        const profile = getProfile().unwrap();
+        const profile = getProfile(options.profile);
         const workspacesPromise = queryUserWorkspaces(
           profile.apiUrl,
           profile.token

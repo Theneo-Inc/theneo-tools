@@ -1,6 +1,6 @@
 {
   "name": "@theneo/cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Theneo cli",
   "repository": {
     "type": "git",
@@ -38,7 +38,7 @@
     "clean": "rm -rf ./lib/",
     "cm": "cz",
     "lint": "eslint ./src/  --fix",
-    "start": "TS_NODE_FILES=true ts-node ./src/bin.ts",
+    "start": "npm run build && TS_NODE_FILES=true ts-node ./src/bin.ts",
     "prepare": "husky install",
     "semantic-release": "semantic-release",
     "test:watch": "jest --watch",

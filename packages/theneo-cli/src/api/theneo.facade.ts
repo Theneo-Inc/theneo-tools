@@ -35,7 +35,6 @@ export class Theneo {
       options.baseApiUrl ??
       process.env.THENEO_API_URL ??
       'https://api.theneo.com';
-    // this.baseAppUrl = options.baseAppUrl ?? process.env.THENEO_APP_URL ?? "https://app.theneo.com";
 
     if (!options.apiKey) {
       const apiKey = process.env.THENEO_API_KEY;

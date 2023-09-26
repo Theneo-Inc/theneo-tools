@@ -1,8 +1,8 @@
 import { Command } from 'commander';
-import { queryProjectList } from '../../api/requests/project';
 import { getProfile } from '../../context/auth';
 import Table from 'cli-table';
 import { Project } from '../../models/project';
+import { createTheneo } from '../../core/theneo';
 
 export function initProjectListCommand() {
   return new Command('list')
@@ -14,10 +14,8 @@ export function initProjectListCommand() {
     )
     .action(async (options: { json: boolean; profile: string | undefined }) => {
       const profile = getProfile(options.profile);
-      const projectsResult = await queryProjectList(
-        profile.apiUrl,
-        profile.token
-      );
+      const theneo = createTheneo(profile);
+      const projectsResult = await theneo.listProjects();
       if (projectsResult.err) {
         console.error(projectsResult.error.message);
         process.exit(1);

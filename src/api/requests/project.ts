@@ -5,219 +5,133 @@ import {
   PublishProjectResponse,
   PublishProjectSchema,
 } from '../schema/project';
-import axios from 'axios';
 import { Project } from '../../models/project';
-import { getCommonHeaders } from './base/headers';
 import { ResponseSchema } from '../schema/base';
 import FormData from 'form-data';
 import { Result } from '../../results';
-
-const WRONG_STATUS_CODE_ERROR = 'API returned status code: ';
-const EMPTY_RESPONSE_ERROR = 'No data returned from API! message:';
+import {
+  ApiHeaders,
+  deleteRequest,
+  getRequest,
+  postRequest,
+} from './base/requests';
 
 export async function queryProjectList(
   baseUrl: string,
-  apiKey: string
+  headers: ApiHeaders
 ): Promise<Result<Project[], Error>> {
-  const urlPath = new URL(`${baseUrl}/project/api-client`);
-
-  try {
-    const result = await axios.get<ResponseSchema<ProjectSchema[]>>(
-      urlPath.toString(),
-      {
-        headers: getCommonHeaders(apiKey),
-      }
-    );
-
-    if (result.status !== 200) {
-      return Result.err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
+  const url = new URL(`${baseUrl}/project/api-client`);
+  const result = await getRequest<ResponseSchema<ProjectSchema[]>>({
+    url,
+    headers,
+  });
+  return result.chain(data => {
+    if (data.message !== 'Success') {
+      return Result.err(new Error(data.message));
     }
+    return Result.ok(data.data.map(project => convertProject(project)));
+  });
+}
 
-    const data = result.data.data;
-    if (data === undefined) {
-      return Result.err(new Error(EMPTY_RESPONSE_ERROR + result.data.message));
+function handleResponse<T>(
+  result: Result<ResponseSchema<T>, Error>
+): Result<T, Error> {
+  return result.chain(data => {
+    if (data.message !== 'Success') {
+      return Result.err(new Error(data.message));
     }
-    const projects = data.map(project => convertProject(project));
-    console.assert(result.data.message === 'Success');
-    return Result.ok(projects);
-  } catch (error) {
-    return Result.err(error as Error);
-  }
+    return Result.ok(data.data);
+  });
 }
 
 export async function createProject(
   baseUrl: string,
-  apiKey: string,
-  requestData: CreateProjectSchema
+  headers: ApiHeaders,
+  requestBody: CreateProjectSchema
 ): Promise<Result<string, Error>> {
-  const urlPath = new URL(`${baseUrl}/project/create/api-client`);
-
-  try {
-    const result = await axios.post<ResponseSchema<string>>(
-      urlPath.toString(),
-      requestData,
-      {
-        headers: getCommonHeaders(apiKey),
-      }
-    );
-
-    if (result.status !== 200) {
-      return Result.err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
+  const url = new URL(`${baseUrl}/project/create/api-client`);
+  const result = await postRequest<CreateProjectSchema, ResponseSchema<string>>(
+    {
+      url,
+      headers,
+      requestBody,
     }
-    const data = result.data.data;
-    if (data === undefined) {
-      return Result.err(new Error(EMPTY_RESPONSE_ERROR + result.data.message));
-    }
-    console.assert(result.data.message === 'Success');
-    return Result.ok(data);
-  } catch (error) {
-    return Result.err(error as Error);
-  }
+  );
+  return handleResponse(result);
 }
 
 export async function importProjectDocumentFile(
   baseUrl: string,
-  apiKey: string,
+  headers: ApiHeaders,
   content: Buffer,
-  projectId: string | null = null
+  projectId: string
 ): Promise<Result<string, Error>> {
-  if (!projectId) {
-    return Result.err(new Error('projectId and projectSlug are required'));
-  }
-
-  const urlPath = new URL(`${baseUrl}/project/${projectId}/import/api-client`);
-
+  const url = new URL(`${baseUrl}/project/${projectId}/import/api-client`);
   const bodyFormData = new FormData();
   bodyFormData.append('file', content);
-
-  try {
-    const result = await axios.post<ResponseSchema<string>>(
-      urlPath.toString(),
-      bodyFormData,
-      {
-        headers: {
-          ...getCommonHeaders(apiKey),
-          ...bodyFormData.getHeaders(),
-        },
-      }
-    );
-
-    if (result.status !== 200) {
-      return Result.err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
-    }
-    const data = result.data.data;
-    if (data === undefined) {
-      return Result.err(new Error(EMPTY_RESPONSE_ERROR + result.data.message));
-    }
-    console.assert(result.data.message === 'Success');
-    return Result.ok(data);
-  } catch (error) {
-    return Result.err(error as Error);
-  }
+  const result = await postRequest<FormData, ResponseSchema<string>>({
+    url,
+    headers: {
+      ...headers,
+      ...bodyFormData.getHeaders(),
+    },
+    requestBody: bodyFormData,
+  });
+  return handleResponse(result);
 }
 
 export async function publishProject(
   baseUrl: string,
-  apiKey: string,
+  headers: ApiHeaders,
   projectId: string
 ): Promise<Result<PublishProjectResponse, Error>> {
-  const urlPath = new URL(`${baseUrl}/publish/${projectId}/api-client`);
+  const url = new URL(`${baseUrl}/publish/${projectId}/api-client`);
+  const result = await postRequest<
+    null,
+    ResponseSchema<PublishProjectResponse>
+  >({
+    url,
+    headers,
+  });
 
-  try {
-    const result = await axios.post<ResponseSchema<PublishProjectResponse>>(
-      urlPath.toString(),
-      {},
-      {
-        headers: getCommonHeaders(apiKey),
-      }
-    );
-
-    if (result.status !== 200) {
-      return Result.err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
-    }
-    const data = result.data.data;
-    if (data === undefined) {
-      return Result.err(new Error(EMPTY_RESPONSE_ERROR + result.data.message));
-    }
-    console.assert(result.data.message === 'Success');
-    return Result.ok(data);
-  } catch (error) {
-    return Result.err(error as Error);
-  }
+  return handleResponse(result);
 }
 
 export async function deleteProject(
   baseUrl: string,
-  apiKey: string,
+  headers: ApiHeaders,
   projectId: string
-): Promise<Result<null, Error>> {
-  const urlPath = new URL(`${baseUrl}/project/${projectId}/api-client`);
+): Promise<Result<void, Error>> {
+  const url = new URL(`${baseUrl}/project/${projectId}/api-client`);
+  return deleteRequest({ url, headers });
+}
 
-  try {
-    const result = await axios.delete<ResponseSchema<null>>(
-      urlPath.toString(),
-      {
-        headers: getCommonHeaders(apiKey),
-      }
-    );
-
-    if (result.status !== 200) {
-      return Result.err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
-    }
-
-    console.assert(result.data.message === 'Success');
-    return Result.ok(null);
-  } catch (error) {
-    return Result.err(error as Error);
-  }
+export interface CompleteProjectCreationRequest {
+  shouldOverride?: boolean;
+  isProjectPublic: boolean;
 }
 
 export async function completeProjectCreation(
   baseUrl: string,
-  apiKey: string,
+  headers: ApiHeaders,
   projectId: string,
-  requestData: {
-    shouldOverride?: boolean;
-    isProjectPublic: boolean;
-  }
-) {
-  const urlPath = new URL(
+  requestBody: CompleteProjectCreationRequest
+): Promise<Result<null, Error>> {
+  const url = new URL(
     `${baseUrl}/project/${projectId}/create/complete/api-client`
   );
-
-  try {
-    const result = await axios.post<null>(urlPath.toString(), requestData, {
-      headers: getCommonHeaders(apiKey),
-    });
-
-    if (result.status !== 200) {
-      return Result.err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
-    }
-
-    return Result.ok(null);
-  } catch (error) {
-    return Result.err(error as Error);
-  }
+  return postRequest<CompleteProjectCreationRequest, null>({
+    url,
+    headers,
+    requestBody,
+  });
 }
 
 export async function getDescriptionGenerationStatus(
   baseUrl: string,
-  apiKey: string,
+  headers: ApiHeaders,
   projectId: string
 ): Promise<Result<PublishProjectSchema, Error>> {
-  const urlPath = new URL(`${baseUrl}/project/${projectId}/status/api-client`);
-
-  try {
-    const result = await axios.get<PublishProjectSchema>(urlPath.toString(), {
-      headers: getCommonHeaders(apiKey),
-    });
-
-    if (result.status !== 200) {
-      return Result.err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
-    }
-
-    return Result.ok(result.data);
-  } catch (error) {
-    return Result.err(error as Error);
-  }
+  const url = new URL(`${baseUrl}/project/${projectId}/status/api-client`);
+  return getRequest<PublishProjectSchema>({ url, headers });
 }

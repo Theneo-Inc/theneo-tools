@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
-import { deleteProject } from '../../api/requests/project';
 import { getProject } from './common';
+import { createTheneo } from '../../core/theneo';
 
 export function initProjectDeleteCommand() {
   return new Command('delete')
@@ -17,12 +17,9 @@ export function initProjectDeleteCommand() {
         profile: string | undefined;
       }) => {
         const profile = getProfile(options.profile);
-        const project = await getProject(profile, options);
-        const projectsResult = await deleteProject(
-          profile.apiUrl,
-          profile.token,
-          project.id
-        );
+        const theneo = createTheneo(profile);
+        const project = await getProject(theneo, options);
+        const projectsResult = await theneo.deleteProjectById(project.id);
         if (projectsResult.err) {
           console.error(projectsResult.error.message);
           process.exit(1);

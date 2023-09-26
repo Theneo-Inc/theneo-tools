@@ -1,15 +1,14 @@
-import { Profile } from '../../config';
 import { Project } from '../../models/project';
-import { queryProjectList } from '../../api/requests/project';
 import { select } from '@inquirer/prompts';
+import { Theneo } from '../../api/theneo.facade';
 
 export async function getProject(
-  profile: Profile,
+  theneo: Theneo,
   options: {
     project: string | undefined;
   }
 ): Promise<Project> {
-  const projectsList = await queryProjectList(profile.apiUrl, profile.token);
+  const projectsList = await theneo.listProjects();
   if (projectsList.err) {
     console.error(projectsList.error.message);
     process.exit(1);

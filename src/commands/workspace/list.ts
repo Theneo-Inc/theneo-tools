@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
 import Table from 'cli-table';
-import { queryUserWorkspaces } from '../../api/requests/workspace';
 import { Workspace } from '../../api/schema/workspace';
+import { createTheneo } from '../../core/theneo';
 
 export function initWorkspaceListCommand() {
   return new Command('list')
@@ -14,22 +14,20 @@ export function initWorkspaceListCommand() {
     )
     .action(async (options: { json: boolean; profile: string | undefined }) => {
       const profile = getProfile(options.profile);
-      const projectsResult = await queryUserWorkspaces(
-        profile.apiUrl,
-        profile.token
-      );
-      if (projectsResult.err) {
-        console.error(projectsResult.error.message);
+      const theneo = createTheneo(profile);
+      const workspaces = await theneo.listWorkspaces();
+
+      if (workspaces.err) {
+        console.error(workspaces.error.message);
         process.exit(1);
       }
       if (options.json) {
-        console.log(JSON.stringify(projectsResult.value, null, 2));
+        console.log(JSON.stringify(workspaces.value, null, 2));
       } else {
         const table = new Table({
           head: ['#', 'ID', 'Name', 'Slug', 'Default', 'Role'],
-          rows: projectsResult.value.map(
-            (workspace: Workspace, index: number) =>
-              getWorkspaceRow(index, workspace)
+          rows: workspaces.value.map((workspace: Workspace, index: number) =>
+            getWorkspaceRow(index, workspace)
           ),
         });
 

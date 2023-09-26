@@ -3,12 +3,9 @@ import { getProfile } from '../../context/auth';
 import { input } from '@inquirer/prompts';
 import { createSpinner } from 'nanospinner';
 import { checkDocumentationFile, getAbsoluteFilePath } from '../../utils/file';
-import {
-  importProjectDocumentFile,
-  publishProject,
-} from '../../api/requests/project';
 import { readFile } from 'fs/promises';
 import { getProject } from './common';
+import { createTheneo } from '../../core/theneo';
 
 export function initProjectImportCommand() {
   return new Command('import')
@@ -28,7 +25,8 @@ export function initProjectImportCommand() {
         profile: string | undefined;
       }) => {
         const profile = getProfile(options.profile);
-        const project = await getProject(profile, options);
+        const theneo = createTheneo(profile);
+        const project = await getProject(theneo, options);
         const specFileName =
           options.file ??
           (await input({
@@ -50,11 +48,9 @@ export function initProjectImportCommand() {
         const spinner = createSpinner(
           "updating project's documentation file"
         ).start();
-        const importResult = await importProjectDocumentFile(
-          profile.apiUrl,
-          profile.token,
-          file,
-          project.id
+        const importResult = await theneo.importProjectDocument(
+          project.id,
+          file
         );
         if (importResult.err) {
           console.error(importResult.error.message);
@@ -63,17 +59,13 @@ export function initProjectImportCommand() {
         spinner.success({ text: 'project updated successfully' });
         if (options.publish) {
           spinner.start({ text: 'publishing project' });
-          const publishResult = await publishProject(
-            profile.apiUrl,
-            profile.token,
-            project.id
-          );
+          const publishResult = await theneo.publishProjectById(project.id);
           if (publishResult.err) {
             console.error(publishResult.error.message);
             process.exit(1);
           }
           spinner.success({
-            text: `project published successfully! link: ${profile.appUrl}/${publishResult.value.companySlug}/${publishResult.value.projectKey}`,
+            text: `project published successfully! Published Page: ${profile.appUrl}/${publishResult.value.companySlug}/${publishResult.value.projectKey}`,
           });
         }
       }

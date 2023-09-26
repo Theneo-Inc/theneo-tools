@@ -1,23 +1,16 @@
 import { Command, Option } from 'commander';
 import { getProfile } from '../../context/auth';
-import {
-  completeProjectCreation,
-  createProject,
-  getDescriptionGenerationStatus,
-  importProjectDocumentFile,
-  publishProject,
-} from '../../api/requests/project';
-import { queryUserWorkspaces } from '../../api/requests/workspace';
+
 import { UserRole, Workspace } from '../../api/schema/workspace';
-import {
-  CreatedProjectStatusEnum,
-  CreateProjectSchema,
-} from '../../api/schema/project';
+import { CreatedProjectStatusEnum } from '../../api/schema/project';
 import { readFile } from 'fs/promises';
 import { checkDocumentationFile, getAbsoluteFilePath } from '../../utils/file';
 import { input, select, confirm } from '@inquirer/prompts';
 import { createSpinner, Spinner } from 'nanospinner';
-import { Profile } from '../../config';
+import { createTheneo } from '../../core/theneo';
+import { DescriptionGenerationType } from '../../api/schema/base';
+import { sleep } from '../../utils';
+import { Theneo } from '../../api/theneo.facade';
 
 async function getDocumentationFileLocation(options: CreateCommandOptions) {
   const specFileName =
@@ -37,12 +30,6 @@ async function getDocumentationFileLocation(options: CreateCommandOptions) {
     process.exit(1);
   }
   return absoluteFilePath;
-}
-
-enum DescriptionGenerationType {
-  FILl = 'fill',
-  OVERWRITE = 'overwrite',
-  NO_GENERATION = 'no generation',
 }
 
 async function getShouldBePublic(
@@ -115,23 +102,16 @@ function getDescriptionGenerationOption() {
     });
 }
 
-function sleep(time: number) {
-  return new Promise(resolve => setTimeout(resolve, time));
-}
-
 async function waitForDescriptionGeneration(
+  theneo: Theneo,
   spinner: Spinner,
-  profile: Profile,
   projectId: string
 ): Promise<boolean> {
   spinner.reset();
   spinner.start({ text: 'Generating descriptions' });
   while (true) {
-    const generateDescriptionsResult = await getDescriptionGenerationStatus(
-      profile.apiUrl,
-      profile.token,
-      projectId
-    );
+    const generateDescriptionsResult =
+      await theneo.getDescriptionGenerationStatus(projectId);
     if (generateDescriptionsResult.err) {
       console.error(generateDescriptionsResult.error.message);
       process.exit(1);
@@ -192,11 +172,9 @@ export function initProjectCreateCommand() {
       const isInteractive = options.name === undefined;
 
       const profile = getProfile(options.profile);
-      const workspacesPromise = queryUserWorkspaces(
-        profile.apiUrl,
-        profile.token,
-        UserRole.EDITOR
-      );
+      const theneo = createTheneo(profile);
+      const workspacesPromise = theneo.listWorkspaces(UserRole.EDITOR);
+
       const projectName =
         options.name ??
         (await input({
@@ -219,10 +197,6 @@ export function initProjectCreateCommand() {
         options.workspace
       );
       const absoluteFilePath = await getDocumentationFileLocation(options);
-      const requestData = getCreateProjectRequestData(
-        projectName,
-        workspace.workspaceId
-      );
 
       const isPublic = await getShouldBePublic(options, isInteractive);
       const descriptionGeneration = await getDescriptionGenerationType(
@@ -231,64 +205,42 @@ export function initProjectCreateCommand() {
       );
 
       spinner.start({ text: 'creating project' });
-      const projectResult = await createProject(
-        profile.apiUrl,
-        profile.token,
-        requestData
+      const projectResult = await theneo.createProjectBase(
+        projectName,
+        workspace.workspaceId
       );
       if (projectResult.err) {
         console.error(projectResult.error.message);
         process.exit(1);
       }
       const file = await readFile(absoluteFilePath);
-      const importResult = await importProjectDocumentFile(
-        profile.apiUrl,
-        profile.token,
-        file,
-        projectResult.value
-      );
+      const projectId = projectResult.value;
+      const importResult = await theneo.importProjectDocument(projectId, file);
       if (importResult.err) {
         console.error(importResult.error.message);
         process.exit(1);
       }
       spinner.success({ text: 'project created successfully' });
-      await completeProjectCreation(
-        profile.apiUrl,
-        profile.token,
-        projectResult.value,
-        {
-          isProjectPublic: isPublic,
-          shouldOverride:
-            descriptionGeneration === DescriptionGenerationType.OVERWRITE
-              ? true
-              : descriptionGeneration === DescriptionGenerationType.FILl
-              ? false
-              : undefined,
-        }
+      await theneo.completeProjectCreation(
+        projectId,
+        isPublic,
+        descriptionGeneration
       );
       if (descriptionGeneration !== DescriptionGenerationType.NO_GENERATION) {
-        await waitForDescriptionGeneration(
-          spinner,
-          profile,
-          projectResult.value
-        );
+        await waitForDescriptionGeneration(theneo, spinner, projectId);
       }
       const shouldPublish = await getShouldPublish(options, isInteractive);
       if (shouldPublish) {
         spinner.reset();
         spinner.start({ text: 'Publishing project' });
         spinner.spin();
-        const publishResult = await publishProject(
-          profile.apiUrl,
-          profile.token,
-          projectResult.value
-        );
+        const publishResult = await theneo.publishProjectById(projectId);
         if (publishResult.err) {
           console.error(publishResult.error.message);
           process.exit(1);
         }
         spinner.success({
-          text: `Project published successfully! link: ${profile.appUrl}/${publishResult.value.companySlug}/${publishResult.value.projectKey}`,
+          text: `Project published successfully! Published Page: ${profile.appUrl}/${publishResult.value.companySlug}/${publishResult.value.projectKey}`,
         });
       }
     });
@@ -326,36 +278,6 @@ async function getWorkspace(
       return { value: ws, name: ws.name };
     }),
   });
-}
-
-function getCreateProjectRequestData(projectName: string, workspaceId: string) {
-  const requestData: CreateProjectSchema = {
-    name: projectName,
-    workspaceId: workspaceId,
-    useSampleFile: false,
-    otherDocType: {
-      docType: '',
-      gettingStartedSections: {
-        introduction: false,
-        prerequisites: false,
-        quickStart: false,
-        resources: false,
-      },
-      sdk: {
-        overview: false,
-        supportedLibraries: false,
-        sampleCode: false,
-        troubleshooting: false,
-      },
-      faq: {
-        generalInfo: false,
-        authentication: false,
-        usage: false,
-        billing: false,
-      },
-    },
-  };
-  return requestData;
 }
 
 async function getShouldPublish(

@@ -45,7 +45,7 @@ export function initLogin(program: Command): Command {
 
       // Save the token to the config file
       if (result.err) {
-        console.log(`Token saving failed. \n ${result.val.message}`);
+        console.log(`Token saving failed. \n ${result.error.message}`);
       }
     });
 }

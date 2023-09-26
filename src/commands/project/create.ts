@@ -33,7 +33,7 @@ async function getDocumentationFileLocation(options: CreateCommandOptions) {
   const absoluteFilePath = getAbsoluteFilePath(specFileName);
   const isValidRes = await checkDocumentationFile(absoluteFilePath);
   if (isValidRes.err) {
-    console.error(isValidRes.val);
+    console.error(isValidRes.error);
     process.exit(1);
   }
   return absoluteFilePath;
@@ -133,27 +133,31 @@ async function waitForDescriptionGeneration(
       projectId
     );
     if (generateDescriptionsResult.err) {
-      console.error(generateDescriptionsResult.val.message);
+      console.error(generateDescriptionsResult.error.message);
       process.exit(1);
     }
     if (
-      generateDescriptionsResult.val.creationStatus ===
+      generateDescriptionsResult.value.creationStatus ===
       CreatedProjectStatusEnum.Finished
     ) {
       spinner.success({ text: 'Description  generation finished' });
       return true;
     }
     if (
-      generateDescriptionsResult.val.creationStatus ===
+      generateDescriptionsResult.value.creationStatus ===
       CreatedProjectStatusEnum.Error
     ) {
       spinner.error({ text: 'Description Generation Errored' });
       return false;
     }
+    const progress = generateDescriptionsResult.value
+      .descriptionGenerationProgress
+      ? `| ${String(
+          generateDescriptionsResult.value.descriptionGenerationProgress
+        ).substring(0, 2)}%`
+      : '';
     spinner.update({
-      text:
-        'Generating descriptions ' +
-        generateDescriptionsResult.val.descriptionGenerationProgress,
+      text: 'Generating descriptions ' + progress,
     });
     await sleep(5000);
   }
@@ -207,11 +211,11 @@ export function initProjectCreateCommand() {
       const workspacesResult = await workspacesPromise;
       spinner.reset();
       if (workspacesResult.err) {
-        console.error(workspacesResult.val.message);
+        console.error(workspacesResult.error.message);
         process.exit(1);
       }
       const workspace = await getWorkspace(
-        workspacesResult.val,
+        workspacesResult.value,
         options.workspace
       );
       const absoluteFilePath = await getDocumentationFileLocation(options);
@@ -233,7 +237,7 @@ export function initProjectCreateCommand() {
         requestData
       );
       if (projectResult.err) {
-        console.error(projectResult.val.message);
+        console.error(projectResult.error.message);
         process.exit(1);
       }
       const file = await readFile(absoluteFilePath);
@@ -241,17 +245,17 @@ export function initProjectCreateCommand() {
         profile.apiUrl,
         profile.token,
         file,
-        projectResult.val
+        projectResult.value
       );
       if (importResult.err) {
-        console.error(importResult.val.message);
+        console.error(importResult.error.message);
         process.exit(1);
       }
       spinner.success({ text: 'project created successfully' });
       await completeProjectCreation(
         profile.apiUrl,
         profile.token,
-        projectResult.val,
+        projectResult.value,
         {
           isProjectPublic: isPublic,
           shouldOverride:
@@ -263,24 +267,28 @@ export function initProjectCreateCommand() {
         }
       );
       if (descriptionGeneration !== DescriptionGenerationType.NO_GENERATION) {
-        await waitForDescriptionGeneration(spinner, profile, projectResult.val);
+        await waitForDescriptionGeneration(
+          spinner,
+          profile,
+          projectResult.value
+        );
       }
       const shouldPublish = await getShouldPublish(options, isInteractive);
       if (shouldPublish) {
         spinner.reset();
-        spinner.start({ text: 'publishing project' });
+        spinner.start({ text: 'Publishing project' });
         spinner.spin();
         const publishResult = await publishProject(
           profile.apiUrl,
           profile.token,
-          projectResult.val
+          projectResult.value
         );
         if (publishResult.err) {
-          console.error(publishResult.val.message);
+          console.error(publishResult.error.message);
           process.exit(1);
         }
         spinner.success({
-          text: `project published successfully! link: ${profile.appUrl}/${publishResult.val.companySlug}/${publishResult.val.projectKey}`,
+          text: `Project published successfully! link: ${profile.appUrl}/${publishResult.value.companySlug}/${publishResult.value.projectKey}`,
         });
       }
     });

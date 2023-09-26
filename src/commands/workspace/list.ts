@@ -19,16 +19,17 @@ export function initWorkspaceListCommand() {
         profile.token
       );
       if (projectsResult.err) {
-        console.error(projectsResult.val.message);
+        console.error(projectsResult.error.message);
         process.exit(1);
       }
       if (options.json) {
-        console.log(JSON.stringify(projectsResult.val, null, 2));
+        console.log(JSON.stringify(projectsResult.value, null, 2));
       } else {
         const table = new Table({
           head: ['#', 'ID', 'Name', 'Slug', 'Default', 'Role'],
-          rows: projectsResult.val.map((workspace: Workspace, index: number) =>
-            getWorkspaceRow(index, workspace)
+          rows: projectsResult.value.map(
+            (workspace: Workspace, index: number) =>
+              getWorkspaceRow(index, workspace)
           ),
         });
 

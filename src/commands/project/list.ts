@@ -19,15 +19,15 @@ export function initProjectListCommand() {
         profile.token
       );
       if (projectsResult.err) {
-        console.error(projectsResult.val.message);
+        console.error(projectsResult.error.message);
         process.exit(1);
       }
       if (options.json) {
-        console.log(JSON.stringify(projectsResult.val, null, 2));
+        console.log(JSON.stringify(projectsResult.value, null, 2));
       } else {
         const table = new Table({
           head: ['#', 'Key', 'Name', 'Company', 'URL', 'Public', 'ID'],
-          rows: projectsResult.val.map((project: Project, index: number) =>
+          rows: projectsResult.value.map((project: Project, index: number) =>
             getProjectRow(index, project, profile.appUrl)
           ),
         });

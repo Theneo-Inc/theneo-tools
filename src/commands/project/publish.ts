@@ -26,11 +26,11 @@ export function initProjectPublishCommand() {
           project.id
         );
         if (publishResult.err) {
-          console.error(publishResult.val.message);
+          console.error(publishResult.error.message);
           process.exit(1);
         }
         spinner.success({
-          text: `project published successfully! link: ${profile.appUrl}/${publishResult.val.companySlug}/${publishResult.val.projectKey}`,
+          text: `project published successfully! link: ${profile.appUrl}/${publishResult.value.companySlug}/${publishResult.value.projectKey}`,
         });
       }
     );

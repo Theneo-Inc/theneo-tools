@@ -42,5 +42,6 @@ module.exports = {
     "security/detect-non-literal-fs-filename": 'off',
     "security/detect-non-literal-require": 'off',
     "no-constant-condition": "warn",
+    "@typescript-eslint/no-unused-vars":"warn",
   },
 };

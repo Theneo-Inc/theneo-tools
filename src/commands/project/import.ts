@@ -42,7 +42,7 @@ export function initProjectImportCommand() {
         const absoluteFilePath = getAbsoluteFilePath(specFileName);
         const isValidRes = await checkDocumentationFile(absoluteFilePath);
         if (isValidRes.err) {
-          console.error(isValidRes.val);
+          console.error(isValidRes.error);
           process.exit(1);
         }
 
@@ -57,7 +57,7 @@ export function initProjectImportCommand() {
           project.id
         );
         if (importResult.err) {
-          console.error(importResult.val.message);
+          console.error(importResult.error.message);
           process.exit(1);
         }
         spinner.success({ text: 'project updated successfully' });
@@ -69,11 +69,11 @@ export function initProjectImportCommand() {
             project.id
           );
           if (publishResult.err) {
-            console.error(publishResult.val.message);
+            console.error(publishResult.error.message);
             process.exit(1);
           }
           spinner.success({
-            text: `project published successfully! link: ${profile.appUrl}/${publishResult.val.companySlug}/${publishResult.val.projectKey}`,
+            text: `project published successfully! link: ${profile.appUrl}/${publishResult.value.companySlug}/${publishResult.value.projectKey}`,
           });
         }
       }

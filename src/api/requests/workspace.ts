@@ -1,7 +1,7 @@
-import { Err, Ok, Result } from 'ts-results';
 import axios from 'axios';
 import { getCommonHeaders } from './base/headers';
 import { Workspace } from '../schema/workspace';
+import { Result } from '../../results';
 
 export async function queryUserWorkspaces(
   baseUrl: string,
@@ -18,15 +18,15 @@ export async function queryUserWorkspaces(
     });
 
     if (result.status !== 200) {
-      return Err(new Error('API returned status code ' + result.status));
+      return Result.err(new Error('API returned status code ' + result.status));
     }
 
     const data = result.data;
     if (data === undefined) {
-      return Err(new Error('No data returned from API'));
+      return Result.err(new Error('No data returned from API'));
     }
-    return Ok(data);
+    return Result.ok(data);
   } catch (error) {
-    return Err(error as Error);
+    return Result.err(error as Error);
   }
 }

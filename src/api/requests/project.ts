@@ -1,4 +1,3 @@
-import { Err, Ok, Result } from 'ts-results';
 import {
   convertProject,
   CreateProjectSchema,
@@ -11,6 +10,7 @@ import { Project } from '../../models/project';
 import { getCommonHeaders } from './base/headers';
 import { ResponseSchema } from '../schema/base';
 import FormData from 'form-data';
+import { Result } from '../../results';
 
 const WRONG_STATUS_CODE_ERROR = 'API returned status code: ';
 const EMPTY_RESPONSE_ERROR = 'No data returned from API! message:';
@@ -30,18 +30,18 @@ export async function queryProjectList(
     );
 
     if (result.status !== 200) {
-      return Err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
+      return Result.err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
     }
 
     const data = result.data.data;
     if (data === undefined) {
-      return Err(new Error(EMPTY_RESPONSE_ERROR + result.data.message));
+      return Result.err(new Error(EMPTY_RESPONSE_ERROR + result.data.message));
     }
     const projects = data.map(project => convertProject(project));
     console.assert(result.data.message === 'Success');
-    return Ok(projects);
+    return Result.ok(projects);
   } catch (error) {
-    return Err(error as Error);
+    return Result.err(error as Error);
   }
 }
 
@@ -62,16 +62,16 @@ export async function createProject(
     );
 
     if (result.status !== 200) {
-      return Err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
+      return Result.err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
     }
     const data = result.data.data;
     if (data === undefined) {
-      return Err(new Error(EMPTY_RESPONSE_ERROR + result.data.message));
+      return Result.err(new Error(EMPTY_RESPONSE_ERROR + result.data.message));
     }
     console.assert(result.data.message === 'Success');
-    return Ok(data);
+    return Result.ok(data);
   } catch (error) {
-    return Err(error as Error);
+    return Result.err(error as Error);
   }
 }
 
@@ -82,7 +82,7 @@ export async function importProjectDocumentFile(
   projectId: string | null = null
 ): Promise<Result<string, Error>> {
   if (!projectId) {
-    return Err(new Error('projectId and projectSlug are required'));
+    return Result.err(new Error('projectId and projectSlug are required'));
   }
 
   const urlPath = new URL(`${baseUrl}/project/${projectId}/import/api-client`);
@@ -103,16 +103,16 @@ export async function importProjectDocumentFile(
     );
 
     if (result.status !== 200) {
-      return Err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
+      return Result.err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
     }
     const data = result.data.data;
     if (data === undefined) {
-      return Err(new Error(EMPTY_RESPONSE_ERROR + result.data.message));
+      return Result.err(new Error(EMPTY_RESPONSE_ERROR + result.data.message));
     }
     console.assert(result.data.message === 'Success');
-    return Ok(data);
+    return Result.ok(data);
   } catch (error) {
-    return Err(error as Error);
+    return Result.err(error as Error);
   }
 }
 
@@ -133,16 +133,16 @@ export async function publishProject(
     );
 
     if (result.status !== 200) {
-      return Err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
+      return Result.err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
     }
     const data = result.data.data;
     if (data === undefined) {
-      return Err(new Error(EMPTY_RESPONSE_ERROR + result.data.message));
+      return Result.err(new Error(EMPTY_RESPONSE_ERROR + result.data.message));
     }
     console.assert(result.data.message === 'Success');
-    return Ok(data);
+    return Result.ok(data);
   } catch (error) {
-    return Err(error as Error);
+    return Result.err(error as Error);
   }
 }
 
@@ -162,13 +162,13 @@ export async function deleteProject(
     );
 
     if (result.status !== 200) {
-      return Err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
+      return Result.err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
     }
 
     console.assert(result.data.message === 'Success');
-    return Ok(null);
+    return Result.ok(null);
   } catch (error) {
-    return Err(error as Error);
+    return Result.err(error as Error);
   }
 }
 
@@ -191,12 +191,12 @@ export async function completeProjectCreation(
     });
 
     if (result.status !== 200) {
-      return Err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
+      return Result.err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
     }
 
-    return Ok(null);
+    return Result.ok(null);
   } catch (error) {
-    return Err(error as Error);
+    return Result.err(error as Error);
   }
 }
 
@@ -213,11 +213,11 @@ export async function getDescriptionGenerationStatus(
     });
 
     if (result.status !== 200) {
-      return Err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
+      return Result.err(new Error(WRONG_STATUS_CODE_ERROR + result.status));
     }
 
-    return Ok(result.data);
+    return Result.ok(result.data);
   } catch (error) {
-    return Err(error as Error);
+    return Result.err(error as Error);
   }
 }

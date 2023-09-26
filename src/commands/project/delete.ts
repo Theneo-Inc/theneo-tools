@@ -24,7 +24,7 @@ export function initProjectDeleteCommand() {
           project.id
         );
         if (projectsResult.err) {
-          console.error(projectsResult.val.message);
+          console.error(projectsResult.error.message);
           process.exit(1);
         }
       }

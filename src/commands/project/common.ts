@@ -11,10 +11,10 @@ export async function getProject(
 ): Promise<Project> {
   const projectsList = await queryProjectList(profile.apiUrl, profile.token);
   if (projectsList.err) {
-    console.error(projectsList.val.message);
+    console.error(projectsList.error.message);
     process.exit(1);
   }
-  const projects = projectsList.val;
+  const projects = projectsList.value;
   if (projects.length === 0) {
     console.error(
       'No project found! first create project using `theneo project create` command'
@@ -33,7 +33,7 @@ export async function getProject(
       }),
     });
   } else {
-    const project = projectsList.val.find(
+    const project = projectsList.value.find(
       project => project.key === options.project
     );
     if (!project) {

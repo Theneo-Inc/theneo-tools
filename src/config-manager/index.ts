@@ -7,10 +7,11 @@ export function initConfigManager(): ConfigManager {
     THENEO_CONFIG_DIR,
     Yaml
   );
-  configManager.readInConfig().mapErr(err => {
-    console.error(err.message);
+  const readInConfigRes = configManager.readInConfig();
+  if (readInConfigRes.err) {
+    console.error(readInConfigRes.error.message);
     process.exit(1);
-  });
+  }
 
   return configManager;
 }

@@ -4,8 +4,8 @@ import {
   DEFAULT_THENEO_API_BASE_URL,
   DEFAULT_THENEO_APP_BASE_URL,
 } from '../consts';
-import { Result } from 'ts-results';
 import { Profile } from '../config';
+import { Result } from '../results';
 
 export function setApiKeyAndSave(
   token: string,
@@ -32,8 +32,8 @@ export function getProfile(profileName?: string): Profile {
     };
   });
   if (result.err) {
-    console.error(result.val.message);
+    console.error(result.error.message);
     process.exit(1);
   }
-  return result.val;
+  return result.value;
 }

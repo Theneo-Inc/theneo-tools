@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync } from 'fs';
-import { Err, Ok, Result } from 'ts-results';
 import { lintFile } from 'yaml-lint';
 import path from 'path';
+import { Result } from '../results';
 
 export function createDirectorySync(path: string) {
   if (!existsSync(path)) {
@@ -15,10 +15,10 @@ export function getAbsoluteFilePath(filePath: string): string {
 
 export async function checkDocumentationFile(
   path: string
-): Promise<Result<boolean, string>> {
+): Promise<Result<boolean, Error>> {
   // check if file exists
   if (!existsSync(path)) {
-    return Err('File does not exist');
+    return Result.err(new Error('File does not exist'));
   }
 
   if (path.includes('.')) {
@@ -27,10 +27,13 @@ export async function checkDocumentationFile(
       try {
         await lintFile(path);
       } catch (err) {
-        return Err((err as Error).message);
+        if (err instanceof Error) {
+          return Result.err(err);
+        }
+        return Result.err(new Error('Unknown error'));
       }
     }
     // TODO ADD checks for other type of files
   }
-  return Ok(true);
+  return Result.ok(true);
 }

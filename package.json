@@ -1,35 +1,37 @@
 {
   "name": "theneo-tools",
   "version": "1.0.0",
+  "private": true,
   "description": "## Theneo tools",
-  "packageManager": "npm@9.6.7",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
-  "dependencies": {
-
-  },
-  "devDependencies": {
-    "eslint": "^8.50.0",
-    "prettier": "^3.0.3",
-    "tsconfig": "*",
-    "turbo": "latest",
-    "husky": "^8.0.3",
-    "lint-staged": "^14.0.1"
-  },
   "scripts": {
-    "prepare": "husky install",
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "install:cli": "turbo build lint && npm i -g ./packages/theneo-cli"
+    "check:packages": "manypkg check",
+    "install:cli": "turbo build lint && npm i -g ./packages/theneo-cli",
+    "lint": "turbo run lint",
+    "prepare": "husky install",
+    "publish-packages": "turbo run build lint test && changeset version && changeset publish",
+    "sort": "npx sort-package-json"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "lint-staged": {
     "*.ts": "eslint --cache --cache-location .eslintcache --fix"
-  }
+  },
+  "devDependencies": {
+    "@manypkg/cli": "latest",
+    "eslint": "^8.50.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.1",
+    "prettier": "^3.0.3",
+    "tsconfig": "*",
+    "turbo": "latest"
+  },
+  "packageManager": "npm@9.6.7"
 }

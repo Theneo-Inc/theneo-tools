@@ -1,19 +1,7 @@
 {
   "name": "@theneo/cli",
-  "version": "0.0.5",
+  "version": "0.0.3",
   "description": "Theneo CLI",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Theneo-Inc/theneo-cli.git"
-  },
-  "license": "MIT",
-  "author": {
-    "name": "theneo",
-    "url": "https://github.com/Theneo-Inc"
-  },
-  "engines": {
-    "node": ">=16.0"
-  },
   "keywords": [
     "theneo",
     "api",
@@ -21,31 +9,44 @@
     "cli",
     "typescript"
   ],
-  "bugs": {
-    "url": "https://github.com/Theneo-Inc/theneo-cli/issues"
+  "publishConfig": {
+    "access": "public"
   },
-  "homepage": "https://github.com/Theneo-Inc/theneo-cli#readme",
+  "homepage": "https://github.com/Theneo-Inc/theneo-tools/tree/main/packages/theneo-cli#readme",
+  "bugs": {
+    "url": "https://github.com/Theneo-Inc/theneo-tools/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Theneo-Inc/theneo-tools.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "theneo",
+    "url": "https://github.com/Theneo-Inc"
+  },
+  "bin": {
+    "theneo": "./bin/index.js"
+  },
   "files": [
     "dist/**/*",
     "bin/**/*"
   ],
-  "bin": {
-    "theneo": "./bin/index.js"
-  },
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf ./dist/",
-    "lint": "eslint ./src/  --fix",
-    "start": "npm run build && TS_NODE_FILES=true ts-node ./src/bin.ts",
-    "test:watch": "jest --watch",
-    "test": "jest",
-    "typecheck": "tsc --noEmit",
     "ci": "npm run build",
+    "clean": "rm -rf ./dist/",
+    "install-locally": "npm run lint && npm run build && npm i -g ../theneo-cli",
+    "lint": "eslint ./src/  --fix",
     "release": "npm run ci && changeset publish",
-    "install-locally": "npm run lint && npm run build && npm i -g ../theneo-cli"
+    "start": "npm run build && TS_NODE_FILES=true ts-node ./src/bin.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@inquirer/prompts": "^3.1.2",
+    "@theneo/sdk": "*",
     "axios": "^1.5.1",
     "chalk": "^5.3.0",
     "cli-table": "^0.3.11",
@@ -56,8 +57,7 @@
     "js-yaml": "^4.1.0",
     "nanospinner": "^1.1.0",
     "toml": "^3.0.0",
-    "yaml-lint": "^1.7.0",
-    "@theneo/sdk": "*"
+    "yaml-lint": "^1.7.0"
   },
   "devDependencies": {
     "@types/cli-table": "^0.3.2",
@@ -78,5 +78,8 @@
     "ts-node": "^10.9.1",
     "type-fest": "^4.3.2",
     "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=16.0"
   }
 }

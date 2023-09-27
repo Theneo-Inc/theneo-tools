@@ -4,7 +4,7 @@ import * as yamlParser from 'js-yaml';
 import { parse as tomlParser } from 'toml';
 import { createDirectorySync } from '../utils/file';
 import { ProfileConfig, TheneoConfig } from '../config';
-import { Result } from '../results';
+import { Result, Err, Ok } from '@theneo/sdk';
 
 export const Json = 'json';
 export const Yaml = 'yaml';
@@ -47,13 +47,13 @@ export class ConfigManager {
 
   public getProfile(profileName: string): Result<ProfileConfig, Error> {
     if (!this.config) {
-      return Result.err(ErrorConfigIsEmpty);
+      return Err(ErrorConfigIsEmpty);
     }
     const profile = this.config.profiles[String(profileName)];
     if (!profile) {
-      return Result.err(ErrorInvalidProfile);
+      return Err(ErrorInvalidProfile);
     }
-    return Result.ok(profile);
+    return Ok(profile);
   }
 
   public setProfile(profileName: string, profile: ProfileConfig): void {
@@ -69,7 +69,7 @@ export class ConfigManager {
 
   public readInConfig(): Result<null, Error> {
     if (!this.fileType) {
-      return Result.err(ErrorNoFileType);
+      return Err(ErrorNoFileType);
     }
     if (fs.existsSync(this.configFilePath)) {
       this.fileType = FileTypeMapping().get(this.fileType);
@@ -88,21 +88,21 @@ export class ConfigManager {
           ) as TheneoConfig;
           break;
         default:
-          return Result.err(ErrorUnrecognisedFormat);
+          return Err(ErrorUnrecognisedFormat);
       }
     }
 
-    return Result.ok(null);
+    return Ok(null);
   }
 
   public save(): Result<null, Error> {
     if (!this.fileType) {
-      return Result.err(ErrorNoFileType);
+      return Err(ErrorNoFileType);
     }
     this.fileType = FileTypeMapping().get(this.fileType);
     // move everything from the kvCache to the config object
     if (!this.config) {
-      return Result.err(ErrorConfigIsEmpty);
+      return Err(ErrorConfigIsEmpty);
     }
 
     switch (this.fileType) {
@@ -116,9 +116,9 @@ export class ConfigManager {
         fs.writeFileSync(this.configFilePath, yamlParser.dump(this.config));
         break;
       default:
-        return Result.err(ErrorUnrecognisedFormat);
+        return Err(ErrorUnrecognisedFormat);
     }
 
-    return Result.ok(null);
+    return Ok(null);
   }
 }

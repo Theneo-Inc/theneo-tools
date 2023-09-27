@@ -1,7 +1,7 @@
 {
   "name": "@theneo/cli",
-  "version": "0.0.4",
-  "description": "Theneo cli",
+  "version": "0.0.5",
+  "description": "Theneo CLI",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Theneo-Inc/theneo-cli.git"
@@ -26,8 +26,7 @@
   },
   "homepage": "https://github.com/Theneo-Inc/theneo-cli#readme",
   "files": [
-    "!lib/__tests__/**/*",
-    "lib/**/*",
+    "dist/**/*",
     "bin/**/*"
   ],
   "bin": {
@@ -35,8 +34,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf ./lib/",
-    "cm": "cz",
+    "clean": "rm -rf ./dist/",
     "lint": "eslint ./src/  --fix",
     "start": "npm run build && TS_NODE_FILES=true ts-node ./src/bin.ts",
     "test:watch": "jest --watch",
@@ -58,7 +56,8 @@
     "js-yaml": "^4.1.0",
     "nanospinner": "^1.1.0",
     "toml": "^3.0.0",
-    "yaml-lint": "^1.7.0"
+    "yaml-lint": "^1.7.0",
+    "@theneo/sdk": "*"
   },
   "devDependencies": {
     "@types/cli-table": "^0.3.2",

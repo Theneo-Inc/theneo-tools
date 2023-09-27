@@ -1,9 +1,15 @@
-import { UserRole, Workspace } from './schema/workspace';
-import { queryUserWorkspaces } from './requests/workspace';
-import { Result } from '../results';
-import { ApiHeaders } from './requests/base/requests';
-import { THENEO_API_CLIENT_KEY_HEADER_NAME } from './requests/base/headers';
 import {
+  CompleteProjectCreationRequest,
+  CreateProjectSchema,
+  DescriptionGenerationType,
+  PublishProjectResponse,
+  PublishProjectSchema,
+  UserRole,
+  Workspace,
+} from './schema';
+import { Result } from './results';
+import {
+  ApiHeaders,
   completeProjectCreation,
   createProject,
   deleteProject,
@@ -11,12 +17,12 @@ import {
   importProjectDocumentFile,
   publishProject,
   queryProjectList,
-} from './requests/project';
-import { Project } from '../models/project';
-import { CreateProjectSchema, PublishProjectResponse } from './schema/project';
-import { DescriptionGenerationType } from './schema/base';
+  queryUserWorkspaces,
+  THENEO_API_CLIENT_KEY_HEADER_NAME,
+} from './requests';
+import { Project } from './models';
 
-interface TheneoOptions {
+export interface TheneoOptions {
   baseApiUrl?: string;
   baseAppUrl?: string;
   apiKey?: string;
@@ -49,9 +55,7 @@ export class Theneo {
     this.apiClientName = options.apiClientName ?? 'theneo-sdk';
   }
 
-  public async listWorkspaces(
-    role?: UserRole
-  ): Promise<Result<Workspace[], Error>> {
+  public async listWorkspaces(role?: UserRole): Promise<Result<Workspace[]>> {
     return queryUserWorkspaces(
       this.baseApiUrl,
       {
@@ -62,16 +66,14 @@ export class Theneo {
     );
   }
 
-  public async listProjects(): Promise<Result<Project[], Error>> {
+  public async listProjects(): Promise<Result<Project[]>> {
     return queryProjectList(this.baseApiUrl, {
       ...this.defaultHeaders(),
       ...this.authHeaders(),
     });
   }
 
-  public async deleteProjectById(
-    projectId: string
-  ): Promise<Result<void, Error>> {
+  public async deleteProjectById(projectId: string): Promise<Result<void>> {
     return deleteProject(
       this.baseApiUrl,
       {
@@ -84,7 +86,7 @@ export class Theneo {
 
   public async publishProjectById(
     projectId: string
-  ): Promise<Result<PublishProjectResponse, Error>> {
+  ): Promise<Result<PublishProjectResponse>> {
     return publishProject(
       this.baseApiUrl,
       {
@@ -95,7 +97,10 @@ export class Theneo {
     );
   }
 
-  public async importProjectDocument(projectId: string, content: Buffer) {
+  public async importProjectDocument(
+    projectId: string,
+    content: Buffer
+  ): Promise<Result<string>> {
     return importProjectDocumentFile(
       this.baseApiUrl,
       {
@@ -107,7 +112,10 @@ export class Theneo {
     );
   }
 
-  public async createProjectBase(projectName: string, workspaceId: string) {
+  public async createProjectBase(
+    projectName: string,
+    workspaceId: string
+  ): Promise<Result<string>> {
     const requestData = this.getCreateProjectRequestData(
       projectName,
       workspaceId
@@ -126,8 +134,8 @@ export class Theneo {
     projectId: string,
     isPublic: boolean,
     descriptionGeneration: DescriptionGenerationType
-  ) {
-    const requestData = {
+  ): Promise<Result<void, Error>> {
+    const requestData: CompleteProjectCreationRequest = {
       isProjectPublic: isPublic,
       shouldOverride:
         descriptionGeneration === DescriptionGenerationType.OVERWRITE
@@ -147,7 +155,9 @@ export class Theneo {
     );
   }
 
-  public async getDescriptionGenerationStatus(projectId: string) {
+  public async getDescriptionGenerationStatus(
+    projectId: string
+  ): Promise<Result<PublishProjectSchema, Error>> {
     return getDescriptionGenerationStatus(
       this.baseApiUrl,
       {

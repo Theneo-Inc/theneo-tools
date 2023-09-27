@@ -1,5 +1,5 @@
-import { Workspace } from '../schema/workspace';
-import { Result } from '../../results';
+import { Workspace } from '../schema';
+import { Result } from '../results';
 import { getRequest } from './base/requests';
 
 export async function queryUserWorkspaces(

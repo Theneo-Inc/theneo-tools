@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
 import Table from 'cli-table';
-import { Workspace } from '../../api/schema/workspace';
 import { createTheneo } from '../../core/theneo';
+import { Workspace } from '@theneo/sdk';
 
 export function initWorkspaceListCommand() {
   return new Command('list')

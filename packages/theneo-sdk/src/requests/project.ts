@@ -1,14 +1,15 @@
 import {
+  CompleteProjectCreationRequest,
   convertProject,
   CreateProjectSchema,
   ProjectSchema,
   PublishProjectResponse,
   PublishProjectSchema,
-} from '../schema/project';
-import { Project } from '../../models/project';
-import { ResponseSchema } from '../schema/base';
+  ResponseSchema,
+} from '../schema';
+import { Project } from '../models';
 import FormData from 'form-data';
-import { Result } from '../../results';
+import { Err, Ok, Result } from '../results';
 import {
   ApiHeaders,
   deleteRequest,
@@ -27,9 +28,9 @@ export async function queryProjectList(
   });
   return result.chain(data => {
     if (data.message !== 'Success') {
-      return Result.err(new Error(data.message));
+      return Err(new Error(data.message));
     }
-    return Result.ok(data.data.map(project => convertProject(project)));
+    return Ok(data.data.map(project => convertProject(project)));
   });
 }
 
@@ -38,9 +39,9 @@ function handleResponse<T>(
 ): Result<T, Error> {
   return result.chain(data => {
     if (data.message !== 'Success') {
-      return Result.err(new Error(data.message));
+      return Err(new Error(data.message));
     }
-    return Result.ok(data.data);
+    return Ok(data.data);
   });
 }
 
@@ -106,21 +107,16 @@ export async function deleteProject(
   return deleteRequest({ url, headers });
 }
 
-export interface CompleteProjectCreationRequest {
-  shouldOverride?: boolean;
-  isProjectPublic: boolean;
-}
-
 export async function completeProjectCreation(
   baseUrl: string,
   headers: ApiHeaders,
   projectId: string,
   requestBody: CompleteProjectCreationRequest
-): Promise<Result<null, Error>> {
+): Promise<Result<void, Error>> {
   const url = new URL(
     `${baseUrl}/project/${projectId}/create/complete/api-client`
   );
-  return postRequest<CompleteProjectCreationRequest, null>({
+  return postRequest<CompleteProjectCreationRequest, void>({
     url,
     headers,
     requestBody,

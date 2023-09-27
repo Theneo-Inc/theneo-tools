@@ -5,7 +5,7 @@ import {
   DEFAULT_THENEO_APP_BASE_URL,
 } from '../consts';
 import { Profile } from '../config';
-import { Result } from '../results';
+import { Result } from '@theneo/sdk';
 
 export function setApiKeyAndSave(
   token: string,

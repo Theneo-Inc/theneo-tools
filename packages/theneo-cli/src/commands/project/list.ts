@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
 import Table from 'cli-table';
-import { Project } from '../../models/project';
 import { createTheneo } from '../../core/theneo';
+import { Project } from '@theneo/sdk';
 
 export function initProjectListCommand() {
   return new Command('list')

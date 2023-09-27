@@ -1,8 +1,10 @@
-import { Result } from '../../../results';
+import { Err, Ok, Result } from '../../results';
 import axios from 'axios';
 
 export type ApiHeaders = Record<string, string>;
 export type ApiQueryParams = Record<string, string | undefined>;
+export const THENEO_API_CLIENT_KEY_HEADER_NAME = 'x-theneo-api-key';
+export const THENEO_API_CLIENT_NAME_HEADER_NAME = 'x-theneo-api-client';
 
 const UNKNOWN_ERROR_MESSAGE = 'Unknown error';
 const EMPTY_DATA_ERROR_MESSAGE = 'No data returned from API';
@@ -36,7 +38,7 @@ export async function getRequest<Response>({
     });
 
     if (result.status >= 400) {
-      return Result.err(
+      return Err(
         new Error(
           `API returned status code: ${result.status} ${result.statusText}`
         )
@@ -44,19 +46,19 @@ export async function getRequest<Response>({
     }
     const data = result.data;
     if (data === undefined) {
-      return Result.err(new Error(EMPTY_DATA_ERROR_MESSAGE));
+      return Err(new Error(EMPTY_DATA_ERROR_MESSAGE));
     }
-    return Result.ok(data);
+    return Ok(data);
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return Result.err(
+      return Err(
         error.response ? new Error(String(error.response.data)) : error
       );
     }
     if (error instanceof Error) {
-      return Result.err(error);
+      return Err(error);
     }
-    return Result.err(new Error(UNKNOWN_ERROR_MESSAGE));
+    return Err(new Error(UNKNOWN_ERROR_MESSAGE));
   }
 }
 
@@ -79,7 +81,7 @@ export async function postRequest<Request, Response>({
     });
 
     if (result.status >= 400) {
-      return Result.err(
+      return Err(
         new Error(
           `API returned status code: ${result.status} ${result.statusText}`
         )
@@ -87,19 +89,19 @@ export async function postRequest<Request, Response>({
     }
     const data = result.data;
     if (data === undefined) {
-      return Result.err(new Error(EMPTY_DATA_ERROR_MESSAGE));
+      return Err(new Error(EMPTY_DATA_ERROR_MESSAGE));
     }
-    return Result.ok(data);
+    return Ok(data);
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return Result.err(
+      return Err(
         error.response ? new Error(String(error.response.data)) : error
       );
     }
     if (error instanceof Error) {
-      return Result.err(error);
+      return Err(error);
     }
-    return Result.err(new Error(UNKNOWN_ERROR_MESSAGE));
+    return Err(new Error(UNKNOWN_ERROR_MESSAGE));
   }
 }
 
@@ -119,7 +121,7 @@ export async function deleteRequest<Response>({
     });
 
     if (result.status >= 400) {
-      return Result.err(
+      return Err(
         new Error(
           `API returned status code: ${result.status} ${result.statusText}`
         )
@@ -127,18 +129,18 @@ export async function deleteRequest<Response>({
     }
     const data = result.data;
     if (data === undefined) {
-      return Result.err(new Error(EMPTY_DATA_ERROR_MESSAGE));
+      return Err(new Error(EMPTY_DATA_ERROR_MESSAGE));
     }
-    return Result.ok(data);
+    return Ok(data);
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      return Result.err(
+      return Err(
         error.response ? new Error(String(error.response.data)) : error
       );
     }
     if (error instanceof Error) {
-      return Result.err(error);
+      return Err(error);
     }
-    return Result.err(new Error(UNKNOWN_ERROR_MESSAGE));
+    return Err(new Error(UNKNOWN_ERROR_MESSAGE));
   }
 }

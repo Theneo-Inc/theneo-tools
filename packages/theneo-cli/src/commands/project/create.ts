@@ -1,16 +1,19 @@
 import { Command, Option } from 'commander';
 import { getProfile } from '../../context/auth';
 
-import { UserRole, Workspace } from '../../api/schema/workspace';
-import { CreatedProjectStatusEnum } from '../../api/schema/project';
 import { readFile } from 'fs/promises';
 import { checkDocumentationFile, getAbsoluteFilePath } from '../../utils/file';
 import { input, select, confirm } from '@inquirer/prompts';
 import { createSpinner, Spinner } from 'nanospinner';
 import { createTheneo } from '../../core/theneo';
-import { DescriptionGenerationType } from '../../api/schema/base';
 import { sleep } from '../../utils';
-import { Theneo } from '../../api/theneo.facade';
+import {
+  Theneo,
+  CreatedProjectStatusEnum,
+  UserRole,
+  Workspace,
+  DescriptionGenerationType,
+} from '@theneo/sdk';
 
 async function getDocumentationFileLocation(options: CreateCommandOptions) {
   const specFileName =

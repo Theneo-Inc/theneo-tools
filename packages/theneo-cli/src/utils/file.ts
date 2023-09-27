@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync } from 'fs';
 import { lintFile } from 'yaml-lint';
 import path from 'path';
-import { Result } from '../results';
+import { Err, Ok, Result } from '@theneo/sdk';
 
 export function createDirectorySync(path: string) {
   if (!existsSync(path)) {
@@ -18,7 +18,7 @@ export async function checkDocumentationFile(
 ): Promise<Result<boolean, Error>> {
   // check if file exists
   if (!existsSync(path)) {
-    return Result.err(new Error('File does not exist'));
+    return Err(new Error('File does not exist'));
   }
 
   if (path.includes('.')) {
@@ -28,12 +28,12 @@ export async function checkDocumentationFile(
         await lintFile(path);
       } catch (err) {
         if (err instanceof Error) {
-          return Result.err(err);
+          return Err(err);
         }
-        return Result.err(new Error('Unknown error'));
+        return Err(new Error('Unknown error'));
       }
     }
     // TODO ADD checks for other type of files
   }
-  return Result.ok(true);
+  return Ok(true);
 }

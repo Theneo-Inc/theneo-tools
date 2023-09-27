@@ -10,7 +10,7 @@
     "checkJs": true,
 
     /* EMIT RULES */
-    "outDir": "lib/",
+    "outDir": "dist",
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,

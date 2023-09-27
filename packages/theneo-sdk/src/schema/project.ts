@@ -1,4 +1,4 @@
-import { Company, Project } from '../../models/project';
+import { Company, Project } from '../models';
 
 export interface CompanySchema {
   _id: string;
@@ -83,4 +83,9 @@ export interface PublishProjectSchema {
   updatedAt: string;
   creationStatus: CreatedProjectStatusEnum;
   descriptionGenerationProgress: number;
+}
+
+export interface CompleteProjectCreationRequest {
+  shouldOverride?: boolean | undefined;
+  isProjectPublic: boolean;
 }

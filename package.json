@@ -25,6 +25,7 @@
     "*.ts": "eslint --cache --cache-location .eslintcache --fix"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.26.2",
     "@manypkg/cli": "latest",
     "eslint": "^8.50.0",
     "husky": "^8.0.3",

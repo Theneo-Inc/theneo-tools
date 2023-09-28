@@ -21,6 +21,7 @@ import {
   THENEO_API_CLIENT_KEY_HEADER_NAME,
 } from './requests';
 import { Project } from './models';
+import { SDK_VERSION } from './utils/version';
 
 export interface TheneoOptions {
   baseApiUrl?: string;
@@ -52,7 +53,7 @@ export class Theneo {
       this.apiKey = options.apiKey;
     }
 
-    this.apiClientName = options.apiClientName ?? 'theneo-sdk';
+    this.apiClientName = options.apiClientName ?? `theneo-sdk:${SDK_VERSION}`;
   }
 
   public async listWorkspaces(role?: UserRole): Promise<Result<Workspace[]>> {

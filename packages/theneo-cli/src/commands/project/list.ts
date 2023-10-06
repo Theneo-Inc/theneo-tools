@@ -24,7 +24,7 @@ export function initProjectListCommand() {
         console.log(JSON.stringify(projectsResult.value, null, 2));
       } else {
         const table = new Table({
-          head: ['#', 'Key', 'Name', 'Company', 'URL', 'Public', 'ID'],
+          head: ['#', 'Key', 'Name', 'Workspace', 'URL', 'Public', 'ID'],
           rows: projectsResult.value.map((project: Project, index: number) =>
             getProjectRow(index, project, profile.appUrl)
           ),

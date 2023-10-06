@@ -3,7 +3,8 @@ import * as path from 'path';
 export const THENEO_CLI_APP = 'theneo';
 export const THENEO_CONFIG_DIR = path.join(
   process.env.HOME ?? process.env.USERPROFILE ?? '',
-  '.theneo'
+  '.config',
+  'theneo'
 );
 export const THENEO_CLI_CONFIG_NAME = 'config';
 

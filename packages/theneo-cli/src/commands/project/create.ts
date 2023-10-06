@@ -87,7 +87,7 @@ async function getDescriptionGenerationType(
 function getDescriptionGenerationOption() {
   return new Option(
     '--generate-description',
-    'Should descriptions be updated using AI? options are (fill-empty, overwrite-all, no)'
+    'Indicates if AI should be used for description generation'
   )
     .default('no')
     .choices(['fill-empty', 'overwrite-all', 'no'])
@@ -245,6 +245,10 @@ export function initProjectCreateCommand() {
         spinner.success({
           text: `Project published successfully! Published Page: ${profile.appUrl}/${publishResult.value.companySlug}/${publishResult.value.projectKey}`,
         });
+      } else {
+        console.log(
+          `Project created, you can make changes via editor before publishing. Editor link: ${profile.appUrl}/editor/${projectId}`
+        );
       }
     });
 }

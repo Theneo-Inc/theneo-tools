@@ -52,7 +52,11 @@ export async function getRequest<Response>({
   } catch (error) {
     if (axios.isAxiosError(error)) {
       return Err(
-        error.response ? new Error(String(error.response.data)) : error
+        error.response
+          ? new Error(
+              String(error.response.data?.message || error.response.data)
+            )
+          : error
       );
     }
     if (error instanceof Error) {
@@ -95,7 +99,11 @@ export async function postRequest<Request, Response>({
   } catch (error) {
     if (axios.isAxiosError(error)) {
       return Err(
-        error.response ? new Error(String(error.response.data)) : error
+        error.response
+          ? new Error(
+              String(error.response.data?.message || error.response.data)
+            )
+          : error
       );
     }
     if (error instanceof Error) {
@@ -135,7 +143,11 @@ export async function deleteRequest<Response>({
   } catch (error) {
     if (axios.isAxiosError(error)) {
       return Err(
-        error.response ? new Error(String(error.response.data)) : error
+        error.response
+          ? new Error(
+              String(error.response.data?.message || error.response.data)
+            )
+          : error
       );
     }
     if (error instanceof Error) {

@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
-import { getProject } from './common';
 import { createTheneo } from '../../core/theneo';
+import { getProject } from '../../core/cli/project/project';
 
 export function initProjectDeleteCommand() {
   return new Command('delete')

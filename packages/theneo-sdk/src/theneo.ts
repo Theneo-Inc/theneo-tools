@@ -2,6 +2,7 @@ import {
   CompleteProjectCreationRequest,
   CreateProjectSchema,
   DescriptionGenerationType,
+  ProjectSchema,
   PublishProjectResponse,
   PublishProjectSchema,
   UserRole,
@@ -10,18 +11,20 @@ import {
 import { Result } from './results';
 import {
   ApiHeaders,
-  completeProjectCreation,
-  createProject,
-  deleteProject,
-  getDescriptionGenerationStatus,
-  importProjectDocumentFile,
-  publishProject,
-  queryProjectList,
-  queryUserWorkspaces,
+  callCompleteProjectCreation,
+  callCreateProject,
+  callDeleteProject,
+  callDescriptionGenerationStatus,
+  callImportProjectDocumentFile,
+  callPublishProject,
+  callProjectList,
+  callUserWorkspaces,
   THENEO_API_CLIENT_KEY_HEADER_NAME,
+  THENEO_API_CLIENT_NAME_HEADER_NAME,
 } from './requests';
-import { Project } from './models';
 import { SDK_VERSION } from './utils/version';
+import { CreateProjectOptions } from 'theneo/models/inputs/project';
+import { createProject } from './core/project/create';
 
 export interface TheneoOptions {
   baseApiUrl?: string;
@@ -57,7 +60,7 @@ export class Theneo {
   }
 
   public async listWorkspaces(role?: UserRole): Promise<Result<Workspace[]>> {
-    return queryUserWorkspaces(
+    return callUserWorkspaces(
       this.baseApiUrl,
       {
         ...this.defaultHeaders(),
@@ -67,15 +70,15 @@ export class Theneo {
     );
   }
 
-  public async listProjects(): Promise<Result<Project[]>> {
-    return queryProjectList(this.baseApiUrl, {
+  public async listProjects(): Promise<Result<ProjectSchema[]>> {
+    return callProjectList(this.baseApiUrl, {
       ...this.defaultHeaders(),
       ...this.authHeaders(),
     });
   }
 
   public async deleteProjectById(projectId: string): Promise<Result<void>> {
-    return deleteProject(
+    return callDeleteProject(
       this.baseApiUrl,
       {
         ...this.defaultHeaders(),
@@ -88,7 +91,7 @@ export class Theneo {
   public async publishProjectById(
     projectId: string
   ): Promise<Result<PublishProjectResponse>> {
-    return publishProject(
+    return callPublishProject(
       this.baseApiUrl,
       {
         ...this.defaultHeaders(),
@@ -102,7 +105,7 @@ export class Theneo {
     projectId: string,
     content: Buffer
   ): Promise<Result<string>> {
-    return importProjectDocumentFile(
+    return callImportProjectDocumentFile(
       this.baseApiUrl,
       {
         ...this.defaultHeaders(),
@@ -115,13 +118,13 @@ export class Theneo {
 
   public async createProjectBase(
     projectName: string,
-    workspaceId: string
+    workspaceId?: string
   ): Promise<Result<string>> {
     const requestData = this.getCreateProjectRequestData(
       projectName,
       workspaceId
     );
-    return createProject(
+    return callCreateProject(
       this.baseApiUrl,
       {
         ...this.defaultHeaders(),
@@ -130,7 +133,15 @@ export class Theneo {
       requestData
     );
   }
-
+  public async createProject(
+    options: CreateProjectOptions
+  ): Promise<Result<string>> {
+    const headers = {
+      ...this.defaultHeaders(),
+      ...this.authHeaders(),
+    };
+    return createProject(this.baseApiUrl, headers, options);
+  }
   public async completeProjectCreation(
     projectId: string,
     isPublic: boolean,
@@ -145,7 +156,7 @@ export class Theneo {
           ? false
           : undefined,
     };
-    return completeProjectCreation(
+    return callCompleteProjectCreation(
       this.baseApiUrl,
       {
         ...this.defaultHeaders(),
@@ -159,7 +170,7 @@ export class Theneo {
   public async getDescriptionGenerationStatus(
     projectId: string
   ): Promise<Result<PublishProjectSchema, Error>> {
-    return getDescriptionGenerationStatus(
+    return callDescriptionGenerationStatus(
       this.baseApiUrl,
       {
         ...this.defaultHeaders(),
@@ -171,7 +182,7 @@ export class Theneo {
 
   private getCreateProjectRequestData(
     projectName: string,
-    workspaceId: string
+    workspaceId: string | undefined
   ) {
     const requestData: CreateProjectSchema = {
       name: projectName,
@@ -210,7 +221,7 @@ export class Theneo {
     return {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      'User-Agent': this.getUserAgent(),
+      [THENEO_API_CLIENT_NAME_HEADER_NAME]: this.getUserAgent(),
     };
   }
 

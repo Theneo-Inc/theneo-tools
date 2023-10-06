@@ -4,8 +4,8 @@ import { input } from '@inquirer/prompts';
 import { createSpinner } from 'nanospinner';
 import { checkDocumentationFile, getAbsoluteFilePath } from '../../utils/file';
 import { readFile } from 'fs/promises';
-import { getProject } from './common';
 import { createTheneo } from '../../core/theneo';
+import { getProject } from '../../core/cli/project/project';
 
 export function initProjectImportCommand() {
   return new Command('import')

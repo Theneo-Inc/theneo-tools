@@ -1,12 +1,12 @@
 import { select } from '@inquirer/prompts';
-import { Theneo, Project } from '@theneo/sdk';
+import { Theneo, ProjectSchema } from '@theneo/sdk';
 
 export async function getProject(
   theneo: Theneo,
   options: {
     project: string | undefined;
   }
-): Promise<Project> {
+): Promise<ProjectSchema> {
   const projectsList = await theneo.listProjects();
   if (projectsList.err) {
     console.error(projectsList.error.message);
@@ -22,7 +22,7 @@ export async function getProject(
   if (!options.project) {
     return select({
       message: 'Select project:',
-      choices: projects.map((project: Project, index: number) => {
+      choices: projects.map((project: ProjectSchema, index: number) => {
         return {
           value: project,
           name: `${index}. ${project.name}`,
@@ -31,8 +31,8 @@ export async function getProject(
       }),
     });
   } else {
-    const project: Project | undefined = projects.find(
-      (project: Project) => project.key === options.project
+    const project: ProjectSchema | undefined = projects.find(
+      (project: ProjectSchema) => project.key === options.project
     );
     if (!project) {
       console.error('No project found with this key!');

@@ -1,8 +1,8 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
-import { getProject } from './common';
 import { createSpinner } from 'nanospinner';
 import { createTheneo } from '../../core/theneo';
+import { getProject } from '../../core/cli/project/project';
 
 export function initProjectPublishCommand() {
   return new Command('publish')

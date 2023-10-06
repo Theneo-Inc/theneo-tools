@@ -2,7 +2,7 @@ import { Workspace } from '../schema';
 import { Result } from '../results';
 import { getRequest } from './base/requests';
 
-export async function queryUserWorkspaces(
+export async function callUserWorkspaces(
   baseUrl: string,
   headers: Record<string, string>,
   role?: string

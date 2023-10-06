@@ -6,5 +6,5 @@ export interface ResponseSchema<T> {
 export enum DescriptionGenerationType {
   FILl = 'fill',
   OVERWRITE = 'overwrite',
-  NO_GENERATION = 'no generation',
+  NO_GENERATION = 'no_generation',
 }

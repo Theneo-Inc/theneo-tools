@@ -1,13 +1,13 @@
 import {
   CompleteProjectCreationRequest,
-  convertProject,
+  CreateOtherTypeOfDocOptions,
   CreateProjectSchema,
+  DescriptionGenerationType,
   ProjectSchema,
   PublishProjectResponse,
   PublishProjectSchema,
   ResponseSchema,
 } from '../schema';
-import { Project } from '../models';
 import FormData from 'form-data';
 import { Err, Ok, Result } from '../results';
 import {
@@ -16,23 +16,6 @@ import {
   getRequest,
   postRequest,
 } from './base/requests';
-
-export async function queryProjectList(
-  baseUrl: string,
-  headers: ApiHeaders
-): Promise<Result<Project[], Error>> {
-  const url = new URL(`${baseUrl}/project/api-client`);
-  const result = await getRequest<ResponseSchema<ProjectSchema[]>>({
-    url,
-    headers,
-  });
-  return result.chain(data => {
-    if (data.message !== 'Success') {
-      return Err(new Error(data.message));
-    }
-    return Ok(data.data.map(project => convertProject(project)));
-  });
-}
 
 function handleResponse<T>(
   result: Result<ResponseSchema<T>, Error>
@@ -45,7 +28,18 @@ function handleResponse<T>(
   });
 }
 
-export async function createProject(
+export async function callProjectList(
+  baseUrl: string,
+  headers: ApiHeaders
+): Promise<Result<ProjectSchema[], Error>> {
+  const url = new URL(`${baseUrl}/api/project`);
+  return getRequest<ProjectSchema[]>({
+    url,
+    headers,
+  });
+}
+
+export async function callCreateProject(
   baseUrl: string,
   headers: ApiHeaders,
   requestBody: CreateProjectSchema
@@ -61,7 +55,7 @@ export async function createProject(
   return handleResponse(result);
 }
 
-export async function importProjectDocumentFile(
+export async function callImportProjectDocumentFile(
   baseUrl: string,
   headers: ApiHeaders,
   content: Buffer,
@@ -81,7 +75,7 @@ export async function importProjectDocumentFile(
   return handleResponse(result);
 }
 
-export async function publishProject(
+export async function callPublishProject(
   baseUrl: string,
   headers: ApiHeaders,
   projectId: string
@@ -98,7 +92,7 @@ export async function publishProject(
   return handleResponse(result);
 }
 
-export async function deleteProject(
+export async function callDeleteProject(
   baseUrl: string,
   headers: ApiHeaders,
   projectId: string
@@ -107,7 +101,7 @@ export async function deleteProject(
   return deleteRequest({ url, headers });
 }
 
-export async function completeProjectCreation(
+export async function callCompleteProjectCreation(
   baseUrl: string,
   headers: ApiHeaders,
   projectId: string,
@@ -123,11 +117,70 @@ export async function completeProjectCreation(
   });
 }
 
-export async function getDescriptionGenerationStatus(
+export async function callDescriptionGenerationStatus(
   baseUrl: string,
   headers: ApiHeaders,
   projectId: string
 ): Promise<Result<PublishProjectSchema, Error>> {
   const url = new URL(`${baseUrl}/project/${projectId}/status/api-client`);
   return getRequest<PublishProjectSchema>({ url, headers });
+}
+
+export interface CreateProjectWithFileContent {
+  name: string;
+  isPublic: boolean;
+  publish: boolean;
+  descriptionGenerationType: DescriptionGenerationType;
+  workspaceId?: string | undefined;
+  sampleFile?: boolean;
+  file?: Buffer;
+  link?: string;
+  text?: string;
+  postmanKey?: string;
+  postmanId?: string;
+  otherDocumentType?: CreateOtherTypeOfDocOptions;
+}
+
+export async function callCreateProjectNew(
+  baseUrl: string,
+  headers: ApiHeaders,
+  options: CreateProjectWithFileContent
+): Promise<Result<string, Error>> {
+  const url = new URL(`${baseUrl}/api/project/create`);
+  const bodyFormData = new FormData();
+  bodyFormData.append('name', options.name);
+  bodyFormData.append('isPublic', options.isPublic);
+  bodyFormData.append('publish', options.publish);
+  bodyFormData.append(
+    'descriptionGenerationType',
+    options.descriptionGenerationType
+  );
+  if (options.otherDocumentType) {
+    bodyFormData.append('otherDocumentType', options.otherDocumentType);
+  }
+  if (options.postmanId) {
+    bodyFormData.append('postmanId', options.postmanId);
+  }
+  if (options.postmanKey) {
+    bodyFormData.append('postmanKey', options.postmanKey);
+  }
+  if (options.workspaceId) {
+    bodyFormData.append('workspaceId', options.workspaceId);
+  }
+  if (options.file) {
+    bodyFormData.append('file', options.file);
+  }
+  if (options.text) {
+    bodyFormData.append('text', options.text);
+  }
+
+  const result = await postRequest<FormData, ResponseSchema<string>>({
+    url,
+    headers: {
+      ...headers,
+      ...bodyFormData.getHeaders(),
+    },
+    requestBody: bodyFormData,
+  });
+  return handleResponse(result);
 }

@@ -1,9 +1,8 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
 
-import { readFile } from 'fs/promises';
 import { input } from '@inquirer/prompts';
-import { createSpinner } from 'nanospinner';
+import { createSpinner, Spinner } from 'nanospinner';
 import { createTheneo } from '../../core/theneo';
 import { UserRole, DescriptionGenerationType } from '@theneo/sdk';
 import {
@@ -12,10 +11,12 @@ import {
   getDocumentationFileLocation,
   getShouldBePublic,
   getShouldPublish,
-  waitForDescriptionGeneration,
 } from '../../core/cli/project/create';
 import { CreateCommandOptions } from '../../core/cli/project';
 import { getWorkspace } from '../../core/cli/workspace';
+import { CreateProjectOptions } from '@theneo/sdk';
+import { Theneo } from '@theneo/sdk';
+import { Profile } from '../../config';
 
 export function initProjectCreateCommand() {
   return new Command('create')
@@ -29,10 +30,12 @@ export function initProjectCreateCommand() {
       '-f, --file <file>',
       'API file path to import (eg: docs/openapi.yml)'
     )
+    .option('--link <link>', 'API file URL to import')
+    .option('--sample', 'Creates project with sample data', false)
     .option('--publish', 'Publish the project after creation', false)
     .option(
       '--public',
-      'Make published documentation public, default private',
+      'Make published documentation to be publicly accessible. Private by default',
       false
     )
 
@@ -47,6 +50,36 @@ export function initProjectCreateCommand() {
 
       const profile = getProfile(options.profile);
       const theneo = createTheneo(profile);
+
+      const spinner = createSpinner();
+      if (!isInteractive) {
+        spinner.start({ text: 'creating project' });
+        const createOptions: CreateProjectOptions = {
+          name: options.name ?? '',
+          workspace: {
+            key: options.workspace,
+          },
+          isPublic: options.public,
+          publish: options.publish,
+          descriptionGenerationType: options.generateDescription,
+          sampleData: options.sample,
+          data: {
+            file: options.file,
+            link: options.link ? new URL(options.link) : undefined,
+          },
+        };
+        if (
+          createOptions.descriptionGenerationType !==
+          DescriptionGenerationType.NO_GENERATION
+        ) {
+          spinner.start({ text: 'Generating descriptions' });
+          createOptions.progressUpdateHandler =
+            generationProgressHandler(spinner);
+        }
+        await createProject(spinner, createOptions, theneo, profile);
+        return;
+      }
+
       const workspacesPromise = theneo.listWorkspaces(UserRole.EDITOR);
 
       const projectName =
@@ -58,7 +91,6 @@ export function initProjectCreateCommand() {
             return true;
           },
         }));
-      const spinner = createSpinner().start();
       spinner.start();
       const workspacesResult = await workspacesPromise;
       spinner.reset();
@@ -77,53 +109,29 @@ export function initProjectCreateCommand() {
         options,
         isInteractive
       );
-
-      spinner.start({ text: 'creating project' });
-      const projectResult = await theneo.createProjectBase(
-        projectName,
-        workspace.workspaceId
-      );
-      if (projectResult.err) {
-        console.error(projectResult.error.message);
-        process.exit(1);
-      }
-      const file = await readFile(absoluteFilePath);
-      const projectId = projectResult.value;
-      const importResult = await theneo.importProjectDocument(projectId, file);
-      if (importResult.err) {
-        console.error(importResult.error.message);
-        process.exit(1);
-      }
-      spinner.success({ text: 'project created successfully' });
-      await theneo.completeProjectCreation(
-        projectId,
-        isPublic,
-        descriptionGeneration
-      );
-      if (descriptionGeneration !== DescriptionGenerationType.NO_GENERATION) {
-        await waitForDescriptionGeneration(theneo, spinner, projectId);
-      }
       const shouldPublish = await getShouldPublish(options, isInteractive);
-      if (shouldPublish) {
-        spinner.reset();
-        spinner.start({ text: 'Publishing project' });
-        spinner.spin();
-        const publishResult = await theneo.publishProjectById(projectId);
-        if (publishResult.err) {
-          console.error(publishResult.error.message);
-          process.exit(1);
-        }
-        const publishedPageLink = ` ${profile.appUrl}/${publishResult.value.companySlug}/${publishResult.value.projectKey}`;
-
-        spinner.success({
-          text: `Project published successfully! Published Page:${publishedPageLink}`,
-        });
-      } else {
-        const editorLink = `${profile.appUrl}/editor/${projectId}`;
-        console.log(
-          `Project created, you can make changes via editor before publishing. Editor link: ${editorLink}`
-        );
+      spinner.start({ text: 'creating project' });
+      const createOptions: CreateProjectOptions = {
+        name: projectName,
+        workspace: {
+          id: workspace.workspaceId,
+        },
+        isPublic: isPublic,
+        publish: shouldPublish,
+        descriptionGenerationType: descriptionGeneration,
+        data: {
+          file: absoluteFilePath,
+        },
+      };
+      if (
+        createOptions.descriptionGenerationType !==
+        DescriptionGenerationType.NO_GENERATION
+      ) {
+        spinner.start({ text: 'Generating descriptions' });
+        createOptions.progressUpdateHandler =
+          generationProgressHandler(spinner);
       }
+      await createProject(spinner, createOptions, theneo, profile);
     });
 }
 
@@ -139,5 +147,38 @@ function validateOptions(options: CreateCommandOptions) {
   if (options.file !== undefined && options.file.length === 0) {
     console.error('--file flag cannot be empty');
     process.exit(1);
+  }
+}
+
+const generationProgressHandler =
+  (spinner: Spinner) => (progressPercent: number) => {
+    const progress = progressPercent
+      ? `| ${String(progressPercent).substring(0, 2)}%`
+      : '';
+    spinner.update({
+      text: `Generating descriptions ${progress}`,
+    });
+  };
+
+async function createProject(
+  spinner: Spinner,
+  options: CreateProjectOptions,
+  theneo: Theneo,
+  profile: Profile
+) {
+  const res = await theneo.createProject(options);
+  if (res.err) {
+    spinner.error({ text: res.error.message });
+    process.exit(1);
+  }
+  if (res.value.publishData?.publishedPageUrl) {
+    spinner.success({
+      text: `Project published successfully! Published Page: ${res.value.publishData.publishedPageUrl}`,
+    });
+  } else {
+    const editorLink = `${profile.appUrl}/editor/${res.value.projectId}`;
+    spinner.success({
+      text: `Project created, you can make changes via editor before publishing. Editor link: ${editorLink}`,
+    });
   }
 }

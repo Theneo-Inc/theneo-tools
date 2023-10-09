@@ -1,3 +1,6 @@
+import { DescriptionGenerationType, ImportOption } from '../models';
+import { PublishProjectResponse } from 'theneo/schema/publish';
+
 export interface CompanySchema {
   id: string;
   name: string;
@@ -40,17 +43,29 @@ export interface CreateOtherTypeOfDocOptions {
   };
 }
 
-export interface CreateProjectSchema {
-  name: string;
-  workspaceId?: string | undefined;
-  useSampleFile: boolean;
-  otherDocType?: CreateOtherTypeOfDocOptions;
+export interface ImportProjectInput {
+  file?: Buffer;
+  link?: string;
+  text?: string;
+  postmanKey?: string;
+  postmanCollections?: string[];
+  importOption?: ImportOption;
+  publish: boolean;
 }
 
-export interface PublishProjectResponse {
-  projectKey: string;
-  baseUrlRequired: boolean;
-  companySlug: string;
+export interface CreateProjectInput {
+  name: string;
+  isPublic: boolean;
+  publish: boolean;
+  descriptionGenerationType: DescriptionGenerationType;
+  workspaceId?: string | undefined;
+  sampleFile?: boolean;
+  otherDocumentType?: CreateOtherTypeOfDocOptions;
+  file?: Buffer;
+  link?: string;
+  text?: string;
+  postmanKey?: string;
+  postmanCollections?: string[];
 }
 
 export enum CreatedProjectStatusEnum {
@@ -61,15 +76,34 @@ export enum CreatedProjectStatusEnum {
   CREATED_WITHOUT_AI_GENERATION = 'CREATED_WITHOUT_AI_GENERATION',
 }
 
-export interface PublishProjectSchema {
-  key: string;
-  name: string;
-  updatedAt: string;
-  creationStatus: CreatedProjectStatusEnum;
-  descriptionGenerationProgress: number;
+export interface CreateProjectResponse {
+  projectId: string;
+  publishData?: PublishProjectResponse;
 }
 
-export interface CompleteProjectCreationRequest {
-  shouldOverride?: boolean | undefined;
-  isProjectPublic: boolean;
+export interface ProjectCreationStatusResponse {
+  /**
+   * Project name
+   */
+  name: string;
+  /**
+   * Project key - used to identify a project in API URL
+   */
+  key: string;
+
+  /**
+   * Creation status of a description generation for a project
+   */
+  creationStatus: CreatedProjectStatusEnum;
+
+  /**
+   * Progress of description generation in percentage
+   */
+  descriptionGenerationProgress: number;
+  updatedAt: string;
+}
+
+export interface ImportResponse {
+  collectionId: string;
+  publishData?: PublishProjectResponse;
 }

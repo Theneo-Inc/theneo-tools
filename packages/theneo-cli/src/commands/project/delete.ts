@@ -6,14 +6,14 @@ import { getProject } from '../../core/cli/project/project';
 export function initProjectDeleteCommand() {
   return new Command('delete')
     .description('Delete project')
-    .option('--project <project>', 'Project key')
+    .option('--key <project-key>', 'Project key')
     .option(
       '--profile <string>',
       'Use a specific profile from your config file.'
     )
     .action(
       async (options: {
-        project: string | undefined;
+        key: string | undefined;
         profile: string | undefined;
       }) => {
         const profile = getProfile(options.profile);

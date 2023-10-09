@@ -4,6 +4,7 @@ import { initProjectCreateCommand } from './create';
 import { initProjectImportCommand } from './import';
 import { initProjectDeleteCommand } from './delete';
 import { initProjectPublishCommand } from './publish';
+import { initProjectPreviewCommand } from './preview';
 
 export function initProjectCommand(program: Command): Command {
   return program
@@ -13,5 +14,6 @@ export function initProjectCommand(program: Command): Command {
     .addCommand(initProjectCreateCommand())
     .addCommand(initProjectImportCommand())
     .addCommand(initProjectDeleteCommand())
-    .addCommand(initProjectPublishCommand());
+    .addCommand(initProjectPublishCommand())
+    .addCommand(initProjectPreviewCommand());
 }

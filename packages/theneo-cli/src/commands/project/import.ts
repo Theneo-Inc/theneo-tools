@@ -1,17 +1,83 @@
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { getProfile } from '../../context/auth';
-import { input } from '@inquirer/prompts';
+import { input, select } from '@inquirer/prompts';
 import { createSpinner } from 'nanospinner';
-import { checkDocumentationFile, getAbsoluteFilePath } from '../../utils/file';
-import { readFile } from 'fs/promises';
 import { createTheneo } from '../../core/theneo';
 import { getProject } from '../../core/cli/project/project';
+import { getShouldPublish } from '../../core/cli/project/create';
+import { ImportOption } from '@theneo/sdk';
+
+enum ImportTypeOptions {
+  FILE = 'file',
+  LINK = 'link',
+}
+
+// updates `options` object
+async function getImportSource(options: {
+  file: string | undefined;
+  link: string | undefined;
+  key: string | undefined;
+  publish: boolean;
+  profile: string | undefined;
+}) {
+  const importType = await select({
+    message: 'Select import type',
+    choices: [
+      { value: ImportTypeOptions.FILE, name: 'File' },
+      { value: ImportTypeOptions.LINK, name: 'Link' },
+    ],
+  });
+
+  if (importType === ImportTypeOptions.LINK) {
+    options.link = await input({
+      message: 'API file URL (eg: https://example.com/openapi.yml) : ',
+      validate: value => {
+        if (value.length === 0) return 'Link is required!';
+        return true;
+      },
+    });
+  } else {
+    options.file = await input({
+      message: 'API file name (eg: openapi.yml) : ',
+      validate: value => {
+        if (value.length === 0) return 'File is required!';
+        return true;
+      },
+    });
+  }
+}
+
+function createImportTypeOption() {
+  return new Option(
+    '--import-type <import-type>',
+    'Indicates how should the new api spec be imported'
+  )
+    .choices([
+      ImportOption.OVERWRITE,
+      ImportOption.MERGE,
+      ImportOption.ENDPOINTS_ONLY,
+    ])
+    .argParser((value, previous) => {
+      if (value !== undefined) {
+        return value;
+      }
+      if (previous !== undefined && previous !== null) {
+        return previous;
+      }
+      return undefined;
+    });
+}
 
 export function initProjectImportCommand() {
   return new Command('import')
     .description('Update theneo project with a updated API file')
-    .option('--project <project>', 'Specify the project key to import')
+    .option(
+      '--key <project-key>',
+      'Specify the project key to import updated documentation in'
+    )
     .option('-f, --file <file>', 'Specify the file to import')
+    .option('--link <link>', 'API file URL to import')
+    .addOption(createImportTypeOption())
     .option('--publish', 'Automatically publish the project', false)
     .option(
       '--profile <string>',
@@ -19,53 +85,46 @@ export function initProjectImportCommand() {
     )
     .action(
       async (options: {
+        key: string | undefined;
         file: string | undefined;
-        project: string | undefined;
+        link: string | undefined;
+        importType: ImportOption | undefined;
         publish: boolean;
         profile: string | undefined;
       }) => {
+        const isInteractive = options.key === undefined;
         const profile = getProfile(options.profile);
         const theneo = createTheneo(profile);
         const project = await getProject(theneo, options);
-        const specFileName =
-          options.file ??
-          (await input({
-            message: 'API file name (eg: openapi.yml) : ',
-            validate: value => {
-              if (value.length === 0) return 'File is required!';
-              return true;
-            },
-          }));
 
-        const absoluteFilePath = getAbsoluteFilePath(specFileName);
-        const isValidRes = await checkDocumentationFile(absoluteFilePath);
-        if (isValidRes.err) {
-          console.error(isValidRes.error);
-          process.exit(1);
+        if (!options.file && !options.link) {
+          await getImportSource(options);
         }
 
-        const file = await readFile(absoluteFilePath);
-        const spinner = createSpinner(
-          "updating project's documentation file"
-        ).start();
-        const importResult = await theneo.importProjectDocument(
-          project.id,
-          file
-        );
-        if (importResult.err) {
-          console.error(importResult.error.message);
+        const shouldPublish = await getShouldPublish(options, isInteractive);
+
+        const spinner = createSpinner('Updating documentation').start();
+        const res = await theneo.importProjectDocument({
+          projectId: project.id,
+          publish: shouldPublish,
+          data: {
+            file: options.file,
+            link: options.link ? new URL(options.link) : undefined,
+          },
+          importOption: options.importType,
+        });
+        if (res.err) {
+          spinner.error({ text: res.error.message });
           process.exit(1);
         }
-        spinner.success({ text: 'project updated successfully' });
-        if (options.publish) {
-          spinner.start({ text: 'publishing project' });
-          const publishResult = await theneo.publishProjectById(project.id);
-          if (publishResult.err) {
-            console.error(publishResult.error.message);
-            process.exit(1);
-          }
+        if (res.value.publishData?.publishedPageUrl) {
           spinner.success({
-            text: `project published successfully! Published Page: ${profile.appUrl}/${publishResult.value.companySlug}/${publishResult.value.projectKey}`,
+            text: `Project published successfully! Published Page: ${res.value.publishData.publishedPageUrl}`,
+          });
+        } else {
+          const editorLink = `${profile.appUrl}/editor/${project.id}`;
+          spinner.success({
+            text: `Project created, you can make changes via editor before publishing. Editor link: ${editorLink}`,
           });
         }
       }

@@ -1,5 +1,5 @@
 import path from 'path';
-import fs from 'fs';
+import * as fs from 'fs';
 import * as yamlParser from 'js-yaml';
 import { parse as tomlParser } from 'toml';
 import { createDirectorySync } from '../utils/file';

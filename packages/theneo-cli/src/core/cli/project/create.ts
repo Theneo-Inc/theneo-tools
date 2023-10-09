@@ -3,13 +3,7 @@ import {
   checkDocumentationFile,
   getAbsoluteFilePath,
 } from '../../../utils/file';
-import {
-  CreatedProjectStatusEnum,
-  DescriptionGenerationType,
-  Theneo,
-} from '@theneo/sdk';
-import { Spinner } from 'nanospinner';
-import { sleep } from '../../../utils';
+import { DescriptionGenerationType } from '@theneo/sdk';
 import { CreateCommandOptions } from './index';
 import { Option } from 'commander';
 
@@ -76,68 +70,28 @@ export async function getDescriptionGenerationType(
 
 export function getDescriptionGenerationOption() {
   return new Option(
-    '--generate-description',
+    '--generate-description <generate-description>',
     'Indicates if AI should be used for description generation'
   )
-    .default('no')
-    .choices(['fill-empty', 'overwrite-all', 'no'])
+    .default(DescriptionGenerationType.NO_GENERATION)
+    .choices([
+      DescriptionGenerationType.FILl,
+      DescriptionGenerationType.OVERWRITE,
+      DescriptionGenerationType.NO_GENERATION,
+    ])
     .argParser((value, previous) => {
-      if (value === 'fill-empty') {
-        return DescriptionGenerationType.FILl;
+      if (value !== undefined) {
+        return value;
       }
-      if (value === 'overwrite-all') {
-        return DescriptionGenerationType.OVERWRITE;
+      if (previous !== undefined && previous !== null) {
+        return previous;
       }
-      if (value === 'no') {
-        return DescriptionGenerationType.NO_GENERATION;
-      }
-      return previous;
+      return DescriptionGenerationType.NO_GENERATION;
     });
-}
-
-export async function waitForDescriptionGeneration(
-  theneo: Theneo,
-  spinner: Spinner,
-  projectId: string
-): Promise<boolean> {
-  spinner.reset();
-  spinner.start({ text: 'Generating descriptions' });
-  while (true) {
-    const generateDescriptionsResult =
-      await theneo.getDescriptionGenerationStatus(projectId);
-    if (generateDescriptionsResult.err) {
-      console.error(generateDescriptionsResult.error.message);
-      process.exit(1);
-    }
-    if (
-      generateDescriptionsResult.value.creationStatus ===
-      CreatedProjectStatusEnum.Finished
-    ) {
-      spinner.success({ text: 'Description  generation finished' });
-      return true;
-    }
-    if (
-      generateDescriptionsResult.value.creationStatus ===
-      CreatedProjectStatusEnum.Error
-    ) {
-      spinner.error({ text: 'Description Generation Errored' });
-      return false;
-    }
-    const progress = generateDescriptionsResult.value
-      .descriptionGenerationProgress
-      ? `| ${String(
-          generateDescriptionsResult.value.descriptionGenerationProgress
-        ).substring(0, 2)}%`
-      : '';
-    spinner.update({
-      text: 'Generating descriptions ' + progress,
-    });
-    await sleep(5000);
-  }
 }
 
 export async function getShouldPublish(
-  options: CreateCommandOptions,
+  options: { publish: boolean },
   isInteractive: boolean
 ): Promise<boolean> {
   if (isInteractive) {

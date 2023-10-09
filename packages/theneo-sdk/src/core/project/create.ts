@@ -1,15 +1,21 @@
 import {
   ApiHeaders,
-  callCreateProjectNew,
-  callUserWorkspaces,
-  CreateProjectWithFileContent,
+  callCreateProjectApi,
+  callUserWorkspacesApi,
 } from 'theneo/requests';
 import {
   CreateProjectOptions,
   WorkspaceOption,
 } from 'theneo/models/inputs/project';
-import { DescriptionGenerationType, Result, UserRole } from 'theneo';
-import fs from 'fs/promises';
+import {
+  CreateProjectInput,
+  CreateProjectResponse,
+  DescriptionGenerationType,
+  Err,
+  Result,
+  UserRole,
+} from 'theneo';
+import * as fs from 'fs';
 
 async function getWorkspaceId(
   baseUrl: string,
@@ -25,7 +31,7 @@ async function getWorkspaceId(
   if (!workspace.key) {
     return undefined;
   }
-  const workspacesResult = await callUserWorkspaces(
+  const workspacesResult = await callUserWorkspacesApi(
     baseUrl,
     headers,
     UserRole.EDITOR
@@ -42,10 +48,9 @@ export async function createProject(
   baseUrl: string,
   headers: ApiHeaders,
   options: CreateProjectOptions
-): Promise<Result<string>> {
+): Promise<Result<CreateProjectResponse>> {
   const workspaceId = await getWorkspaceId(baseUrl, headers, options.workspace);
-
-  const createFileOptions: CreateProjectWithFileContent = {
+  const createInput: CreateProjectInput = {
     name: options.name,
     workspaceId: workspaceId,
     isPublic: options.isPublic ?? false,
@@ -55,23 +60,26 @@ export async function createProject(
       DescriptionGenerationType.NO_GENERATION,
   };
 
-  if (options.data?.sampleData !== undefined) {
-    createFileOptions.sampleFile = options.data.sampleData;
+  // TODO validate
+  if (options?.sampleData !== undefined) {
+    createInput.sampleFile = options.sampleData;
   }
   if (options.data?.file !== undefined) {
-    // TODO check if file exists
-    createFileOptions.file = await fs.readFile(options.data.file);
+    if (!fs.existsSync(options.data.file)) {
+      return Err(new Error('File does not exist'));
+    }
+    createInput.file = fs.readFileSync(options.data.file);
   }
-  if (options.data?.url !== undefined) {
-    createFileOptions.link = options.data.url.toString();
+  if (options.data?.link !== undefined) {
+    createInput.link = options.data.link.toString();
   }
   if (options.data?.text !== undefined) {
-    createFileOptions.text = options.data.text;
+    createInput.text = options.data.text;
   }
   if (options.data?.postman !== undefined) {
-    createFileOptions.postmanKey = options.data.postman.apiKey;
-    createFileOptions.postmanId = options.data.postman.collection;
+    createInput.postmanKey = options.data.postman.apiKey;
+    createInput.postmanCollections = options.data.postman.collectionId;
   }
 
-  return callCreateProjectNew(baseUrl, headers, createFileOptions);
+  return callCreateProjectApi(baseUrl, headers, createInput);
 }

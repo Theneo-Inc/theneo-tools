@@ -1,5 +1,14 @@
-import fs from 'fs';
-import { DescriptionGenerationType } from 'theneo';
+import * as fs from 'fs';
+
+export enum DescriptionGenerationType {
+  FILl = 'fill',
+  OVERWRITE = 'overwrite',
+  NO_GENERATION = 'no_generation',
+}
+
+export type DescriptionGenerationProgressHandler = (
+  progressPercent: number
+) => void;
 
 export interface PostmanImportOptions {
   /**
@@ -8,9 +17,9 @@ export interface PostmanImportOptions {
   apiKey: string;
 
   /**
-   * Postman collection id
+   * Postman collection ids to be imported in theneo
    */
-  collection: string;
+  collectionId: string[];
 }
 
 /**
@@ -42,7 +51,7 @@ export interface ApiDataInputOption {
   /**
    * URL to a file containing the API Documentation to create the project from.
    */
-  url?: URL;
+  link?: URL;
 
   /**
    * API documentation as a string to create the project from.
@@ -53,11 +62,6 @@ export interface ApiDataInputOption {
    * Postman collection to create the project from.
    */
   postman?: PostmanImportOptions;
-
-  /**
-   * Indicates if the project should be created with sample data.
-   */
-  sampleData?: boolean;
 }
 
 export interface CreateProjectOptions {
@@ -92,8 +96,40 @@ export interface CreateProjectOptions {
   data?: ApiDataInputOption;
 
   /**
-   *  specify if you want to generate descriptions using AI
+   * Indicates if the project should be created with sample data.
+   */
+  sampleData?: boolean;
+
+  /**
+   *  Used to generate descriptions using AI
+   *  Specify `fill` if you want to generate description for params that does not have descriptions already.
+   *  Specify `overwrite` if you want to overwrite descriptions for params that does not have descriptions already.
+   *  Specify `no_generation` if you want to not generate descriptions for params that does not have descriptions already.
+   *
+   *  @see DescriptionGenerationType for more details.
+   *  @see DescriptionGenerationProgressHandler for more details.
    *  @default no generation
    */
   descriptionGenerationType?: DescriptionGenerationType;
+
+  /**
+   * call back function that is called when description generation progress is received
+   */
+  progressUpdateHandler?: DescriptionGenerationProgressHandler;
+}
+
+export enum ImportOption {
+  ENDPOINTS_ONLY = 'endpoints',
+  OVERWRITE = 'overwrite',
+  MERGE = 'merge',
+}
+
+export interface ImportProjectOptions {
+  projectId: string;
+  publish: boolean;
+  data: ApiDataInputOption;
+  /**
+   * indicates what should happen to old data when new api spec is imported
+   */
+  importOption?: ImportOption;
 }

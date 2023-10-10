@@ -1,5 +1,16 @@
 # @theneo/cli
 
+## 0.2.0
+
+### Minor Changes
+
+- 0fee7d6: Update SDK to new API and added Preview command
+
+### Patch Changes
+
+- Updated dependencies [0fee7d6]
+  - @theneo/sdk@0.2.0
+
 ## 0.1.1
 
 ### Patch Changes

@@ -1,5 +1,5 @@
 import path from 'path';
-import fs from 'fs';
+import * as fs from 'fs';
 import * as yamlParser from 'js-yaml';
 import { parse as tomlParser } from 'toml';
 import { createDirectorySync } from '../utils/file';
@@ -10,8 +10,11 @@ export const Json = 'json';
 export const Yaml = 'yaml';
 export const Toml = 'toml';
 
-export const ErrorInvalidFilePath = new Error('invalid file path or file name');
-export const ErrorNoFileType = new Error('invalid file type');
+export const ErrorInvalidFilePath = new Error(
+  'Invalid config file path or file name'
+);
+export const ErrorInvalidFileContent = new Error('Invalid config file Content');
+export const ErrorNoFileType = new Error('Invalid config file type');
 export const ErrorUnrecognisedFormat = new Error(
   'this type of configuration format is not supported at the moment'
 );
@@ -73,22 +76,26 @@ export class ConfigManager {
     }
     if (fs.existsSync(this.configFilePath)) {
       this.fileType = FileTypeMapping().get(this.fileType);
-      switch (this.fileType) {
-        case Json:
-          this.config = require(this.configFilePath) as TheneoConfig;
-          break;
-        case Toml:
-          this.config = tomlParser(
-            fs.readFileSync(this.configFilePath).toString()
-          ) as TheneoConfig;
-          break;
-        case Yaml:
-          this.config = yamlParser.load(
-            fs.readFileSync(this.configFilePath).toString()
-          ) as TheneoConfig;
-          break;
-        default:
-          return Err(ErrorUnrecognisedFormat);
+      try {
+        switch (this.fileType) {
+          case Json:
+            this.config = require(this.configFilePath) as TheneoConfig;
+            break;
+          case Toml:
+            this.config = tomlParser(
+              fs.readFileSync(this.configFilePath).toString()
+            ) as TheneoConfig;
+            break;
+          case Yaml:
+            this.config = yamlParser.load(
+              fs.readFileSync(this.configFilePath).toString()
+            ) as TheneoConfig;
+            break;
+          default:
+            return Err(ErrorUnrecognisedFormat);
+        }
+      } catch (e) {
+        return Err(ErrorInvalidFileContent);
       }
     }
 

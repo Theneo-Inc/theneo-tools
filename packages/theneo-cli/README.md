@@ -38,21 +38,34 @@ theneo login
 
 ### Create new project
 
-```bash
-theneo project create
-```
+1. create new project interactively
+    ```bash
+    theneo project create
+    ```
+2. Create the project directly using api spec file 
+
+    ```bash
+    theneo project create --name api-documentation --generate-description overwrite --publish --public --file ./examples/openapi-spec.json
+    ```
+3. Create project using a link to api documentation
+    ```bash
+    theneo project create --name api-documentation --generate-description fill --publish --public --link https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/uspto.json 
+    ```
 
 ### Update api documentation from api spec file
 
 ```bash
 theneo project import --file <file> --project <project-key> --publish
 ```
+
 ### Publish document
+
 ```bash
 theneo project publish --project <project-key>
 ```
 
 ### Delete project
+
 ```bash
 theneo project delete --project <project-key>
 ```

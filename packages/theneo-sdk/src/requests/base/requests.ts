@@ -1,5 +1,6 @@
 import { Err, Ok, Result } from '../../results';
 import axios from 'axios';
+import { ResponseSchema } from 'theneo';
 
 export type ApiHeaders = Record<string, string>;
 export type ApiQueryParams = Record<string, string | undefined>;
@@ -16,6 +17,18 @@ function addQueryParameters(url: URL, queryParams: ApiQueryParams) {
     }
   });
 }
+
+export function handleResponse<T>(
+  result: Result<ResponseSchema<T>, Error>
+): Result<T, Error> {
+  return result.chain(data => {
+    if (data.message !== 'Success') {
+      return Err(new Error(data.message));
+    }
+    return Ok(data.data);
+  });
+}
+
 export interface BaseRequestInput {
   url: URL;
   headers: ApiHeaders;
@@ -52,7 +65,11 @@ export async function getRequest<Response>({
   } catch (error) {
     if (axios.isAxiosError(error)) {
       return Err(
-        error.response ? new Error(String(error.response.data)) : error
+        error.response
+          ? new Error(
+              String(error.response.data?.message || error.response.data)
+            )
+          : error
       );
     }
     if (error instanceof Error) {
@@ -95,7 +112,11 @@ export async function postRequest<Request, Response>({
   } catch (error) {
     if (axios.isAxiosError(error)) {
       return Err(
-        error.response ? new Error(String(error.response.data)) : error
+        error.response
+          ? new Error(
+              String(error.response.data?.message || error.response.data)
+            )
+          : error
       );
     }
     if (error instanceof Error) {
@@ -135,7 +156,11 @@ export async function deleteRequest<Response>({
   } catch (error) {
     if (axios.isAxiosError(error)) {
       return Err(
-        error.response ? new Error(String(error.response.data)) : error
+        error.response
+          ? new Error(
+              String(error.response.data?.message || error.response.data)
+            )
+          : error
       );
     }
     if (error instanceof Error) {

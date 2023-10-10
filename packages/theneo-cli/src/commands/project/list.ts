@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
 import Table from 'cli-table';
 import { createTheneo } from '../../core/theneo';
-import { Project } from '@theneo/sdk';
+import { ProjectSchema } from '@theneo/sdk';
 
 export function initProjectListCommand() {
   return new Command('list')
@@ -20,13 +20,20 @@ export function initProjectListCommand() {
         console.error(projectsResult.error.message);
         process.exit(1);
       }
+
+      if (projectsResult.value.length === 0) {
+        console.warn('No projects found');
+        return;
+      }
+
       if (options.json) {
         console.log(JSON.stringify(projectsResult.value, null, 2));
       } else {
         const table = new Table({
-          head: ['#', 'Key', 'Name', 'Company', 'URL', 'Public', 'ID'],
-          rows: projectsResult.value.map((project: Project, index: number) =>
-            getProjectRow(index, project, profile.appUrl)
+          head: ['#', 'Key', 'Name', 'Workspace', 'URL', 'Public', 'ID'],
+          rows: projectsResult.value.map(
+            (project: ProjectSchema, index: number) =>
+              getProjectRow(index, project, profile.appUrl)
           ),
         });
 
@@ -37,7 +44,7 @@ export function initProjectListCommand() {
 
 function getProjectRow(
   index: number,
-  project: Project,
+  project: ProjectSchema,
   appUrl: string
 ): string[] {
   return [

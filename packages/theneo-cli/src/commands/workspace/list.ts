@@ -25,7 +25,7 @@ export function initWorkspaceListCommand() {
         console.log(JSON.stringify(workspaces.value, null, 2));
       } else {
         const table = new Table({
-          head: ['#', 'ID', 'Name', 'Slug', 'Default', 'Role'],
+          head: ['#', 'Name', 'Slug', 'Default', 'Role'],
           rows: workspaces.value.map((workspace: Workspace, index: number) =>
             getWorkspaceRow(index, workspace)
           ),
@@ -39,7 +39,6 @@ export function initWorkspaceListCommand() {
 function getWorkspaceRow(index: number, workspace: Workspace): string[] {
   return [
     String(index),
-    workspace.workspaceId,
     workspace.name,
     workspace.slug,
     workspace.isDefault ? '*' : '',

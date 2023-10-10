@@ -1,35 +1,58 @@
 import {
-  CompleteProjectCreationRequest,
-  CreateProjectSchema,
-  DescriptionGenerationType,
+  CreatedProjectStatusEnum,
+  CreateProjectResponse,
+  ImportResponse,
+  ProjectCreationStatusResponse,
+  ProjectSchema,
   PublishProjectResponse,
-  PublishProjectSchema,
   UserRole,
   Workspace,
 } from './schema';
-import { Result } from './results';
+import { Err, Ok, Result } from './results';
 import {
   ApiHeaders,
-  completeProjectCreation,
-  createProject,
-  deleteProject,
-  getDescriptionGenerationStatus,
-  importProjectDocumentFile,
-  publishProject,
-  queryProjectList,
-  queryUserWorkspaces,
+  callDeleteProjectApi,
+  callDescriptionGenerationStatusApi,
+  callGetProjectListApi,
+  callImportProjectApi,
+  callUserWorkspacesApi,
   THENEO_API_CLIENT_KEY_HEADER_NAME,
+  THENEO_API_CLIENT_NAME_HEADER_NAME,
 } from './requests';
-import { Project } from './models';
 import { SDK_VERSION } from './utils/version';
+import {
+  CreateProjectOptions,
+  DescriptionGenerationProgressHandler,
+  DescriptionGenerationType,
+  ImportProjectOptions,
+} from 'theneo/models/inputs/project';
+import { createProject } from './core/project/create';
+import { sleep } from './utils';
+import {
+  callPreviewProjectApi,
+  callPublishProjectApi,
+} from 'theneo/requests/publish';
+import { importProject } from 'theneo/core/project/import';
 
 export interface TheneoOptions {
-  baseApiUrl?: string;
-  baseAppUrl?: string;
+  /**
+   * API key for the Theneo application
+   */
   apiKey?: string;
+  /**
+   * Name of the client making the API call.
+   * This will be sent to the server as part of the request headers.
+   * If not provided, the SDK will use the default value of `theneo-sdk:${SDK_VERSION}
+   */
   apiClientName?: string;
-  timeout?: number;
-  maxRetries?: number;
+  /**
+   * @internal Theneo API URL
+   */
+  baseApiUrl?: string;
+  /**
+   * @internal Theneo APP URL
+   */
+  baseAppUrl?: string;
 }
 
 export class Theneo {
@@ -41,7 +64,7 @@ export class Theneo {
     this.baseApiUrl =
       options.baseApiUrl ??
       process.env.THENEO_API_URL ??
-      'https://api.theneo.com';
+      'https://api.theneo.io';
 
     if (!options.apiKey) {
       const apiKey = process.env.THENEO_API_KEY;
@@ -56,8 +79,12 @@ export class Theneo {
     this.apiClientName = options.apiClientName ?? `theneo-sdk:${SDK_VERSION}`;
   }
 
+  /**
+   * Returns list of Workspaces available for user
+   * @param role user role
+   */
   public async listWorkspaces(role?: UserRole): Promise<Result<Workspace[]>> {
-    return queryUserWorkspaces(
+    return callUserWorkspacesApi(
       this.baseApiUrl,
       {
         ...this.defaultHeaders(),
@@ -67,15 +94,22 @@ export class Theneo {
     );
   }
 
-  public async listProjects(): Promise<Result<Project[]>> {
-    return queryProjectList(this.baseApiUrl, {
+  /**
+   * Returns list of user projects
+   */
+  public async listProjects(): Promise<Result<ProjectSchema[]>> {
+    return callGetProjectListApi(this.baseApiUrl, {
       ...this.defaultHeaders(),
       ...this.authHeaders(),
     });
   }
 
+  /**
+   * deletes project
+   * @param projectId
+   */
   public async deleteProjectById(projectId: string): Promise<Result<void>> {
-    return deleteProject(
+    return callDeleteProjectApi(
       this.baseApiUrl,
       {
         ...this.defaultHeaders(),
@@ -85,10 +119,27 @@ export class Theneo {
     );
   }
 
-  public async publishProjectById(
+  /**
+   * Publish API documentation
+   * If `public` flag is set in project setting then the documentation will be publicly available after publishing it
+   * @param projectId
+   */
+  public async publishProject(
     projectId: string
   ): Promise<Result<PublishProjectResponse>> {
-    return publishProject(
+    return callPublishProjectApi(
+      this.baseApiUrl,
+      {
+        ...this.defaultHeaders(),
+        ...this.authHeaders(),
+      },
+      projectId
+    );
+  }
+  public async previewProject(
+    projectId: string
+  ): Promise<Result<PublishProjectResponse>> {
+    return callPreviewProjectApi(
       this.baseApiUrl,
       {
         ...this.defaultHeaders(),
@@ -98,68 +149,76 @@ export class Theneo {
     );
   }
 
+  /**
+   * Imports API document to existing project
+   * @param options
+   */
   public async importProjectDocument(
-    projectId: string,
-    content: Buffer
-  ): Promise<Result<string>> {
-    return importProjectDocumentFile(
+    options: ImportProjectOptions
+  ): Promise<Result<ImportResponse>> {
+    return importProject(
       this.baseApiUrl,
       {
         ...this.defaultHeaders(),
         ...this.authHeaders(),
       },
-      content,
-      projectId
+      options
     );
   }
 
-  public async createProjectBase(
-    projectName: string,
-    workspaceId: string
-  ): Promise<Result<string>> {
-    const requestData = this.getCreateProjectRequestData(
-      projectName,
-      workspaceId
-    );
-    return createProject(
-      this.baseApiUrl,
-      {
-        ...this.defaultHeaders(),
-        ...this.authHeaders(),
-      },
-      requestData
-    );
-  }
-
-  public async completeProjectCreation(
-    projectId: string,
-    isPublic: boolean,
-    descriptionGeneration: DescriptionGenerationType
-  ): Promise<Result<void, Error>> {
-    const requestData: CompleteProjectCreationRequest = {
-      isProjectPublic: isPublic,
-      shouldOverride:
-        descriptionGeneration === DescriptionGenerationType.OVERWRITE
-          ? true
-          : descriptionGeneration === DescriptionGenerationType.FILl
-          ? false
-          : undefined,
+  /**
+   * Creates a new project on a theneo platform,
+   * If the project should be published automatically after creation and description should be generated by AI,
+   * Then it waits for description generation and makes a separate call to publish api
+   * @param options
+   */
+  public async createProject(
+    options: CreateProjectOptions
+  ): Promise<Result<CreateProjectResponse>> {
+    const headers = {
+      ...this.defaultHeaders(),
+      ...this.authHeaders(),
     };
-    return completeProjectCreation(
-      this.baseApiUrl,
-      {
-        ...this.defaultHeaders(),
-        ...this.authHeaders(),
-      },
-      projectId,
-      requestData
-    );
+
+    const result = await createProject(this.baseApiUrl, headers, options);
+
+    if (
+      result.ok &&
+      (options.descriptionGenerationType === DescriptionGenerationType.FILl ||
+        options.descriptionGenerationType ===
+          DescriptionGenerationType.OVERWRITE)
+    ) {
+      const generationResult = await this.waitForDescriptionGeneration(
+        result.value.projectId,
+        options.progressUpdateHandler
+      );
+
+      // TODO make way to chane async the results
+      if (generationResult.err) {
+        return Err(generationResult.error);
+      }
+
+      // need to publish the project if it was created with description generation,
+      // otherwise it will be published automatically
+      if (options.publish) {
+        const publishResult = await this.publishProject(result.value.projectId);
+        if (publishResult.ok) {
+          const createProjectData: CreateProjectResponse = {
+            ...result.value,
+            publishData: publishResult.value,
+          };
+          return Ok(createProjectData);
+        }
+      }
+    }
+
+    return result;
   }
 
   public async getDescriptionGenerationStatus(
     projectId: string
-  ): Promise<Result<PublishProjectSchema, Error>> {
-    return getDescriptionGenerationStatus(
+  ): Promise<Result<ProjectCreationStatusResponse, Error>> {
+    return callDescriptionGenerationStatusApi(
       this.baseApiUrl,
       {
         ...this.defaultHeaders(),
@@ -167,39 +226,6 @@ export class Theneo {
       },
       projectId
     );
-  }
-
-  private getCreateProjectRequestData(
-    projectName: string,
-    workspaceId: string
-  ) {
-    const requestData: CreateProjectSchema = {
-      name: projectName,
-      workspaceId: workspaceId,
-      useSampleFile: false,
-      otherDocType: {
-        docType: '',
-        gettingStartedSections: {
-          introduction: false,
-          prerequisites: false,
-          quickStart: false,
-          resources: false,
-        },
-        sdk: {
-          overview: false,
-          supportedLibraries: false,
-          sampleCode: false,
-          troubleshooting: false,
-        },
-        faq: {
-          generalInfo: false,
-          authentication: false,
-          usage: false,
-          billing: false,
-        },
-      },
-    };
-    return requestData;
   }
 
   private getUserAgent(): string {
@@ -210,11 +236,62 @@ export class Theneo {
     return {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      'User-Agent': this.getUserAgent(),
+      [THENEO_API_CLIENT_NAME_HEADER_NAME]: this.getUserAgent(),
     };
   }
 
   private authHeaders(): ApiHeaders {
     return { [THENEO_API_CLIENT_KEY_HEADER_NAME]: this.apiKey };
+  }
+
+  /**
+   * Waits for the description generation to finish
+   * @param projectId Project id
+   * @param progressUpdateHandler Callback function that received description generation progress in percentages
+   * @param retryTime Default 5 seconds
+   * @param maxWaitTime default 10 min
+   */
+  public async waitForDescriptionGeneration(
+    projectId: string,
+    progressUpdateHandler?: DescriptionGenerationProgressHandler,
+    retryTime = 5_000,
+    maxWaitTime = 600_000
+  ): Promise<Result<null>> {
+    const startTime = Date.now();
+    while (true) {
+      const generateDescriptionsResult =
+        await this.getDescriptionGenerationStatus(projectId);
+      if (generateDescriptionsResult.err) {
+        console.error(generateDescriptionsResult.error.message);
+        process.exit(1);
+      }
+      if (
+        generateDescriptionsResult.value.creationStatus ===
+        CreatedProjectStatusEnum.Finished
+      ) {
+        return Ok(null);
+      }
+      if (
+        generateDescriptionsResult.value.creationStatus ===
+        CreatedProjectStatusEnum.Error
+      ) {
+        return Err(new Error('Error while generating descriptions'));
+      }
+
+      if (progressUpdateHandler) {
+        progressUpdateHandler(
+          generateDescriptionsResult.value.descriptionGenerationProgress
+        );
+      }
+      if (maxWaitTime < startTime - Date.now()) {
+        return Err(
+          new Error(
+            'Timeout while waiting for description generation to finish'
+          )
+        );
+      }
+
+      await sleep(retryTime);
+    }
   }
 }

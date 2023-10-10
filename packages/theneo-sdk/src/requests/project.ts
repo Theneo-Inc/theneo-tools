@@ -1,15 +1,13 @@
 import {
-  CompleteProjectCreationRequest,
-  convertProject,
-  CreateProjectSchema,
+  CreateProjectInput,
+  CreateProjectResponse,
+  ImportProjectInput,
+  ImportResponse,
+  ProjectCreationStatusResponse,
   ProjectSchema,
-  PublishProjectResponse,
-  PublishProjectSchema,
-  ResponseSchema,
 } from '../schema';
-import { Project } from '../models';
 import FormData from 'form-data';
-import { Err, Ok, Result } from '../results';
+import { Result } from '../results';
 import {
   ApiHeaders,
   deleteRequest,
@@ -17,60 +15,63 @@ import {
   postRequest,
 } from './base/requests';
 
-export async function queryProjectList(
+export async function callGetProjectListApi(
   baseUrl: string,
   headers: ApiHeaders
-): Promise<Result<Project[], Error>> {
-  const url = new URL(`${baseUrl}/project/api-client`);
-  const result = await getRequest<ResponseSchema<ProjectSchema[]>>({
+): Promise<Result<ProjectSchema[], Error>> {
+  const url = new URL(`${baseUrl}/api/project`);
+  return getRequest<ProjectSchema[]>({
     url,
     headers,
   });
-  return result.chain(data => {
-    if (data.message !== 'Success') {
-      return Err(new Error(data.message));
-    }
-    return Ok(data.data.map(project => convertProject(project)));
-  });
 }
 
-function handleResponse<T>(
-  result: Result<ResponseSchema<T>, Error>
-): Result<T, Error> {
-  return result.chain(data => {
-    if (data.message !== 'Success') {
-      return Err(new Error(data.message));
-    }
-    return Ok(data.data);
-  });
-}
-
-export async function createProject(
+export async function callCreateProjectApi(
   baseUrl: string,
   headers: ApiHeaders,
-  requestBody: CreateProjectSchema
-): Promise<Result<string, Error>> {
-  const url = new URL(`${baseUrl}/project/create/api-client`);
-  const result = await postRequest<CreateProjectSchema, ResponseSchema<string>>(
-    {
-      url,
-      headers,
-      requestBody,
-    }
-  );
-  return handleResponse(result);
-}
-
-export async function importProjectDocumentFile(
-  baseUrl: string,
-  headers: ApiHeaders,
-  content: Buffer,
-  projectId: string
-): Promise<Result<string, Error>> {
-  const url = new URL(`${baseUrl}/project/${projectId}/import/api-client`);
+  options: CreateProjectInput
+): Promise<Result<CreateProjectResponse, Error>> {
+  const url = new URL(`${baseUrl}/api/project`);
   const bodyFormData = new FormData();
-  bodyFormData.append('file', content);
-  const result = await postRequest<FormData, ResponseSchema<string>>({
+  bodyFormData.append('projectName', options.name);
+  bodyFormData.append('isPublic', JSON.stringify(options.isPublic));
+  bodyFormData.append('publish', JSON.stringify(options.publish));
+  bodyFormData.append(
+    'descriptionGenerationType',
+    options.descriptionGenerationType
+  );
+  if (options.otherDocumentType) {
+    bodyFormData.append(
+      'otherDocumentType',
+      JSON.stringify(options.otherDocumentType)
+    );
+  }
+  if (options.sampleFile) {
+    bodyFormData.append('sampleFile', JSON.stringify(options.sampleFile));
+  }
+  if (options.postmanCollections) {
+    bodyFormData.append(
+      'postmanCollections',
+      JSON.stringify(options.postmanCollections)
+    );
+  }
+  if (options.postmanKey) {
+    bodyFormData.append('postmanKey', options.postmanKey);
+  }
+  if (options.workspaceId) {
+    bodyFormData.append('workspaceId', options.workspaceId);
+  }
+  if (options.file) {
+    bodyFormData.append('file', options.file);
+  }
+  if (options.link) {
+    bodyFormData.append('link', options.link);
+  }
+  if (options.text) {
+    bodyFormData.append('text', options.text);
+  }
+
+  return await postRequest<FormData, CreateProjectResponse>({
     url,
     headers: {
       ...headers,
@@ -78,56 +79,65 @@ export async function importProjectDocumentFile(
     },
     requestBody: bodyFormData,
   });
-  return handleResponse(result);
 }
 
-export async function publishProject(
-  baseUrl: string,
-  headers: ApiHeaders,
-  projectId: string
-): Promise<Result<PublishProjectResponse, Error>> {
-  const url = new URL(`${baseUrl}/publish/${projectId}/api-client`);
-  const result = await postRequest<
-    null,
-    ResponseSchema<PublishProjectResponse>
-  >({
-    url,
-    headers,
-  });
-
-  return handleResponse(result);
-}
-
-export async function deleteProject(
-  baseUrl: string,
-  headers: ApiHeaders,
-  projectId: string
-): Promise<Result<void, Error>> {
-  const url = new URL(`${baseUrl}/project/${projectId}/api-client`);
-  return deleteRequest({ url, headers });
-}
-
-export async function completeProjectCreation(
+export async function callImportProjectApi(
   baseUrl: string,
   headers: ApiHeaders,
   projectId: string,
-  requestBody: CompleteProjectCreationRequest
-): Promise<Result<void, Error>> {
-  const url = new URL(
-    `${baseUrl}/project/${projectId}/create/complete/api-client`
-  );
-  return postRequest<CompleteProjectCreationRequest, void>({
+  options: ImportProjectInput
+): Promise<Result<ImportResponse, Error>> {
+  const url = new URL(`${baseUrl}/api/project/${projectId}/import`);
+  const bodyFormData = new FormData();
+  bodyFormData.append('publish', JSON.stringify(options.publish));
+
+  // TODO validate
+  if (options.postmanCollections) {
+    bodyFormData.append(
+      'postmanCollections',
+      JSON.stringify(options.postmanCollections)
+    );
+  }
+  if (options.postmanKey) {
+    bodyFormData.append('postmanKey', options.postmanKey);
+  }
+  if (options.file) {
+    bodyFormData.append('file', options.file);
+  }
+  if (options.link) {
+    bodyFormData.append('link', options.link);
+  }
+  if (options.text) {
+    bodyFormData.append('text', options.text);
+  }
+  if (options.importOption) {
+    bodyFormData.append('importOption', options.importOption);
+  }
+
+  return postRequest<FormData, ImportResponse>({
     url,
-    headers,
-    requestBody,
+    headers: {
+      ...headers,
+      ...bodyFormData.getHeaders(),
+    },
+    requestBody: bodyFormData,
   });
 }
 
-export async function getDescriptionGenerationStatus(
+export async function callDeleteProjectApi(
   baseUrl: string,
   headers: ApiHeaders,
   projectId: string
-): Promise<Result<PublishProjectSchema, Error>> {
-  const url = new URL(`${baseUrl}/project/${projectId}/status/api-client`);
-  return getRequest<PublishProjectSchema>({ url, headers });
+): Promise<Result<void, Error>> {
+  const url = new URL(`${baseUrl}/api/project/${projectId}`);
+  return deleteRequest({ url, headers });
+}
+
+export async function callDescriptionGenerationStatusApi(
+  baseUrl: string,
+  headers: ApiHeaders,
+  projectId: string
+): Promise<Result<ProjectCreationStatusResponse, Error>> {
+  const url = new URL(`${baseUrl}/api/project/creation-status/${projectId}`);
+  return getRequest<ProjectCreationStatusResponse>({ url, headers });
 }

@@ -1,5 +1,11 @@
 # @theneo/sdk
 
+## 0.2.1
+
+### Patch Changes
+
+- e3c7e28: Update Readme
+
 ## 0.2.0
 
 ### Minor Changes

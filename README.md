@@ -42,10 +42,13 @@ Before you begin, ensure you have met the following requirements:
 1. Clone this repository:
 
    ```shell
-   git clone https://github.com/your-username/theneo-monorepo.git
-   cd theneo-monorepo
+   git clone https://github.com/Theneo-Inc/theneo-tools.git
+   cd theneo-tools
    ```
-
+2. Install cli from the repository
+   ```shell
+   npm run cli
+   ```
 ### Usage
 
 Describe how to use your packages here. Provide examples and instructions for using @theneo/cli and @theneo/sdk.

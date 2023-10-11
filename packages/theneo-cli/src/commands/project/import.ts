@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
-import { input, select, checkbox, password } from '@inquirer/prompts';
+import { checkbox, input, password, select } from '@inquirer/prompts';
 import { createSpinner } from 'nanospinner';
 import { createTheneo } from '../../core/theneo';
 import { getProject, getShouldPublish } from '../../core/cli/project/project';
@@ -106,11 +106,10 @@ async function inputPostmanInfo(options: ImportCommandOptions) {
     value: collection.id,
     name: `${collection.name} - ${collection.id}`,
   }));
-  const postmanCollections1 = await checkbox<string>({
+  options.postmanCollections = await checkbox<string>({
     message: 'Select Postman Collections to import',
     choices: choices,
   });
-  options.postmanCollections = postmanCollections1;
 }
 
 // updates `options` object

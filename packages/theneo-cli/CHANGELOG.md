@@ -1,5 +1,11 @@
 # @theneo/cli
 
+## 0.3.2
+
+### Patch Changes
+
+- Fix indexes for selecting a project
+
 ## 0.3.1
 
 ### Patch Changes

@@ -25,7 +25,7 @@ export async function getProject(
       choices: projects.map((project: ProjectSchema, index: number) => {
         return {
           value: project,
-          name: `${index}. ${project.name}`,
+          name: `${index + 1}. ${project.name}`,
           description: project.key,
         };
       }),

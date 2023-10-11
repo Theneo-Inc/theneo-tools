@@ -1,5 +1,11 @@
 # @theneo/cli
 
+## 0.3.1
+
+### Patch Changes
+
+- fixed file and link import bug
+
 ## 0.3.0
 
 ### Minor Changes

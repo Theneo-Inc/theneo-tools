@@ -125,8 +125,8 @@ async function getImportSource(options: ImportCommandOptions) {
   });
   switch (importType) {
     case ImportTypeOptions.FILE:
-      options.link = await input({
-        message: 'API file URL (eg: https://example.com/openapi.yml): ',
+      options.file = await input({
+        message: 'API file name (eg: openapi.yml): ',
         validate: value => {
           if (value.length === 0) return 'Link is required!';
           return true;
@@ -134,8 +134,8 @@ async function getImportSource(options: ImportCommandOptions) {
       });
       break;
     case ImportTypeOptions.LINK:
-      options.file = await input({
-        message: 'API file name (eg: openapi.yml): ',
+      options.link = await input({
+        message: 'API file URL (eg: https://example.com/openapi.yml): ',
         validate: value => {
           if (value.length === 0) return 'Link is required!';
           return true;

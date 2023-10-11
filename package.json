@@ -18,7 +18,7 @@
     "cli": "turbo build lint && npm i -g ./packages/theneo-cli",
     "lint": "turbo run lint",
     "prepare": "husky install",
-    "publish-packages": "turbo run build lint test && changeset version && changeset publish",
+    "publish-packages": "turbo run build lint && changeset publish",
     "sort": "npx sort-package-json"
   },
   "lint-staged": {

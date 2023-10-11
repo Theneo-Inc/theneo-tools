@@ -1,5 +1,16 @@
 # @theneo/cli
 
+## 0.3.0
+
+### Minor Changes
+
+- 91e8355: Added postman support
+
+### Patch Changes
+
+- Updated dependencies [91e8355]
+  - @theneo/sdk@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes

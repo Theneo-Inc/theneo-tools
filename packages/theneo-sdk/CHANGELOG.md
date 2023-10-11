@@ -1,5 +1,11 @@
 # @theneo/sdk
 
+## 0.3.0
+
+### Minor Changes
+
+- 91e8355: Added postman support
+
 ## 0.2.1
 
 ### Patch Changes

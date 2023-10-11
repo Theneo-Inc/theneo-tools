@@ -37,23 +37,26 @@ theneo login
 ```
 
 ### Create new project
+
 ```bash
 Usage: theneo project create [options]
 
 Create new project
 
 Options:
-  --name <name>                                  Project name
-  --workspace <workspace>                        Enter workspace slug where the project should be created in, if not present uses default workspace
-  -f, --file <file>                              API file path to import (eg: docs/openapi.yml)
-  --link <link>                                  API file URL to import
-  --sample                                       Creates project with sample data (default: false)
-  --publish                                      Publish the project after creation (default: false)
-  --public                                       Make published documentation to be publicly accessible. Private by default (default: false)
-  --generate-description <generate-description>  Indicates if AI should be used for description generation (choices: "fill", "overwrite", "no_generation", default:
-                                                 "no_generation")
-  --profile <string>                             Use a specific profile from your config file.
-  -h, --help                                     display help for command
+  --name <name>                                    Project name
+  --workspace <workspace>                          Enter workspace slug where the project should be created in, if not present uses default workspace
+  -f, --file <file>                                API file path to import (eg: docs/openapi.yml)
+  --link <link>                                    API file URL to create project using it
+  --postman-api-key <postman-api-key>              Postman API Key (env: THENEO_POSTMAN_API_KEY)
+  --postman-collection <postman-collection-id>  Postman collection id
+  --empty                                          Creates empty project (default: false)
+  --sample                                         Creates project with sample template (default: false)
+  --publish                                        Publish the project after creation (default: false)
+  --public                                         Make published documentation to be publicly accessible. Private by default (default: false)
+  --generate-description <generate-description>    Indicates if AI should be used for description generation (choices: "fill", "overwrite", "no_generation", default: "no_generation")
+  --profile <string>                               Use a specific profile from your config file.
+  -h, --help                                       display help for command
 
 ```
 
@@ -61,7 +64,7 @@ Options:
     ```bash
     theneo project create
     ```
-2. Create the project directly using api spec file 
+2. Create the project directly using api spec file
 
     ```bash
     theneo project create --name api-documentation --generate-description overwrite --publish --public --file ./examples/openapi-spec.json
@@ -70,21 +73,28 @@ Options:
     ```bash
     theneo project create --name api-documentation --generate-description fill --publish --public --link https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/uspto.json 
     ```
+4. Create a project from Postman collections
+    ```bash
+     theneo project create --name api-documentation --postman-api-key <key> --postman-collection <id-1> --postman-collection <id-2>
+    ```
 
 ### Update api documentation from api spec file
+
 ```bash
 Usage: theneo project import [options]
 
 Update theneo project with a updated API file
 
 Options:
-  --key <project-key>          Specify the project key to import updated documentation in
-  -f, --file <file>            Specify the file to import
-  --link <link>                API file URL to import
-  --import-type <import-type>  Indicates how should the new api spec be imported (choices: "overwrite", "merge", "endpoints")
-  --publish                    Automatically publish the project (default: false)
-  --profile <string>           Use a specific profile from your config file.
-  -h, --help                   display help for command
+  --key <project-key>                              Specify the project key to import updated documentation in
+  -f, --file <file>                                API file path to import (eg: docs/openapi.yml)
+  --link <link>                                    API file URL to create project using it
+  --postman-api-key <postman-api-key>              Postman API Key (env: THENEO_POSTMAN_API_KEY)
+  --postman-collection <postman-collection-id>  Postman collection id
+  --import-type <import-type>                      Indicates how should the new api spec be imported (choices: "overwrite", "merge", "endpoints")
+  --publish                                        Automatically publish the project (default: false)
+  --profile <string>                               Use a specific profile from your config file.
+  -h, --help                                       display help for command
 
 ```
 

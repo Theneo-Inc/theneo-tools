@@ -1,24 +1,44 @@
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { getProfile } from '../../context/auth';
-
 import { input } from '@inquirer/prompts';
 import { createSpinner, Spinner } from 'nanospinner';
 import { createTheneo } from '../../core/theneo';
-import { UserRole, DescriptionGenerationType } from '@theneo/sdk';
+import {
+  UserRole,
+  DescriptionGenerationType,
+  CreateProjectOptions,
+  Theneo,
+} from '@theneo/sdk';
 import {
   getDescriptionGenerationType,
-  getDocumentationFileLocation,
   getShouldBePublic,
 } from '../../core/cli/project/create';
 import {
   CreateCommandOptions,
+  createFileOption,
+  createLinkOption,
   getDescriptionGenerationOption,
+  getImportSource,
+  getPostmanApiKeyOption,
+  getPostmanCollectionsOption,
+  ImportOptionsEnum,
 } from '../../core/cli/project';
 import { getWorkspace } from '../../core/cli/workspace';
-import { CreateProjectOptions } from '@theneo/sdk';
-import { Theneo } from '@theneo/sdk';
 import { Profile } from '../../config';
 import { getShouldPublish } from '../../core/cli/project/project';
+
+async function getProjectName(options: CreateCommandOptions) {
+  return (
+    options.name ??
+    (await input({
+      message: 'Project Name:',
+      validate: value => {
+        if (value.length === 0) return 'Name is required!';
+        return true;
+      },
+    }))
+  );
+}
 
 export function initProjectCreateCommand() {
   return new Command('create')
@@ -28,19 +48,41 @@ export function initProjectCreateCommand() {
       '--workspace <workspace>',
       'Enter workspace slug where the project should be created in, if not present uses default workspace'
     )
-    .option(
-      '-f, --file <file>',
-      'API file path to import (eg: docs/openapi.yml)'
+    .addOption(
+      createFileOption().conflicts([
+        'link',
+        'postmanApiKey',
+        'postmanCollection',
+        'empty',
+        'sample',
+      ])
     )
-    .option('--link <link>', 'API file URL to import')
-    .option('--sample', 'Creates project with sample data', false)
+    .addOption(
+      createLinkOption().conflicts([
+        'postmanApiKey',
+        'postmanCollection',
+        'empty',
+        'sample',
+      ])
+    )
+    .addOption(getPostmanApiKeyOption().conflicts(['empty', 'sample']))
+    .addOption(getPostmanCollectionsOption().conflicts(['empty', 'sample']))
+    .addOption(
+      new Option('--empty', 'Creates empty project')
+        .conflicts(['sample'])
+        .default(false)
+    )
+    .addOption(
+      new Option('--sample', 'Creates project with sample template').default(
+        false
+      )
+    )
     .option('--publish', 'Publish the project after creation', false)
     .option(
       '--public',
       'Make published documentation to be publicly accessible. Private by default',
       false
     )
-
     .addOption(getDescriptionGenerationOption())
     .option(
       '--profile <string>',
@@ -52,59 +94,40 @@ export function initProjectCreateCommand() {
 
       const profile = getProfile(options.profile);
       const theneo = createTheneo(profile);
-
       const spinner = createSpinner();
-      if (!isInteractive) {
-        spinner.start({ text: 'creating project' });
-        const createOptions: CreateProjectOptions = {
-          name: options.name ?? '',
-          workspace: {
-            key: options.workspace,
-          },
-          isPublic: options.public,
-          publish: options.publish,
-          descriptionGenerationType: options.generateDescription,
-          sampleData: options.sample,
-          data: {
-            file: options.file,
-            link: options.link ? new URL(options.link) : undefined,
-          },
-        };
-        if (
-          createOptions.descriptionGenerationType !==
-          DescriptionGenerationType.NO_GENERATION
-        ) {
-          spinner.start({ text: 'Generating descriptions' });
-          createOptions.progressUpdateHandler =
-            generationProgressHandler(spinner);
-        }
-        await createProject(spinner, createOptions, theneo, profile);
-        return;
-      }
-
       const workspacesPromise = theneo.listWorkspaces(UserRole.EDITOR);
+      const projectName = await getProjectName(options);
 
-      const projectName =
-        options.name ??
-        (await input({
-          message: 'Project Name:',
-          validate: value => {
-            if (value.length === 0) return 'Name is required!';
-            return true;
-          },
-        }));
       spinner.start();
       const workspacesResult = await workspacesPromise;
-      spinner.reset();
       if (workspacesResult.err) {
-        console.error(workspacesResult.error.message);
+        spinner.error({ text: workspacesResult.error.message });
         process.exit(1);
       }
+      spinner.reset();
       const workspace = await getWorkspace(
         workspacesResult.value,
-        options.workspace
+        options.workspace,
+        isInteractive
       );
-      const absoluteFilePath = await getDocumentationFileLocation(options);
+
+      if (
+        !options.file &&
+        !options.link &&
+        !options.empty &&
+        !options.sample &&
+        (!options.postmanApiKey ||
+          !options.postmanCollection ||
+          options.postmanCollection.length === 0)
+      ) {
+        const inputSource = await getImportSource([
+          ImportOptionsEnum.FILE,
+          ImportOptionsEnum.LINK,
+          ImportOptionsEnum.POSTMAN,
+          ImportOptionsEnum.EMPTY,
+        ]);
+        options = { ...options, ...inputSource };
+      }
 
       const isPublic = await getShouldBePublic(options, isInteractive);
       const descriptionGeneration = await getDescriptionGenerationType(
@@ -121,8 +144,18 @@ export function initProjectCreateCommand() {
         isPublic: isPublic,
         publish: shouldPublish,
         descriptionGenerationType: descriptionGeneration,
+        sampleData: options.sample,
+        // TODO handle empty flag properly
         data: {
-          file: absoluteFilePath,
+          file: options.file,
+          link: options.link ? new URL(options.link) : undefined,
+          postman:
+            options.postmanApiKey && options.postmanCollection
+              ? {
+                  apiKey: options.postmanApiKey,
+                  collectionIds: options.postmanCollection,
+                }
+              : undefined,
         },
       };
       if (

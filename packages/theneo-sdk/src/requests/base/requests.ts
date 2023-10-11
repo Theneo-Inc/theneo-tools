@@ -17,6 +17,19 @@ function addQueryParameters(url: URL, queryParams: ApiQueryParams) {
     }
   });
 }
+export function handleApiThrownError(error: unknown): Result<never> {
+  if (axios.isAxiosError(error)) {
+    return Err(
+      error.response
+        ? new Error(String(error.response.data?.message || error.response.data))
+        : error
+    );
+  }
+  if (error instanceof Error) {
+    return Err(error);
+  }
+  return Err(new Error(UNKNOWN_ERROR_MESSAGE));
+}
 
 export function handleResponse<T>(
   result: Result<ResponseSchema<T>, Error>
@@ -63,19 +76,7 @@ export async function getRequest<Response>({
     }
     return Ok(data);
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      return Err(
-        error.response
-          ? new Error(
-              String(error.response.data?.message || error.response.data)
-            )
-          : error
-      );
-    }
-    if (error instanceof Error) {
-      return Err(error);
-    }
-    return Err(new Error(UNKNOWN_ERROR_MESSAGE));
+    return handleApiThrownError(error);
   }
 }
 
@@ -110,19 +111,7 @@ export async function postRequest<Request, Response>({
     }
     return Ok(data);
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      return Err(
-        error.response
-          ? new Error(
-              String(error.response.data?.message || error.response.data)
-            )
-          : error
-      );
-    }
-    if (error instanceof Error) {
-      return Err(error);
-    }
-    return Err(new Error(UNKNOWN_ERROR_MESSAGE));
+    return handleApiThrownError(error);
   }
 }
 
@@ -154,18 +143,6 @@ export async function deleteRequest<Response>({
     }
     return Ok(data);
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      return Err(
-        error.response
-          ? new Error(
-              String(error.response.data?.message || error.response.data)
-            )
-          : error
-      );
-    }
-    if (error instanceof Error) {
-      return Err(error);
-    }
-    return Err(new Error(UNKNOWN_ERROR_MESSAGE));
+    return handleApiThrownError(error);
   }
 }

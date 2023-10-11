@@ -6,17 +6,19 @@ import { createSpinner, Spinner } from 'nanospinner';
 import { createTheneo } from '../../core/theneo';
 import { UserRole, DescriptionGenerationType } from '@theneo/sdk';
 import {
-  getDescriptionGenerationOption,
   getDescriptionGenerationType,
   getDocumentationFileLocation,
   getShouldBePublic,
-  getShouldPublish,
 } from '../../core/cli/project/create';
-import { CreateCommandOptions } from '../../core/cli/project';
+import {
+  CreateCommandOptions,
+  getDescriptionGenerationOption,
+} from '../../core/cli/project';
 import { getWorkspace } from '../../core/cli/workspace';
 import { CreateProjectOptions } from '@theneo/sdk';
 import { Theneo } from '@theneo/sdk';
 import { Profile } from '../../config';
+import { getShouldPublish } from '../../core/cli/project/project';
 
 export function initProjectCreateCommand() {
   return new Command('create')

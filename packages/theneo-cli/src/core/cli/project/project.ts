@@ -1,4 +1,4 @@
-import { select } from '@inquirer/prompts';
+import { confirm, select } from '@inquirer/prompts';
 import { Theneo, ProjectSchema } from '@theneo/sdk';
 
 export async function getProject(
@@ -40,4 +40,17 @@ export async function getProject(
     }
     return project;
   }
+}
+
+export async function getShouldPublish(
+  options: { publish: boolean },
+  isInteractive: boolean
+): Promise<boolean> {
+  if (isInteractive) {
+    return confirm({
+      message: 'Want to publish the project?',
+      default: true,
+    });
+  }
+  return options.publish;
 }

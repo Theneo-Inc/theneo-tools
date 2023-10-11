@@ -16,4 +16,3 @@ export async function callUserWorkspacesApi(
     },
   });
 }
-// /api/project/creation-status/65243b3fb8504485e1057fff

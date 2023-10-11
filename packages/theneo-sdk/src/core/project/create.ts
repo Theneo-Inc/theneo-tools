@@ -1,21 +1,17 @@
-import {
-  ApiHeaders,
-  callCreateProjectApi,
-  callUserWorkspacesApi,
-} from 'theneo/requests';
+import { callCreateProjectApi, callUserWorkspacesApi } from 'theneo/requests';
+
+import * as fs from 'fs';
 import {
   CreateProjectOptions,
-  WorkspaceOption,
-} from 'theneo/models/inputs/project';
-import {
-  CreateProjectInput,
   CreateProjectResponse,
   DescriptionGenerationType,
   Err,
   Result,
   UserRole,
+  WorkspaceOption,
 } from 'theneo';
-import * as fs from 'fs';
+import { CreateProjectInput } from 'theneo/models';
+import { ApiHeaders } from 'theneo/requests/base';
 
 async function getWorkspaceId(
   baseUrl: string,
@@ -78,7 +74,7 @@ export async function createProject(
   }
   if (options.data?.postman !== undefined) {
     createInput.postmanKey = options.data.postman.apiKey;
-    createInput.postmanCollections = options.data.postman.collectionId;
+    createInput.postmanCollections = options.data.postman.collectionIds;
   }
 
   return callCreateProjectApi(baseUrl, headers, createInput);

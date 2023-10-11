@@ -1,7 +1,8 @@
-import { ApiHeaders, callImportProjectApi } from 'theneo/requests';
-import { ImportProjectOptions } from 'theneo/models/inputs/project';
-import { Err, ImportProjectInput, ImportResponse, Result } from 'theneo';
+import { callImportProjectApi } from 'theneo/requests';
 import * as fs from 'fs';
+import { Err, ImportProjectOptions, ImportResponse, Result } from 'theneo';
+import { ImportProjectInput } from 'theneo/models';
+import { ApiHeaders } from '../../requests/base';
 
 export async function importProject(
   baseUrl: string,
@@ -25,7 +26,7 @@ export async function importProject(
   }
   if (options.data.postman !== undefined) {
     importInput.postmanKey = options.data.postman.apiKey;
-    importInput.postmanCollections = options.data.postman.collectionId;
+    importInput.postmanCollections = options.data.postman.collectionIds;
   }
 
   if (options.importOption !== undefined) {

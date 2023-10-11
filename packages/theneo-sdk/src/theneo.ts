@@ -1,7 +1,12 @@
 import {
   CreatedProjectStatusEnum,
+  CreateProjectOptions,
   CreateProjectResponse,
+  DescriptionGenerationProgressHandler,
+  DescriptionGenerationType,
+  ImportProjectOptions,
   ImportResponse,
+  PostmanCollection,
   ProjectCreationStatusResponse,
   ProjectSchema,
   PublishProjectResponse,
@@ -10,29 +15,29 @@ import {
 } from './schema';
 import { Err, Ok, Result } from './results';
 import {
-  ApiHeaders,
   callDeleteProjectApi,
   callDescriptionGenerationStatusApi,
   callGetProjectListApi,
-  callImportProjectApi,
   callUserWorkspacesApi,
-  THENEO_API_CLIENT_KEY_HEADER_NAME,
-  THENEO_API_CLIENT_NAME_HEADER_NAME,
 } from './requests';
 import { SDK_VERSION } from './utils/version';
-import {
-  CreateProjectOptions,
-  DescriptionGenerationProgressHandler,
-  DescriptionGenerationType,
-  ImportProjectOptions,
-} from 'theneo/models/inputs/project';
+
 import { createProject } from './core/project/create';
 import { sleep } from './utils';
 import {
   callPreviewProjectApi,
   callPublishProjectApi,
-} from 'theneo/requests/publish';
-import { importProject } from 'theneo/core/project/import';
+} from './requests/publish';
+import { importProject } from './core/project/import';
+import {
+  getPostmanCollectionById,
+  getPostmanCollections,
+} from 'theneo/requests/postman';
+import {
+  ApiHeaders,
+  THENEO_API_CLIENT_KEY_HEADER_NAME,
+  THENEO_API_CLIENT_NAME_HEADER_NAME,
+} from 'theneo/requests/base';
 
 export interface TheneoOptions {
   /**
@@ -136,6 +141,7 @@ export class Theneo {
       projectId
     );
   }
+
   public async previewProject(
     projectId: string
   ): Promise<Result<PublishProjectResponse>> {
@@ -256,7 +262,7 @@ export class Theneo {
     progressUpdateHandler?: DescriptionGenerationProgressHandler,
     retryTime = 5_000,
     maxWaitTime = 600_000
-  ): Promise<Result<null>> {
+  ): Promise<Result<never>> {
     const startTime = Date.now();
     while (true) {
       const generateDescriptionsResult =
@@ -269,7 +275,7 @@ export class Theneo {
         generateDescriptionsResult.value.creationStatus ===
         CreatedProjectStatusEnum.Finished
       ) {
-        return Ok(null);
+        return Ok(null as never);
       }
       if (
         generateDescriptionsResult.value.creationStatus ===
@@ -293,5 +299,15 @@ export class Theneo {
 
       await sleep(retryTime);
     }
+  }
+
+  /**
+   * Returns list of Postman Collections using the api key
+   * @param postmanApiKey
+   */
+  public static async listPostmanCollections(
+    postmanApiKey: string
+  ): Promise<Result<PostmanCollection[]>> {
+    return getPostmanCollections(postmanApiKey);
   }
 }

@@ -5,7 +5,6 @@ import {
 } from '../../../utils/file';
 import { DescriptionGenerationType } from '@theneo/sdk';
 import { CreateCommandOptions } from './index';
-import { Option } from 'commander';
 
 export async function getDocumentationFileLocation(
   options: CreateCommandOptions
@@ -66,39 +65,4 @@ export async function getDescriptionGenerationType(
     });
   }
   return options.generateDescription;
-}
-
-export function getDescriptionGenerationOption() {
-  return new Option(
-    '--generate-description <generate-description>',
-    'Indicates if AI should be used for description generation'
-  )
-    .default(DescriptionGenerationType.NO_GENERATION)
-    .choices([
-      DescriptionGenerationType.FILl,
-      DescriptionGenerationType.OVERWRITE,
-      DescriptionGenerationType.NO_GENERATION,
-    ])
-    .argParser((value, previous) => {
-      if (value !== undefined) {
-        return value;
-      }
-      if (previous !== undefined && previous !== null) {
-        return previous;
-      }
-      return DescriptionGenerationType.NO_GENERATION;
-    });
-}
-
-export async function getShouldPublish(
-  options: { publish: boolean },
-  isInteractive: boolean
-): Promise<boolean> {
-  if (isInteractive) {
-    return confirm({
-      message: 'Want to publish the project?',
-      default: true,
-    });
-  }
-  return options.publish;
 }

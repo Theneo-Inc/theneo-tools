@@ -1,7 +1,5 @@
 import {
-  CreateProjectInput,
   CreateProjectResponse,
-  ImportProjectInput,
   ImportResponse,
   ProjectCreationStatusResponse,
   ProjectSchema,
@@ -14,6 +12,7 @@ import {
   getRequest,
   postRequest,
 } from './base/requests';
+import { CreateProjectInput, ImportProjectInput } from 'theneo/models';
 
 export async function callGetProjectListApi(
   baseUrl: string,

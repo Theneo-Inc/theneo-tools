@@ -19,11 +19,11 @@ with the required options.
 Then, you can use the methods provided by the SDK to interact with the Theneo API.
 
 ```typescript
-import { Theneo, TheneoOptions, Result, Workspace, ProjectSchema, CreateProjectOptions } from '@theneo/sdk';
+import { Theneo, TheneoOptions, Result, Workspace, ProjectSchema, CreateProjectOptions } from "@theneo/sdk";
 
 // Define Theneo options
 const options: TheneoOptions = {
-  apiKey: 'YOUR_API_KEY',
+  apiKey: "YOUR_API_KEY"
 };
 
 // Create a Theneo instance
@@ -34,27 +34,44 @@ async function listWorkspaces() {
   const result: Result<Workspace[]> = await theneo.listWorkspaces();
   if (result.ok) {
     const workspaces: Workspace[] = result.unwrap();
-    console.log('Workspaces:', workspaces);
+    console.log("Workspaces:", workspaces);
   } else {
-    console.error('Error:', result.unwrapErr());
+    console.error("Error:", result.unwrap());
   }
 }
 
 // Create a new project
 async function createProject() {
   const projectOptions: CreateProjectOptions = {
-    name: 'My Project',
-    workspace: { key: 'workspace-key' },
+    name: "My Project",
+    workspace: { key: "workspace-key" },
     publish: true,
     isPublic: true,
+    data: {
+      // Specify the data source using one of the following attributes:
+      // 1. Import from a file
+      // file: '/path/to/api-documentation.json',
+
+      // 2. Import from a URL
+      // link: 'https://example.com/api-documentation.json',
+
+      // 3. Import from a text string
+      // text: 'API documentation content as a string',
+
+      // 4. Import from a Postman collection
+      // postman: {
+      //   apiKey: 'YOUR_POSTMAN_API_KEY',
+      //   collectionIds: ['collection-id-1', 'collection-id-2'],
+      // },
+    } as ApiDataInputOption
   };
 
   const result: Result<CreateProjectResponse> = await theneo.createProject(projectOptions);
   if (result.ok) {
     const createdProject: CreateProjectResponse = result.unwrap();
-    console.log('Created Project:', createdProject);
+    console.log("Created Project:", createdProject);
   } else {
-    console.error('Error:', result.unwrapErr());
+    console.error("Error:", result.unwrap());
   }
 }
 
@@ -62,15 +79,19 @@ async function createProject() {
 listWorkspaces();
 createProject();
 ```
+
 ### Import api document
-Certainly! Here's an example demonstrating how to use the `importProjectDocument` method to import API documentation to an existing project using the Theneo SDK in TypeScript:
+
+An example
+demonstrating how to use the `importProjectDocument` method
+to import API documentation to an existing project using the Theneo SDK in TypeScript:
 
 ```typescript
-import { Theneo, TheneoOptions, Result, ImportProjectOptions, ImportResponse, ApiDataInputOption } from '@theneo/sdk';
+import { Theneo, TheneoOptions, Result, ImportProjectOptions, ImportResponse, ApiDataInputOption } from "@theneo/sdk";
 
 // Define Theneo options
 const options: TheneoOptions = {
-  apiKey: 'YOUR_API_KEY',
+  apiKey: "YOUR_API_KEY"
 };
 
 // Create a Theneo instance
@@ -78,25 +99,25 @@ const theneo = new Theneo(options);
 
 // Define the import options
 const importOptions: ImportProjectOptions = {
-  projectId: 'project-id', // Replace with the actual project ID
+  projectId: "project-id", // Replace with the actual project ID
   publish: true, // Set to true if you want to publish the imported data
   data: {
     // Specify the data source using one of the following attributes:
     // 1. Import from a file
     // file: '/path/to/api-documentation.json',
-    
+
     // 2. Import from a URL
     // link: 'https://example.com/api-documentation.json',
-    
+
     // 3. Import from a text string
     // text: 'API documentation content as a string',
-    
+
     // 4. Import from a Postman collection
     // postman: {
     //   apiKey: 'YOUR_POSTMAN_API_KEY',
-    //   collectionId: ['collection-id-1', 'collection-id-2'],
+    //   collectionIds: ['collection-id-1', 'collection-id-2'],
     // },
-  } as ApiDataInputOption,
+  } as ApiDataInputOption
 };
 
 // Import API documentation to the project
@@ -104,9 +125,9 @@ async function importApiDocumentation() {
   const result: Result<ImportResponse> = await theneo.importProjectDocument(importOptions);
   if (result.ok) {
     const importResponse: ImportResponse = result.unwrap();
-    console.log('Imported API Documentation:', importResponse);
+    console.log("Imported API Documentation:", importResponse);
   } else {
-    console.error('Error:', result.unwrapErr());
+    console.error("Error:", result.unwrap());
   }
 }
 
@@ -118,9 +139,11 @@ In this example:
 
 - We first create an instance of the `Theneo` class and provide the necessary API key in the `options` object.
 
-- We define the import options in the `importOptions` object. You should replace `'project-id'` with the actual ID of the project where you want to import the API documentation.
+- We define the import options in the `importOptions` object. You should replace `'project-id'` with the actual ID of
+  the project where you want to import the API documentation.
 
-- Inside the `data` attribute of `importOptions`, you can specify the source of the API documentation to be imported. You can choose one of the four options:
+- Inside the `data` attribute of `importOptions`, you can specify the source of the API documentation to be imported.
+  You can choose one of the four options:
   1. Import from a file (specify the file path).
   2. Import from a URL (specify the URL).
   3. Import from a text string (specify the content as a string).
@@ -130,9 +153,8 @@ In this example:
 
 - The `importApiDocumentation` function uses the `importProjectDocument` method to perform the import operation.
 
-Make sure to replace the placeholder values (`'YOUR_API_KEY'`, `'project-id'`, and any others) with your actual API key and project details before running the code.
-
-
+Make sure to replace the placeholder values (`'YOUR_API_KEY'`, `'project-id'`, and any others) with your actual API key
+and project details before running the code.
 
 ## TheneoOptions (Interface)
 
@@ -162,8 +184,11 @@ The main class for interacting with the Theneo API.
   Theneo platform.
 - `getDescriptionGenerationStatus(projectId: string): Promise<Result<ProjectCreationStatusResponse, Error>>`: Gets the
   description generation status for a project.
-- `waitForDescriptionGeneration(projectId: string, progressUpdateHandler?: DescriptionGenerationProgressHandler, retryTime?: number, maxWaitTime?: number): Promise<Result<null>>`:
+- `waitForDescriptionGeneration(projectId: string, progressUpdateHandler?: DescriptionGenerationProgressHandler, retryTime?: number, maxWaitTime?: number): Promise<Result<never>>`:
   Waits for description generation to finish.
+
+- `static listPostmanCollections(postmanApiKey: string): Promise<Result<PostmanCollection[]>>`: Returns list of Postman
+  Collections using the api key
 
 ## DescriptionGenerationType (Enum)
 
@@ -274,38 +299,6 @@ Options for creating other types of documentation.
   documentation sections.
 - `faq?: { generalInfo: boolean; authentication: boolean; usage: boolean; billing: boolean; }`: FAQ sections.
 
-## ImportProjectInput (Interface)
-
-Input options for importing a project.
-
-- `file?: Buffer`:
-
-Buffer containing the project data.
-
-- `link?: string`: URL to the project data.
-- `text?: string`: Project data as a string.
-- `postmanKey?: string`: Postman collection key.
-- `postmanCollections?: string[]`: Postman collections to import.
-- `importOption?: ImportOption`: Import option.
-- `publish: boolean`: Indicates if the project should be published.
-
-## CreateProjectInput (Interface)
-
-Input options for creating a project.
-
-- `name: string`: Project name.
-- `isPublic: boolean`: Indicates if the project is public.
-- `publish: boolean`: Indicates if the project should be published.
-- `descriptionGenerationType: DescriptionGenerationType`: Description generation type.
-- `workspaceId?: string`: Workspace ID.
-- `sampleFile?: boolean`: Indicates if a sample file should be included.
-- `otherDocumentType?: CreateOtherTypeOfDocOptions`: Other documentation options.
-- `file?: Buffer`: Buffer containing project data.
-- `link?: string`: URL to project data.
-- `text?: string`: Project data as a string.
-- `postmanKey?: string`: Postman collection key.
-- `postmanCollections?: string[]`: Postman collections to import.
-
 ## CreatedProjectStatusEnum (Enum)
 
 An enum representing different statuses for a created project.
@@ -358,7 +351,6 @@ Workspace information.
 - `isDefault: boolean`: Indicates if the workspace is the default workspace.
 - `isCorporate: boolean`: Indicates if the workspace is corporate.
 - `isSubscribed: boolean`: Indicates if the workspace is subscribed.
-
 
 ## ResultImpl<T, E extends Error> (Abstract Class)
 

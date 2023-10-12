@@ -1,20 +1,18 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
-import { checkbox, input, password, select } from '@inquirer/prompts';
 import { createSpinner } from 'nanospinner';
 import { createTheneo } from '../../core/theneo';
 import { getProject, getShouldPublish } from '../../core/cli/project/project';
 import {
+  createFileOption,
   createImportTypeOption,
+  createLinkOption,
+  getImportSource,
+  getPostmanApiKeyOption,
+  getPostmanCollectionsOption,
   ImportCommandOptions,
+  ImportOptionsEnum,
 } from '../../core/cli/project';
-import { Theneo } from '@theneo/sdk';
-
-enum ImportTypeOptions {
-  FILE = 'file',
-  LINK = 'link',
-  POSTMAN = 'postman',
-}
 
 export function initProjectImportCommand() {
   return new Command('import')
@@ -23,8 +21,18 @@ export function initProjectImportCommand() {
       '--key <project-key>',
       'Specify the project key to import updated documentation in'
     )
-    .option('-f, --file <file>', 'Specify the file to import')
-    .option('--link <link>', 'API file URL to import')
+    .addOption(
+      createFileOption().conflicts([
+        'link',
+        'postmanApiKey',
+        'postmanCollection',
+      ])
+    )
+    .addOption(
+      createLinkOption().conflicts(['postmanApiKey', 'postmanCollection'])
+    )
+    .addOption(getPostmanApiKeyOption())
+    .addOption(getPostmanCollectionsOption())
     .addOption(createImportTypeOption())
     .option('--publish', 'Automatically publish the project', false)
     .option(
@@ -41,10 +49,15 @@ export function initProjectImportCommand() {
         !options.file &&
         !options.link &&
         (!options.postmanApiKey ||
-          !options.postmanCollections ||
-          options.postmanCollections.length === 0)
+          !options.postmanCollection ||
+          options.postmanCollection.length === 0)
       ) {
-        await getImportSource(options);
+        const inputSource = await getImportSource([
+          ImportOptionsEnum.FILE,
+          ImportOptionsEnum.LINK,
+          ImportOptionsEnum.POSTMAN,
+        ]);
+        options = { ...options, ...inputSource };
       }
 
       const shouldPublish = await getShouldPublish(options, isInteractive);
@@ -57,10 +70,10 @@ export function initProjectImportCommand() {
           file: options.file,
           link: options.link ? new URL(options.link) : undefined,
           postman:
-            options.postmanApiKey && options.postmanCollections
+            options.postmanApiKey && options.postmanCollection
               ? {
                   apiKey: options.postmanApiKey,
-                  collectionIds: options.postmanCollections,
+                  collectionIds: options.postmanCollection,
                 }
               : undefined,
         },
@@ -81,70 +94,4 @@ export function initProjectImportCommand() {
         });
       }
     });
-}
-
-async function inputPostmanInfo(options: ImportCommandOptions) {
-  options.postmanApiKey = await password({
-    message: 'Postman Api Key: ',
-    validate: value => {
-      if (value.length === 0) return 'Postman Key is required!';
-      return true;
-    },
-  });
-
-  const spinner = createSpinner('Getting Postman collections').start();
-
-  const postmanCollectionsResult = await Theneo.listPostmanCollections(
-    options.postmanApiKey
-  );
-  if (postmanCollectionsResult.err) {
-    spinner.error({ text: postmanCollectionsResult.error.message });
-    process.exit(1);
-  }
-  spinner.clear();
-  const choices = postmanCollectionsResult.unwrap().map(collection => ({
-    value: collection.id,
-    name: `${collection.name} - ${collection.id}`,
-  }));
-  options.postmanCollections = await checkbox<string>({
-    message: 'Select Postman Collections to import',
-    choices: choices,
-  });
-}
-
-// updates `options` object
-async function getImportSource(options: ImportCommandOptions) {
-  const importType = await select({
-    message: 'Select import type',
-    choices: [
-      { value: ImportTypeOptions.FILE, name: 'File' },
-      { value: ImportTypeOptions.LINK, name: 'Link' },
-      { value: ImportTypeOptions.POSTMAN, name: 'Postman Collection' },
-    ],
-  });
-  switch (importType) {
-    case ImportTypeOptions.FILE:
-      options.file = await input({
-        message: 'API file name (eg: openapi.yml): ',
-        validate: value => {
-          if (value.length === 0) return 'Link is required!';
-          return true;
-        },
-      });
-      break;
-    case ImportTypeOptions.LINK:
-      options.link = await input({
-        message: 'API file URL (eg: https://example.com/openapi.yml): ',
-        validate: value => {
-          if (value.length === 0) return 'Link is required!';
-          return true;
-        },
-      });
-      break;
-    case ImportTypeOptions.POSTMAN:
-      await inputPostmanInfo(options);
-      break;
-    default:
-      throw new Error('Invalid import type');
-  }
 }

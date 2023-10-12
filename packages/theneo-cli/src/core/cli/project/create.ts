@@ -45,6 +45,9 @@ export async function getDescriptionGenerationType(
   options: CreateCommandOptions,
   isInteractive: boolean
 ): Promise<DescriptionGenerationType> {
+  if (options.empty) {
+    return DescriptionGenerationType.NO_GENERATION;
+  }
   if (isInteractive) {
     return select<DescriptionGenerationType>({
       message: 'Select description generation option type with AI',

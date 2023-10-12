@@ -3,7 +3,8 @@ import { select } from '@inquirer/prompts';
 
 export async function getWorkspace(
   workspaces: Workspace[],
-  workspace: undefined | string
+  workspace: string | undefined,
+  isInteractive: boolean
 ): Promise<Workspace> {
   if (workspaces.length === 0) {
     console.error('No workspaces found.');
@@ -23,7 +24,21 @@ export async function getWorkspace(
     console.info(`Using default workspace: ${workspace.name}`);
     return workspace;
   }
-
+  if (!isInteractive) {
+    const defaultWorkspace = workspaces.find(ws => ws.isDefault);
+    if (defaultWorkspace) {
+      return defaultWorkspace;
+    }
+    const firstWorkspace = workspaces[0];
+    if (firstWorkspace === undefined) {
+      console.error('No workspaces found.');
+      process.exit(1);
+    }
+    console.warn(
+      `no default workspace found, using first workspace: ${firstWorkspace.name}`
+    );
+    return firstWorkspace;
+  }
   return select({
     message: 'Pick a workspace.',
     choices: workspaces.map(ws => {

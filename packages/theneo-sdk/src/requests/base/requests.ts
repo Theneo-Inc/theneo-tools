@@ -21,7 +21,13 @@ export function handleApiThrownError(error: unknown): Result<never> {
   if (axios.isAxiosError(error)) {
     return Err(
       error.response
-        ? new Error(String(error.response.data?.message || error.response.data))
+        ? new Error(
+            JSON.stringify(
+              error.response.data?.message ||
+                error.response.data?.error?.message ||
+                error.response.data
+            )
+          )
         : error
     );
   }

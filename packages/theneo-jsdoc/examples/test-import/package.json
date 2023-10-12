@@ -1,0 +1,11 @@
+{
+  "name": "test-import",
+  "version": "0.0.1",
+  "scripts": {
+    "run:theneo": "node scripts/theneo.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "theneo": "^1.1.0"
+  }
+}

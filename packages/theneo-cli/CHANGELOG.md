@@ -1,5 +1,16 @@
 # @theneo/cli
 
+## 0.4.0
+
+### Minor Changes
+
+- 0ccc9f2: Update project creation and import commands and error messages
+
+### Patch Changes
+
+- Updated dependencies [0ccc9f2]
+  - @theneo/sdk@0.3.1
+
 ## 0.3.3
 
 ### Patch Changes

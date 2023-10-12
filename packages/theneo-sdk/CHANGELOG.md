@@ -1,5 +1,11 @@
 # @theneo/sdk
 
+## 0.3.1
+
+### Patch Changes
+
+- 0ccc9f2: Update project creation and import commands and error messages
+
 ## 0.3.0
 
 ### Minor Changes

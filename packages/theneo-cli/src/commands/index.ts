@@ -4,6 +4,7 @@ import { initLogin } from './login';
 import { initProjectCommand } from './project';
 import { CLI_VERSION } from '../utils/version';
 import { initWorkspaceCommand } from './workspace';
+import { initExportCommand } from './export';
 
 export function createProgram(): Command {
   const program = new Command();
@@ -20,5 +21,6 @@ export function initializeProgram() {
   initLogin(program);
   initProjectCommand(program);
   initWorkspaceCommand(program);
+  initExportCommand(program);
   return program;
 }

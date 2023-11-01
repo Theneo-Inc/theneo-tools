@@ -24,15 +24,9 @@ import { SDK_VERSION } from './utils/version';
 
 import { createProject } from './core/project/create';
 import { sleep } from './utils';
-import {
-  callPreviewProjectApi,
-  callPublishProjectApi,
-} from './requests/publish';
+import { callPublishProjectApi } from './requests/publish';
 import { importProject } from './core/project/import';
-import {
-  getPostmanCollectionById,
-  getPostmanCollections,
-} from 'theneo/requests/postman';
+import { getPostmanCollections } from 'theneo/requests/postman';
 import {
   ApiHeaders,
   THENEO_API_CLIENT_KEY_HEADER_NAME,
@@ -62,6 +56,7 @@ export interface TheneoOptions {
 
 export class Theneo {
   private readonly baseApiUrl: string;
+  private readonly baseAppUrl: string;
   private readonly apiKey: string;
   private readonly apiClientName: string;
 
@@ -70,6 +65,11 @@ export class Theneo {
       options.baseApiUrl ??
       process.env.THENEO_API_URL ??
       'https://api.theneo.io';
+
+    this.baseAppUrl =
+      options.baseAppUrl ??
+      process.env.THENEO_APP_URL ??
+      'https://app.theneo.io';
 
     if (!options.apiKey) {
       const apiKey = process.env.THENEO_API_KEY;
@@ -88,40 +88,23 @@ export class Theneo {
    * Returns list of Workspaces available for user
    * @param role user role
    */
-  public async listWorkspaces(role?: UserRole): Promise<Result<Workspace[]>> {
-    return callUserWorkspacesApi(
-      this.baseApiUrl,
-      {
-        ...this.defaultHeaders(),
-        ...this.authHeaders(),
-      },
-      role
-    );
+  public listWorkspaces(role?: UserRole): Promise<Result<Workspace[]>> {
+    return callUserWorkspacesApi(this.baseApiUrl, this.getHeaders(), role);
   }
 
   /**
    * Returns list of user projects
    */
-  public async listProjects(): Promise<Result<ProjectSchema[]>> {
-    return callGetProjectListApi(this.baseApiUrl, {
-      ...this.defaultHeaders(),
-      ...this.authHeaders(),
-    });
+  public listProjects(): Promise<Result<ProjectSchema[]>> {
+    return callGetProjectListApi(this.baseApiUrl, this.getHeaders());
   }
 
   /**
    * deletes project
    * @param projectId
    */
-  public async deleteProjectById(projectId: string): Promise<Result<void>> {
-    return callDeleteProjectApi(
-      this.baseApiUrl,
-      {
-        ...this.defaultHeaders(),
-        ...this.authHeaders(),
-      },
-      projectId
-    );
+  public deleteProjectById(projectId: string): Promise<Result<void>> {
+    return callDeleteProjectApi(this.baseApiUrl, this.getHeaders(), projectId);
   }
 
   /**
@@ -129,47 +112,24 @@ export class Theneo {
    * If `public` flag is set in project setting then the documentation will be publicly available after publishing it
    * @param projectId
    */
-  public async publishProject(
+  public publishProject(
     projectId: string
   ): Promise<Result<PublishProjectResponse>> {
-    return callPublishProjectApi(
-      this.baseApiUrl,
-      {
-        ...this.defaultHeaders(),
-        ...this.authHeaders(),
-      },
-      projectId
-    );
+    return callPublishProjectApi(this.baseApiUrl, this.getHeaders(), projectId);
   }
 
-  public async previewProject(
-    projectId: string
-  ): Promise<Result<PublishProjectResponse>> {
-    return callPreviewProjectApi(
-      this.baseApiUrl,
-      {
-        ...this.defaultHeaders(),
-        ...this.authHeaders(),
-      },
-      projectId
-    );
+  public getPreviewProjectLink(projectId: string): string {
+    return `${this.baseAppUrl}/preview/${projectId}?github=${this.apiKey}`;
   }
 
   /**
    * Imports API document to existing project
    * @param options
    */
-  public async importProjectDocument(
+  public importProjectDocument(
     options: ImportProjectOptions
   ): Promise<Result<ImportResponse>> {
-    return importProject(
-      this.baseApiUrl,
-      {
-        ...this.defaultHeaders(),
-        ...this.authHeaders(),
-      },
-      options
-    );
+    return importProject(this.baseApiUrl, this.getHeaders(), options);
   }
 
   /**
@@ -181,10 +141,7 @@ export class Theneo {
   public async createProject(
     options: CreateProjectOptions
   ): Promise<Result<CreateProjectResponse>> {
-    const headers = {
-      ...this.defaultHeaders(),
-      ...this.authHeaders(),
-    };
+    const headers = this.getHeaders();
 
     const result = await createProject(this.baseApiUrl, headers, options);
 
@@ -221,15 +178,19 @@ export class Theneo {
     return result;
   }
 
-  public async getDescriptionGenerationStatus(
+  private getHeaders(): ApiHeaders {
+    return {
+      ...this.defaultHeaders(),
+      ...this.authHeaders(),
+    };
+  }
+
+  public getDescriptionGenerationStatus(
     projectId: string
   ): Promise<Result<ProjectCreationStatusResponse, Error>> {
     return callDescriptionGenerationStatusApi(
       this.baseApiUrl,
-      {
-        ...this.defaultHeaders(),
-        ...this.authHeaders(),
-      },
+      this.getHeaders(),
       projectId
     );
   }
@@ -305,7 +266,7 @@ export class Theneo {
    * Returns list of Postman Collections using the api key
    * @param postmanApiKey
    */
-  public static async listPostmanCollections(
+  public static listPostmanCollections(
     postmanApiKey: string
   ): Promise<Result<PostmanCollection[]>> {
     return getPostmanCollections(postmanApiKey);

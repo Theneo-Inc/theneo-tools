@@ -14,7 +14,7 @@ import {
 } from './base/requests';
 import { CreateProjectInput, ImportProjectInput } from 'theneo/models';
 
-export async function callGetProjectListApi(
+export function callGetProjectListApi(
   baseUrl: string,
   headers: ApiHeaders
 ): Promise<Result<ProjectSchema[], Error>> {
@@ -25,7 +25,7 @@ export async function callGetProjectListApi(
   });
 }
 
-export async function callCreateProjectApi(
+export function callCreateProjectApi(
   baseUrl: string,
   headers: ApiHeaders,
   options: CreateProjectInput
@@ -70,7 +70,7 @@ export async function callCreateProjectApi(
     bodyFormData.append('text', options.text);
   }
 
-  return await postRequest<FormData, CreateProjectResponse>({
+  return postRequest<FormData, CreateProjectResponse>({
     url,
     headers: {
       ...headers,
@@ -80,7 +80,7 @@ export async function callCreateProjectApi(
   });
 }
 
-export async function callImportProjectApi(
+export function callImportProjectApi(
   baseUrl: string,
   headers: ApiHeaders,
   projectId: string,
@@ -123,7 +123,7 @@ export async function callImportProjectApi(
   });
 }
 
-export async function callDeleteProjectApi(
+export function callDeleteProjectApi(
   baseUrl: string,
   headers: ApiHeaders,
   projectId: string
@@ -132,7 +132,7 @@ export async function callDeleteProjectApi(
   return deleteRequest({ url, headers });
 }
 
-export async function callDescriptionGenerationStatusApi(
+export function callDescriptionGenerationStatusApi(
   baseUrl: string,
   headers: ApiHeaders,
   projectId: string

@@ -21,6 +21,7 @@ export interface CreateCommandOptions {
 
 export interface ImportCommandOptions {
   key: string | undefined;
+  workspace: string | undefined;
   file: string | undefined;
   link: string | undefined;
   postmanApiKey: string | undefined;

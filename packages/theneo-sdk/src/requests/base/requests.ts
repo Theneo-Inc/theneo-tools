@@ -9,6 +9,7 @@ export const THENEO_API_CLIENT_NAME_HEADER_NAME = 'x-theneo-api-client';
 
 const UNKNOWN_ERROR_MESSAGE = 'Unknown error';
 const EMPTY_DATA_ERROR_MESSAGE = 'No data returned from API';
+
 function addQueryParameters(url: URL, queryParams: ApiQueryParams) {
   Object.keys(queryParams).forEach(key => {
     const queryParam = queryParams[String(key)];
@@ -17,6 +18,7 @@ function addQueryParameters(url: URL, queryParams: ApiQueryParams) {
     }
   });
 }
+
 export function handleApiThrownError(error: unknown): Result<never> {
   if (axios.isAxiosError(error)) {
     return Err(

@@ -1,10 +1,48 @@
 import { confirm, select } from '@inquirer/prompts';
 import { Theneo, ProjectSchema } from '@theneo/sdk';
 
+function findProjectsFromList(
+  projects: ProjectSchema[],
+  options: { projectKey: string | undefined; workspaceKey: string | undefined }
+) {
+  const project: ProjectSchema[] | undefined = projects.filter(
+    (project: ProjectSchema) => {
+      return (
+        project.key === options.projectKey &&
+        (options.workspaceKey
+          ? project.company?.slug === options.workspaceKey
+          : true)
+      );
+    }
+  );
+  if (!project || project.length === 0) {
+    console.error('No project found with this key!');
+    process.exit(1);
+  }
+  if (project.length > 1) {
+    let message = `Multiple projects found with this project key ${options.projectKey}`;
+    if (options.workspaceKey) {
+      message += ` and workspace key ${options.workspaceKey}! please contact theneo support at `;
+    } else {
+      message += '. Please specify workspace key using --workspace flag';
+    }
+
+    console.error(message);
+    process.exit(1);
+  }
+  const projectElement = project[0];
+  if (!projectElement) {
+    console.error('No project found with this key!');
+    process.exit(1);
+  }
+  return projectElement;
+}
+
 export async function getProject(
   theneo: Theneo,
   options: {
-    key: string | undefined;
+    projectKey: string | undefined;
+    workspaceKey: string | undefined;
   }
 ): Promise<ProjectSchema> {
   const projectsList = await theneo.listProjects();
@@ -19,7 +57,7 @@ export async function getProject(
     );
     process.exit(1);
   }
-  if (!options.key) {
+  if (!options.projectKey) {
     return select({
       message: 'Select project:',
       choices: projects.map((project: ProjectSchema, index: number) => {
@@ -31,18 +69,11 @@ export async function getProject(
       }),
     });
   } else {
-    const project: ProjectSchema | undefined = projects.find(
-      (project: ProjectSchema) => project.key === options.key
-    );
-    if (!project) {
-      console.error('No project found with this key!');
-      process.exit(1);
-    }
-    return project;
+    return findProjectsFromList(projects, options);
   }
 }
 
-export async function getShouldPublish(
+export function getShouldPublish(
   options: { publish: boolean },
   isInteractive: boolean
 ): Promise<boolean> {
@@ -52,5 +83,5 @@ export async function getShouldPublish(
       default: true,
     });
   }
-  return options.publish;
+  return Promise.resolve(options.publish);
 }

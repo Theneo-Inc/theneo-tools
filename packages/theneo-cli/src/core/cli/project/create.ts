@@ -28,7 +28,7 @@ export async function getDocumentationFileLocation(
   return absoluteFilePath;
 }
 
-export async function getShouldBePublic(
+export function getShouldBePublic(
   options: CreateCommandOptions,
   isInteractive: boolean
 ): Promise<boolean> {
@@ -38,15 +38,15 @@ export async function getShouldBePublic(
       default: false,
     });
   }
-  return options.publish;
+  return Promise.resolve(options.publish);
 }
 
-export async function getDescriptionGenerationType(
+export function getDescriptionGenerationType(
   options: CreateCommandOptions,
   isInteractive: boolean
 ): Promise<DescriptionGenerationType> {
   if (options.empty) {
-    return DescriptionGenerationType.NO_GENERATION;
+    return Promise.resolve(DescriptionGenerationType.NO_GENERATION);
   }
   if (isInteractive) {
     return select<DescriptionGenerationType>({
@@ -67,5 +67,5 @@ export async function getDescriptionGenerationType(
       ],
     });
   }
-  return options.generateDescription;
+  return Promise.resolve(options.generateDescription);
 }

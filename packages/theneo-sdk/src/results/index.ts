@@ -83,9 +83,16 @@ export function Ok<T, E extends Error>(value: T): Result<T, E> {
 }
 
 export function Err<E extends Error, T = never>(error?: E): Result<T, E>;
-export function Err<E extends Error, T = never>(error: E): Result<T, E> {
+export function Err<E extends Error, T = never>(error?: string): Result<T, E>;
+export function Err<E extends Error, T = never>(
+  error: E | string
+): Result<T, E> {
+  if (typeof error === 'string') {
+    error = new Error(error) as E;
+  }
   return new ErrResult(error || new Error());
 }
+
 export type Result<T, E extends Error = Error> =
   | OkResult<T, E>
   | ErrResult<T, E>;

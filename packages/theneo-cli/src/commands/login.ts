@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { setApiKeyAndSave } from '../context/auth';
 import { password, confirm } from '@inquirer/prompts';
 import { configManager } from '../config-manager';
+import { tryCatch } from '../utils/exception';
 
 async function getApiKeyToken(options: { token: string }) {
   let token = options.token;
@@ -27,25 +28,29 @@ export function initLogin(program: Command): Command {
       '-profile <profile>',
       'Use a specific profile from your config file.'
     )
-    .action(async (options: { token: string; profile: string | undefined }) => {
-      if (options.profile) {
-        const profileRes = configManager.getProfile(options.profile);
-        if (profileRes.ok) {
-          const overwrite = await confirm({
-            message: `profile -${options.profile} - already exists. Do you want to overwrite it?`,
-          });
-          if (!overwrite) {
-            return;
+    .action(
+      tryCatch(
+        async (options: { token: string; profile: string | undefined }) => {
+          if (options.profile) {
+            const profileRes = configManager.getProfile(options.profile);
+            if (profileRes.ok) {
+              const overwrite = await confirm({
+                message: `profile -${options.profile} - already exists. Do you want to overwrite it?`,
+              });
+              if (!overwrite) {
+                return;
+              }
+            }
+          }
+
+          const token = await getApiKeyToken(options);
+          const result = setApiKeyAndSave(token, options.profile);
+
+          // Save the token to the config file
+          if (result.err) {
+            console.log(`Token saving failed. \n ${result.error.message}`);
           }
         }
-      }
-
-      const token = await getApiKeyToken(options);
-      const result = setApiKeyAndSave(token, options.profile);
-
-      // Save the token to the config file
-      if (result.err) {
-        console.log(`Token saving failed. \n ${result.error.message}`);
-      }
-    });
+      )
+    );
 }

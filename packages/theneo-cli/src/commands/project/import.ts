@@ -13,6 +13,7 @@ import {
   ImportCommandOptions,
   ImportOptionsEnum,
 } from '../../core/cli/project';
+import { tryCatch } from '../../utils/exception';
 
 export function initProjectImportCommand() {
   return new Command('import')
@@ -35,63 +36,69 @@ export function initProjectImportCommand() {
     .addOption(getPostmanCollectionsOption())
     .addOption(createImportTypeOption())
     .option('--publish', 'Automatically publish the project', false)
+    .option('--workspace <workspace-key>', 'Workspace key')
     .option(
       '--profile <string>',
       'Use a specific profile from your config file.'
     )
-    .action(async (options: ImportCommandOptions) => {
-      const isInteractive = options.key === undefined;
-      const profile = getProfile(options.profile);
-      const theneo = createTheneo(profile);
-      const project = await getProject(theneo, options);
-
-      if (
-        !options.file &&
-        !options.link &&
-        (!options.postmanApiKey ||
-          !options.postmanCollection ||
-          options.postmanCollection.length === 0)
-      ) {
-        const inputSource = await getImportSource([
-          ImportOptionsEnum.FILE,
-          ImportOptionsEnum.LINK,
-          ImportOptionsEnum.POSTMAN,
-        ]);
-        options = { ...options, ...inputSource };
-      }
-
-      const shouldPublish = await getShouldPublish(options, isInteractive);
-
-      const spinner = createSpinner('Updating documentation').start();
-      const res = await theneo.importProjectDocument({
-        projectId: project.id,
-        publish: shouldPublish,
-        data: {
-          file: options.file,
-          link: options.link ? new URL(options.link) : undefined,
-          postman:
-            options.postmanApiKey && options.postmanCollection
-              ? {
-                  apiKey: options.postmanApiKey,
-                  collectionIds: options.postmanCollection,
-                }
-              : undefined,
-        },
-        importOption: options.importType,
-      });
-      if (res.err) {
-        spinner.error({ text: res.error.message });
-        process.exit(1);
-      }
-      if (res.value.publishData?.publishedPageUrl) {
-        spinner.success({
-          text: `Project published successfully! Published Page: ${res.value.publishData.publishedPageUrl}`,
+    .action(
+      tryCatch(async (options: ImportCommandOptions) => {
+        const isInteractive = options.key === undefined;
+        const profile = getProfile(options.profile);
+        const theneo = createTheneo(profile);
+        const project = await getProject(theneo, {
+          projectKey: options.key,
+          workspaceKey: options.workspace,
         });
-      } else {
-        const editorLink = `${profile.appUrl}/editor/${project.id}`;
-        spinner.success({
-          text: `Project created, you can make changes via editor before publishing. Editor link: ${editorLink}`,
+
+        if (
+          !options.file &&
+          !options.link &&
+          (!options.postmanApiKey ||
+            !options.postmanCollection ||
+            options.postmanCollection.length === 0)
+        ) {
+          const inputSource = await getImportSource([
+            ImportOptionsEnum.FILE,
+            ImportOptionsEnum.LINK,
+            ImportOptionsEnum.POSTMAN,
+          ]);
+          options = { ...options, ...inputSource };
+        }
+
+        const shouldPublish = await getShouldPublish(options, isInteractive);
+
+        const spinner = createSpinner('Updating documentation').start();
+        const res = await theneo.importProjectDocument({
+          projectId: project.id,
+          publish: shouldPublish,
+          data: {
+            file: options.file,
+            link: options.link ? new URL(options.link) : undefined,
+            postman:
+              options.postmanApiKey && options.postmanCollection
+                ? {
+                    apiKey: options.postmanApiKey,
+                    collectionIds: options.postmanCollection,
+                  }
+                : undefined,
+          },
+          importOption: options.importType,
         });
-      }
-    });
+        if (res.err) {
+          spinner.error({ text: res.error.message });
+          process.exit(1);
+        }
+        if (res.value.publishData?.publishedPageUrl) {
+          spinner.success({
+            text: `Project published successfully! Published Page: ${res.value.publishData.publishedPageUrl}`,
+          });
+        } else {
+          const editorLink = `${profile.appUrl}/editor/${project.id}`;
+          spinner.success({
+            text: `Project created, you can make changes via editor before publishing. Editor link: ${editorLink}`,
+          });
+        }
+      })
+    );
 }

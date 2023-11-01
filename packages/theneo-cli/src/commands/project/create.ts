@@ -26,17 +26,18 @@ import {
 import { getWorkspace } from '../../core/cli/workspace';
 import { Profile } from '../../config';
 import { getShouldPublish } from '../../core/cli/project/project';
+import { tryCatch } from '../../utils/exception';
 
-async function getProjectName(options: CreateCommandOptions) {
+function getProjectName(options: CreateCommandOptions) {
   return (
     options.name ??
-    (await input({
+    input({
       message: 'Project Name:',
       validate: value => {
         if (value.length === 0) return 'Name is required!';
         return true;
       },
-    }))
+    })
   );
 }
 
@@ -88,86 +89,88 @@ export function initProjectCreateCommand() {
       '--profile <string>',
       'Use a specific profile from your config file.'
     )
-    .action(async (options: CreateCommandOptions) => {
-      validateOptions(options);
-      const isInteractive = options.name === undefined;
+    .action(
+      tryCatch(async (options: CreateCommandOptions) => {
+        validateOptions(options);
+        const isInteractive = options.name === undefined;
 
-      const profile = getProfile(options.profile);
-      const theneo = createTheneo(profile);
-      const spinner = createSpinner();
-      const workspacesPromise = theneo.listWorkspaces(UserRole.EDITOR);
-      const projectName = await getProjectName(options);
+        const profile = getProfile(options.profile);
+        const theneo = createTheneo(profile);
+        const spinner = createSpinner();
+        const workspacesPromise = theneo.listWorkspaces(UserRole.EDITOR);
+        const projectName = await getProjectName(options);
 
-      spinner.start();
-      const workspacesResult = await workspacesPromise;
-      if (workspacesResult.err) {
-        spinner.error({ text: workspacesResult.error.message });
-        process.exit(1);
-      }
-      spinner.reset();
-      const workspace = await getWorkspace(
-        workspacesResult.value,
-        options.workspace,
-        isInteractive
-      );
+        spinner.start();
+        const workspacesResult = await workspacesPromise;
+        if (workspacesResult.err) {
+          spinner.error({ text: workspacesResult.error.message });
+          process.exit(1);
+        }
+        spinner.reset();
+        const workspace = await getWorkspace(
+          workspacesResult.value,
+          options.workspace,
+          isInteractive
+        );
 
-      if (
-        !options.file &&
-        !options.link &&
-        !options.empty &&
-        !options.sample &&
-        (!options.postmanApiKey ||
-          !options.postmanCollection ||
-          options.postmanCollection.length === 0)
-      ) {
-        const inputSource = await getImportSource([
-          ImportOptionsEnum.FILE,
-          ImportOptionsEnum.LINK,
-          ImportOptionsEnum.POSTMAN,
-          ImportOptionsEnum.EMPTY,
-        ]);
-        options = { ...options, ...inputSource };
-      }
+        if (
+          !options.file &&
+          !options.link &&
+          !options.empty &&
+          !options.sample &&
+          (!options.postmanApiKey ||
+            !options.postmanCollection ||
+            options.postmanCollection.length === 0)
+        ) {
+          const inputSource = await getImportSource([
+            ImportOptionsEnum.FILE,
+            ImportOptionsEnum.LINK,
+            ImportOptionsEnum.POSTMAN,
+            ImportOptionsEnum.EMPTY,
+          ]);
+          options = { ...options, ...inputSource };
+        }
 
-      const isPublic = await getShouldBePublic(options, isInteractive);
-      const descriptionGeneration = await getDescriptionGenerationType(
-        options,
-        isInteractive
-      );
-      const shouldPublish = await getShouldPublish(options, isInteractive);
-      spinner.start({ text: 'creating project' });
-      const createOptions: CreateProjectOptions = {
-        name: projectName,
-        workspace: {
-          id: workspace.workspaceId,
-        },
-        isPublic: isPublic,
-        publish: shouldPublish,
-        descriptionGenerationType: descriptionGeneration,
-        sampleData: options.sample,
-        // TODO handle empty flag properly
-        data: {
-          file: options.file,
-          link: options.link ? new URL(options.link) : undefined,
-          postman:
-            options.postmanApiKey && options.postmanCollection
-              ? {
-                  apiKey: options.postmanApiKey,
-                  collectionIds: options.postmanCollection,
-                }
-              : undefined,
-        },
-      };
-      if (
-        createOptions.descriptionGenerationType !==
-        DescriptionGenerationType.NO_GENERATION
-      ) {
-        spinner.start({ text: 'Generating descriptions' });
-        createOptions.progressUpdateHandler =
-          generationProgressHandler(spinner);
-      }
-      await createProject(spinner, createOptions, theneo, profile);
-    });
+        const isPublic = await getShouldBePublic(options, isInteractive);
+        const descriptionGeneration = await getDescriptionGenerationType(
+          options,
+          isInteractive
+        );
+        const shouldPublish = await getShouldPublish(options, isInteractive);
+        spinner.start({ text: 'creating project' });
+        const createOptions: CreateProjectOptions = {
+          name: projectName,
+          workspace: {
+            id: workspace.workspaceId,
+          },
+          isPublic: isPublic,
+          publish: shouldPublish,
+          descriptionGenerationType: descriptionGeneration,
+          sampleData: options.sample,
+          // TODO handle empty flag properly
+          data: {
+            file: options.file,
+            link: options.link ? new URL(options.link) : undefined,
+            postman:
+              options.postmanApiKey && options.postmanCollection
+                ? {
+                    apiKey: options.postmanApiKey,
+                    collectionIds: options.postmanCollection,
+                  }
+                : undefined,
+          },
+        };
+        if (
+          createOptions.descriptionGenerationType !==
+          DescriptionGenerationType.NO_GENERATION
+        ) {
+          spinner.start({ text: 'Generating descriptions' });
+          createOptions.progressUpdateHandler =
+            generationProgressHandler(spinner);
+        }
+        await createProject(spinner, createOptions, theneo, profile);
+      })
+    );
 }
 
 function validateOptions(options: CreateCommandOptions) {

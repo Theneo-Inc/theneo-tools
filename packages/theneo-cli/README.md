@@ -1,7 +1,5 @@
 # Theneo CLI
 
-## Getting started
-
 ## Install
 
 ```bash

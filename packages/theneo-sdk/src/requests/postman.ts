@@ -32,7 +32,7 @@ export async function getPostmanCollections(
   ).map(collections => collections.collections);
 }
 
-export async function getPostmanCollectionById(
+export function getPostmanCollectionById(
   apiKey: string,
   id: string
 ): Promise<Result<PostmanCollection>> {

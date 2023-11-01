@@ -4,7 +4,7 @@ import { Err, ImportProjectOptions, ImportResponse, Result } from 'theneo';
 import { ImportProjectInput } from 'theneo/models';
 import { ApiHeaders } from '../../requests/base';
 
-export async function importProject(
+export function importProject(
   baseUrl: string,
   headers: ApiHeaders,
   options: ImportProjectOptions
@@ -14,7 +14,7 @@ export async function importProject(
   };
   if (options.data.file !== undefined) {
     if (!fs.existsSync(options.data.file)) {
-      return Err(new Error('File does not exist'));
+      return Promise.resolve(Err(new Error('File does not exist')));
     }
     importInput.file = fs.readFileSync(options.data.file);
   }

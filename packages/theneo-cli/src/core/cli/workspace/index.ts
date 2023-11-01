@@ -1,7 +1,7 @@
 import { Workspace } from '@theneo/sdk';
 import { select } from '@inquirer/prompts';
 
-export async function getWorkspace(
+export function getWorkspace(
   workspaces: Workspace[],
   workspace: string | undefined,
   isInteractive: boolean
@@ -13,7 +13,7 @@ export async function getWorkspace(
   if (workspace) {
     const workspaceFound = workspaces.find(ws => ws.slug === workspace);
     if (workspaceFound) {
-      return workspaceFound;
+      return Promise.resolve(workspaceFound);
     }
     console.error(`Workspace ${workspace} not found.`);
     process.exit(1);
@@ -22,12 +22,12 @@ export async function getWorkspace(
   if (workspaces.length === 1) {
     const workspace = workspaces[0]!;
     console.info(`Using default workspace: ${workspace.name}`);
-    return workspace;
+    return Promise.resolve(workspace);
   }
   if (!isInteractive) {
     const defaultWorkspace = workspaces.find(ws => ws.isDefault);
     if (defaultWorkspace) {
-      return defaultWorkspace;
+      return Promise.resolve(defaultWorkspace);
     }
     const firstWorkspace = workspaces[0];
     if (firstWorkspace === undefined) {
@@ -37,7 +37,7 @@ export async function getWorkspace(
     console.warn(
       `no default workspace found, using first workspace: ${firstWorkspace.name}`
     );
-    return firstWorkspace;
+    return Promise.resolve(firstWorkspace);
   }
   return select({
     message: 'Pick a workspace.',

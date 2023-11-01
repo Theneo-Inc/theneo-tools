@@ -176,8 +176,7 @@ The main class for interacting with the Theneo API.
 - `deleteProjectById(projectId: string): Promise<Result<void>>`: Deletes a project by ID.
 - `publishProject(projectId: string): Promise<Result<PublishProjectResponse>>`: Publishes API documentation for a
   project.
-- `previewProject(projectId: string): Promise<Result<PublishProjectResponse>>`: Previews API documentation for a
-  project.
+- `getPreviewProjectLink(projectId: string): string` returns preview link for a project. 
 - `importProjectDocument(options: ImportProjectOptions): Promise<Result<ImportResponse>>`: Imports API documentation to
   an existing project.
 - `createProject(options: CreateProjectOptions): Promise<Result<CreateProjectResponse>>`: Creates a new project on the

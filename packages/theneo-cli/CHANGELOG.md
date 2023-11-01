@@ -1,5 +1,16 @@
 # @theneo/cli
 
+## 0.5.0
+
+### Minor Changes
+
+- 11bfe22: update preview, linters and added try catches for command functions
+
+### Patch Changes
+
+- Updated dependencies [11bfe22]
+  - @theneo/sdk@0.4.0
+
 ## 0.4.0
 
 ### Minor Changes

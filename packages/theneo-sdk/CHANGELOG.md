@@ -1,5 +1,11 @@
 # @theneo/sdk
 
+## 0.4.0
+
+### Minor Changes
+
+- 11bfe22: update preview, linters and added try catches for command functions
+
 ## 0.3.1
 
 ### Patch Changes

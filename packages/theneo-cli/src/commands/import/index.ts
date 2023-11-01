@@ -3,19 +3,15 @@ import { getProfile } from '../../context/auth';
 import { createTheneo } from '../../core/theneo';
 import { getProject } from '../../core/cli/project/project';
 
-export function initExportCommand(program: Command): Command {
+export function initImportCommand(program: Command): Command {
   return program
-    .command('export')
+    .command('import')
     .description("Export theneo's project in your local environment")
     .option('--key <project-key>', 'project key')
+    .option('--dir <directory>', 'Generated theneo project directory')
     .option(
       '--profile <string>',
       'Use a specific profile from your config file.'
-    )
-    .option(
-      '--dir <directory>',
-      'directory location where the project will be exported',
-      'docs'
     )
     .action(
       async (options: {
@@ -27,15 +23,9 @@ export function initExportCommand(program: Command): Command {
         const theneo = createTheneo(profile);
         const project = await getProject(theneo, options);
 
-        const res = await theneo.exportProject({
+        await theneo.exportProject({
           projectId: project.id,
-          dir: options.dir,
         });
-
-        if (res.err) {
-          console.error(res.error.message);
-          process.exit(1);
-        }
       }
     );
 }

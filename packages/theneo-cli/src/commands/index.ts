@@ -5,6 +5,7 @@ import { initProjectCommand } from './project';
 import { CLI_VERSION } from '../utils/version';
 import { initWorkspaceCommand } from './workspace';
 import { initExportCommand } from './export';
+import { initCreateCommand } from './create';
 
 export function createProgram(): Command {
   const program = new Command();
@@ -22,5 +23,6 @@ export function initializeProgram() {
   initProjectCommand(program);
   initWorkspaceCommand(program);
   initExportCommand(program);
+  initCreateCommand(program);
   return program;
 }

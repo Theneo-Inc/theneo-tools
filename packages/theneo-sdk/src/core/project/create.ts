@@ -1,4 +1,8 @@
-import { callCreateProjectApi, callUserWorkspacesApi } from 'theneo/requests';
+import {
+  callCreateProjectApi,
+  callCreateProjectWithFilesApi,
+  callUserWorkspacesApi,
+} from 'theneo/requests';
 
 import * as fs from 'fs';
 import {
@@ -10,8 +14,10 @@ import {
   UserRole,
   WorkspaceOption,
 } from 'theneo';
-import { CreateProjectInput } from 'theneo/models';
+import { CreateProjectInput, FileInfo } from 'theneo/models';
 import { ApiHeaders } from 'theneo/requests/base';
+import path from 'path';
+import { convertFilePath } from 'theneo/utils/file';
 
 async function getWorkspaceId(
   baseUrl: string,
@@ -40,6 +46,35 @@ async function getWorkspaceId(
     ?.workspaceId;
 }
 
+function getAllFilesFromDirectory(
+  directory: string,
+  filesList: FileInfo[] = [],
+  metadata: Record<string, string> = {}
+): { filesList: FileInfo[]; metadata: Record<string, string> } {
+  const files = fs.readdirSync(directory);
+
+  for (const file of files) {
+    const filePath = path.join(directory, file);
+    const stat = fs.statSync(filePath);
+
+    if (stat.isDirectory()) {
+      getAllFilesFromDirectory(filePath, filesList, metadata);
+    } else {
+      convertFilePath(filePath);
+      const convertedFilename = convertFilePath(filePath);
+      filesList.push({
+        fileName: file,
+        directory,
+        convertedFilename: convertedFilename,
+        filePath: filePath,
+      });
+      metadata[convertedFilename] = filePath;
+    }
+  }
+
+  return { filesList, metadata };
+}
+
 export async function createProject(
   baseUrl: string,
   headers: ApiHeaders,
@@ -55,6 +90,20 @@ export async function createProject(
       options.descriptionGenerationType ??
       DescriptionGenerationType.NO_GENERATION,
   };
+  if (options.data?.directory !== undefined) {
+    const allFilesFromDirectory = getAllFilesFromDirectory(
+      options.data.directory
+    );
+    if (allFilesFromDirectory.filesList.length === 0) {
+      return Err(`${options.data.directory} - Directory is empty`);
+    }
+    createInput.filesData = {
+      files: allFilesFromDirectory.filesList,
+      metadata: allFilesFromDirectory.metadata,
+    };
+
+    return callCreateProjectWithFilesApi(baseUrl, headers, createInput);
+  }
 
   // TODO validate
   if (options?.sampleData !== undefined) {
@@ -66,6 +115,7 @@ export async function createProject(
     }
     createInput.file = fs.readFileSync(options.data.file);
   }
+
   if (options.data?.link !== undefined) {
     createInput.link = options.data.link.toString();
   }

@@ -14,6 +14,13 @@ export interface ImportProjectInput {
   publish: boolean;
 }
 
+export type FileInfo = {
+  fileName: string;
+  directory: string;
+  filePath: string;
+  convertedFilename: string;
+};
+
 export interface CreateProjectInput {
   name: string;
   isPublic: boolean;
@@ -23,6 +30,10 @@ export interface CreateProjectInput {
   sampleFile?: boolean;
   otherDocumentType?: CreateOtherTypeOfDocOptions;
   file?: Buffer;
+  filesData?: {
+    files: FileInfo[];
+    metadata: Record<string, string>;
+  };
   link?: string;
   text?: string;
   postmanKey?: string;

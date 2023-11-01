@@ -1,5 +1,4 @@
 import { PublishProjectResponse } from 'theneo/schema/publish';
-import * as fs from 'fs';
 
 export interface CompanySchema {
   id: string;
@@ -54,6 +53,7 @@ export enum CreatedProjectStatusEnum {
 export interface CreateProjectResponse {
   projectId: string;
   publishData?: PublishProjectResponse;
+  projectData?: any;
 }
 
 export interface ProjectCreationStatusResponse {
@@ -129,7 +129,9 @@ export interface ApiDataInputOption {
   /**
    * Path to a file containing the API Documentation to create the project from.
    */
-  file?: fs.PathLike;
+  file?: string;
+
+  directory?: string;
 
   /**
    * URL to a file containing the API Documentation to create the project from.
@@ -145,6 +147,8 @@ export interface ApiDataInputOption {
    * Postman collection to create the project from.
    */
   postman?: PostmanImportOptions;
+
+  exportDirectory?: string;
 }
 
 export interface CreateProjectOptions {

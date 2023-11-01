@@ -27,15 +27,9 @@ export function initExportCommand(program: Command): Command {
         const theneo = createTheneo(profile);
         const project = await getProject(theneo, options);
 
-        const res = await theneo.exportProject({
+        await theneo.exportProject({
           projectId: project.id,
-          dir: options.dir,
         });
-
-        if (res.err) {
-          console.error(res.error.message);
-          process.exit(1);
-        }
       }
     );
 }

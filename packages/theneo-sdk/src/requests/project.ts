@@ -13,6 +13,8 @@ import {
   postRequest,
 } from './base/requests';
 import { CreateProjectInput, ImportProjectInput } from 'theneo/models';
+import path from 'path';
+import * as fs from 'fs';
 
 export function callGetProjectListApi(
   baseUrl: string,
@@ -139,4 +141,36 @@ export function callDescriptionGenerationStatusApi(
 ): Promise<Result<ProjectCreationStatusResponse, Error>> {
   const url = new URL(`${baseUrl}/api/project/creation-status/${projectId}`);
   return getRequest<ProjectCreationStatusResponse>({ url, headers });
+}
+
+export function callCreateProjectWithFilesApi(
+  baseUrl: string,
+  headers: ApiHeaders,
+  options: CreateProjectInput
+) {
+  const url = new URL(`${baseUrl}/api/project/create`);
+  const bodyFormData = new FormData();
+  bodyFormData.append('projectName', options.name);
+  bodyFormData.append('isPublic', JSON.stringify(options.isPublic));
+  bodyFormData.append('publish', JSON.stringify(options.publish));
+  bodyFormData.append(
+    'descriptionGenerationType',
+    options.descriptionGenerationType
+  );
+  bodyFormData.append('metadata', JSON.stringify(options.filesData?.metadata));
+  options.filesData?.files.map(fileInfo => {
+    console.log(fileInfo.filePath);
+    bodyFormData.append('files', fs.createReadStream(fileInfo.filePath), {
+      filepath: fileInfo.convertedFilename,
+    });
+  });
+
+  return postRequest<FormData, CreateProjectResponse>({
+    url,
+    headers: {
+      ...headers,
+      ...bodyFormData.getHeaders(),
+    },
+    requestBody: bodyFormData,
+  });
 }

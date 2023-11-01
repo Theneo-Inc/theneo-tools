@@ -17,6 +17,8 @@ export interface CreateCommandOptions {
   public: boolean;
   generateDescription: DescriptionGenerationType;
   profile: string | undefined;
+  exportDir: string | undefined;
+  importDir: string | undefined;
 }
 
 export interface ImportCommandOptions {

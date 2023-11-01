@@ -147,7 +147,6 @@ export class Theneo {
     if (result.err) {
       return result;
     }
-
     if (!input.noGeneration) {
       const dir = input.dir || './docs';
       createFiles(dir, result.unwrap().sectionContents);

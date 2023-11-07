@@ -1,5 +1,11 @@
 # @theneo/cli
 
+## 0.5.1
+
+### Patch Changes
+
+- 70703ef: Remove final block from try catch
+
 ## 0.5.0
 
 ### Minor Changes

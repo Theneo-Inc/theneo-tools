@@ -16,8 +16,6 @@ export function tryCatch<T>(
         console.error('unknown error:', e);
       }
       process.exit(1);
-    } finally {
-      console.log('super');
     }
   };
 }

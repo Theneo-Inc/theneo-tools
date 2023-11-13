@@ -167,7 +167,6 @@ export class Theneo {
     const headers = this.getHeaders();
 
     const result = await createProject(this.baseApiUrl, headers, options);
-    console.log(JSON.stringify(result, null, 2));
     if (
       result.ok &&
       (options.descriptionGenerationType === DescriptionGenerationType.FILl ||

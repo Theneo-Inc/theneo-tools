@@ -5,9 +5,12 @@ import { getProject } from '../../core/cli/project/project';
 
 export function initExportCommand(program: Command): Command {
   return program
-    .command('export')
-    .description("Export theneo's project in your local environment")
+    .command('export', { hidden: true })
     .option('--key <project-key>', 'project key')
+    .option(
+      '--workspace <workspace>',
+      'Enter workspace slug where the project should be created in, if not present uses default workspace'
+    )
     .option(
       '--profile <string>',
       'Use a specific profile from your config file.'
@@ -20,12 +23,16 @@ export function initExportCommand(program: Command): Command {
     .action(
       async (options: {
         key: string | undefined;
+        workspace: string | undefined;
         profile: string | undefined;
         dir: string;
       }) => {
         const profile = getProfile(options.profile);
         const theneo = createTheneo(profile);
-        const project = await getProject(theneo, options);
+        const project = await getProject(theneo, {
+          projectKey: options.key,
+          workspaceKey: options.workspace,
+        });
 
         const res = await theneo.exportProject({
           projectId: project.id,

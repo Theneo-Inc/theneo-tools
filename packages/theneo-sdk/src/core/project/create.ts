@@ -48,9 +48,8 @@ async function getWorkspaceId(
 
 function getAllFilesFromDirectory(
   directory: string,
-  filesList: FileInfo[] = [],
-  metadata: Record<string, string> = {}
-): { filesList: FileInfo[]; metadata: Record<string, string> } {
+  filesList: FileInfo[] = []
+): FileInfo[] {
   const files = fs.readdirSync(directory);
 
   for (const file of files) {
@@ -58,7 +57,7 @@ function getAllFilesFromDirectory(
     const stat = fs.statSync(filePath);
 
     if (stat.isDirectory()) {
-      getAllFilesFromDirectory(filePath, filesList, metadata);
+      getAllFilesFromDirectory(filePath, filesList);
     } else {
       convertFilePath(filePath);
       const convertedFilename = convertFilePath(filePath);
@@ -68,11 +67,10 @@ function getAllFilesFromDirectory(
         convertedFilename: convertedFilename,
         filePath: filePath,
       });
-      metadata[convertedFilename] = filePath;
     }
   }
 
-  return { filesList, metadata };
+  return filesList;
 }
 
 export async function createProject(
@@ -91,16 +89,11 @@ export async function createProject(
       DescriptionGenerationType.NO_GENERATION,
   };
   if (options.data?.directory !== undefined) {
-    const allFilesFromDirectory = getAllFilesFromDirectory(
-      options.data.directory
-    );
-    if (allFilesFromDirectory.filesList.length === 0) {
+    const filesInfo = getAllFilesFromDirectory(options.data.directory);
+    if (filesInfo.length === 0) {
       return Err(`${options.data.directory} - Directory is empty`);
     }
-    createInput.filesData = {
-      files: allFilesFromDirectory.filesList,
-      metadata: allFilesFromDirectory.metadata,
-    };
+    createInput.files = filesInfo;
 
     return callCreateProjectWithFilesApi(baseUrl, headers, createInput);
   }

@@ -13,7 +13,6 @@ import {
   postRequest,
 } from './base/requests';
 import { CreateProjectInput, ImportProjectInput } from 'theneo/models';
-import path from 'path';
 import * as fs from 'fs';
 
 export function callGetProjectListApi(
@@ -157,9 +156,7 @@ export function callCreateProjectWithFilesApi(
     'descriptionGenerationType',
     options.descriptionGenerationType
   );
-  bodyFormData.append('metadata', JSON.stringify(options.filesData?.metadata));
-  options.filesData?.files.map(fileInfo => {
-    console.log(fileInfo.filePath);
+  options.files?.map(fileInfo => {
     bodyFormData.append('files', fs.createReadStream(fileInfo.filePath), {
       filepath: fileInfo.convertedFilename,
     });

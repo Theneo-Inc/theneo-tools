@@ -30,10 +30,7 @@ export interface CreateProjectInput {
   sampleFile?: boolean;
   otherDocumentType?: CreateOtherTypeOfDocOptions;
   file?: Buffer;
-  filesData?: {
-    files: FileInfo[];
-    metadata: Record<string, string>;
-  };
+  files?: FileInfo[];
   link?: string;
   text?: string;
   postmanKey?: string;

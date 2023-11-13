@@ -84,17 +84,6 @@ export function initProjectCreateCommand() {
       'Make published documentation to be publicly accessible. Private by default',
       false
     )
-    .option(
-      '--export-dir <directory>',
-      'Directory location where the files will be exported',
-      false
-    )
-    .option(
-      '--source-dir <directory>',
-      'Directory location where the files will be imported from',
-      false
-    )
-
     .addOption(getDescriptionGenerationOption())
     .option(
       '--profile <string>',

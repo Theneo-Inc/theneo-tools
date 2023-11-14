@@ -1,5 +1,11 @@
 # @theneo/sdk
 
+## 0.5.0
+
+### Minor Changes
+
+- 262e9ac: Added experimental commands for creating and exporting theneo documentation with markdown files
+
 ## 0.4.0
 
 ### Minor Changes

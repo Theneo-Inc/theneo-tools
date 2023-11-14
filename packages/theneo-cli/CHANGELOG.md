@@ -1,5 +1,16 @@
 # @theneo/cli
 
+## 0.6.0
+
+### Minor Changes
+
+- 262e9ac: Added experimental commands for creating and exporting theneo documentation with markdown files
+
+### Patch Changes
+
+- Updated dependencies [262e9ac]
+  - @theneo/sdk@0.5.0
+
 ## 0.5.1
 
 ### Patch Changes

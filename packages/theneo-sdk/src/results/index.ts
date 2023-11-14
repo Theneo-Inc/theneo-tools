@@ -51,6 +51,7 @@ abstract class ResultImpl<T, E extends Error> {
 class OkResult<T, E extends Error> extends ResultImpl<T, E> {
   readonly ok = true;
   readonly err = false;
+
   constructor(readonly value: T) {
     super();
   }
@@ -66,6 +67,7 @@ class OkResult<T, E extends Error> extends ResultImpl<T, E> {
 class ErrResult<T, E extends Error> extends ResultImpl<T, E> {
   readonly ok = false;
   readonly err = true;
+
   constructor(readonly error: E) {
     super();
   }

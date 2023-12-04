@@ -1,5 +1,13 @@
 # @theneo/cli
 
+## 0.6.1
+
+### Patch Changes
+
+- eb22d93: Updated create project from local directory
+- Updated dependencies [eb22d93]
+  - @theneo/sdk@0.5.1
+
 ## 0.6.0
 
 ### Minor Changes

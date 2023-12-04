@@ -1,5 +1,11 @@
 # @theneo/sdk
 
+## 0.5.1
+
+### Patch Changes
+
+- eb22d93: Updated create project from local directory
+
 ## 0.5.0
 
 ### Minor Changes

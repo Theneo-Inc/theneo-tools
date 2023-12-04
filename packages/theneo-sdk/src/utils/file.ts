@@ -15,7 +15,7 @@ export function createFiles(
   }
 }
 
-export function convertFilePath(filePath: string, separator = '__'): string {
+export function convertFilePath(filePath: string, separator: string): string {
   // Convert the path to lowercase
   filePath = filePath.toLowerCase();
 

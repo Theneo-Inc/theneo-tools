@@ -12,7 +12,11 @@ import {
   getRequest,
   postRequest,
 } from './base/requests';
-import { CreateProjectInput, ImportProjectInput } from 'theneo/models';
+import {
+  CreateProjectFromDirectoryInput,
+  CreateProjectInput,
+  ImportProjectInput,
+} from 'theneo/models';
 import * as fs from 'fs';
 
 export function callGetProjectListApi(
@@ -142,10 +146,10 @@ export function callDescriptionGenerationStatusApi(
   return getRequest<ProjectCreationStatusResponse>({ url, headers });
 }
 
-export function callCreateProjectWithFilesApi(
+export function callCreateProjectFromDirectoryApi(
   baseUrl: string,
   headers: ApiHeaders,
-  options: CreateProjectInput
+  options: CreateProjectFromDirectoryInput
 ) {
   const url = new URL(`${baseUrl}/api/project/create`);
   const bodyFormData = new FormData();
@@ -156,7 +160,10 @@ export function callCreateProjectWithFilesApi(
     'descriptionGenerationType',
     options.descriptionGenerationType
   );
-  options.files?.map(fileInfo => {
+  bodyFormData.append('workspaceId', options.workspaceId ?? '');
+  bodyFormData.append('filePathSeparator', options.filePathSeparator);
+
+  options.files.map(fileInfo => {
     bodyFormData.append('files', fs.createReadStream(fileInfo.filePath), {
       filepath: fileInfo.convertedFilename,
     });

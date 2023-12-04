@@ -1,6 +1,6 @@
 import {
   callCreateProjectApi,
-  callCreateProjectWithFilesApi,
+  callCreateProjectFromDirectoryApi,
   callUserWorkspacesApi,
 } from 'theneo/requests';
 
@@ -14,7 +14,11 @@ import {
   UserRole,
   WorkspaceOption,
 } from 'theneo';
-import { CreateProjectInput, FileInfo } from 'theneo/models';
+import {
+  CreateProjectFromDirectoryInput,
+  CreateProjectInput,
+  FileInfo,
+} from 'theneo/models';
 import { ApiHeaders } from 'theneo/requests/base';
 import path from 'path';
 import { convertFilePath } from 'theneo/utils/file';
@@ -46,8 +50,11 @@ async function getWorkspaceId(
     ?.workspaceId;
 }
 
+const FILE_SEPARATOR = '__';
+
 function getAllFilesFromDirectory(
   directory: string,
+  originalDirectory: string = directory,
   filesList: FileInfo[] = []
 ): FileInfo[] {
   const files = fs.readdirSync(directory);
@@ -55,12 +62,14 @@ function getAllFilesFromDirectory(
   for (const file of files) {
     const filePath = path.join(directory, file);
     const stat = fs.statSync(filePath);
-
+    const relativeFilePath = path.relative(originalDirectory, filePath);
     if (stat.isDirectory()) {
-      getAllFilesFromDirectory(filePath, filesList);
+      getAllFilesFromDirectory(filePath, originalDirectory, filesList);
     } else {
-      convertFilePath(filePath);
-      const convertedFilename = convertFilePath(filePath);
+      const convertedFilename = convertFilePath(
+        relativeFilePath,
+        FILE_SEPARATOR
+      );
       filesList.push({
         fileName: file,
         directory,
@@ -73,12 +82,48 @@ function getAllFilesFromDirectory(
   return filesList;
 }
 
+function createProjectFromDirectory(
+  options: CreateProjectOptions,
+  workspaceId: string | undefined,
+  baseUrl: string,
+  headers: ApiHeaders
+) {
+  if (!options.data?.directory) {
+    return Err(`Directory not provided ${options.data?.directory}`);
+  }
+  if (!fs.existsSync(options.data.directory)) {
+    return Err(`${options.data.directory} - Directory does not exist`);
+  }
+  const filesInfo = getAllFilesFromDirectory(options.data.directory);
+  if (filesInfo.length === 0) {
+    return Err(`${options.data.directory} - Directory is empty`);
+  }
+  const createInput: CreateProjectFromDirectoryInput = {
+    filePathSeparator: FILE_SEPARATOR,
+    files: filesInfo,
+    name: options.name,
+    workspaceId: workspaceId,
+    isPublic: options.isPublic ?? false,
+    publish: options.publish ?? false,
+    descriptionGenerationType:
+      options.descriptionGenerationType ??
+      DescriptionGenerationType.NO_GENERATION,
+  };
+
+  return callCreateProjectFromDirectoryApi(baseUrl, headers, createInput);
+}
+
 export async function createProject(
   baseUrl: string,
   headers: ApiHeaders,
   options: CreateProjectOptions
 ): Promise<Result<CreateProjectResponse>> {
   const workspaceId = await getWorkspaceId(baseUrl, headers, options.workspace);
+
+  if (options.data?.directory !== undefined) {
+    return createProjectFromDirectory(options, workspaceId, baseUrl, headers);
+  }
+
   const createInput: CreateProjectInput = {
     name: options.name,
     workspaceId: workspaceId,
@@ -88,16 +133,6 @@ export async function createProject(
       options.descriptionGenerationType ??
       DescriptionGenerationType.NO_GENERATION,
   };
-  if (options.data?.directory !== undefined) {
-    const filesInfo = getAllFilesFromDirectory(options.data.directory);
-    if (filesInfo.length === 0) {
-      return Err(`${options.data.directory} - Directory is empty`);
-    }
-    createInput.files = filesInfo;
-
-    return callCreateProjectWithFilesApi(baseUrl, headers, createInput);
-  }
-
   // TODO validate
   if (options?.sampleData !== undefined) {
     createInput.sampleFile = options.sampleData;

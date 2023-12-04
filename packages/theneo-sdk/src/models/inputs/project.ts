@@ -21,7 +21,15 @@ export type FileInfo = {
   convertedFilename: string;
 };
 
-export interface CreateProjectInput {
+export interface CreateProjectBaseInput {
+  name: string;
+  isPublic: boolean;
+  publish: boolean;
+  descriptionGenerationType: DescriptionGenerationType;
+  workspaceId?: string | undefined;
+}
+
+export interface CreateProjectInput extends CreateProjectBaseInput {
   name: string;
   isPublic: boolean;
   publish: boolean;
@@ -30,9 +38,14 @@ export interface CreateProjectInput {
   sampleFile?: boolean;
   otherDocumentType?: CreateOtherTypeOfDocOptions;
   file?: Buffer;
-  files?: FileInfo[];
   link?: string;
   text?: string;
   postmanKey?: string;
   postmanCollections?: string[];
+}
+
+export interface CreateProjectFromDirectoryInput
+  extends CreateProjectBaseInput {
+  files: FileInfo[];
+  filePathSeparator: string;
 }

@@ -40,7 +40,7 @@ export function initCreateCommand(program: Command): Command {
         } else {
           // TODO return correct type from sdk
           // @ts-ignore
-          const projectId = String(res.value.project?._id || '');
+          const projectId = String(res.value.project?.id || '');
           const previewProjectLink = theneo.getPreviewProjectLink(projectId);
           console.log(previewProjectLink);
         }

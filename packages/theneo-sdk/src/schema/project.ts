@@ -211,6 +211,16 @@ export enum ImportOption {
   MERGE = 'merge',
 }
 
+export interface ImportMetadata {
+  /**
+   * Author name of the current changes that is displayed in theneo editor only.
+   *
+   * Useful for team collaboration, might serve the same purpose as git commit author
+   * when importing updated documentation
+   */
+  authorName?: string;
+}
+
 export interface ImportProjectOptions {
   projectId: string;
   publish: boolean;
@@ -219,4 +229,9 @@ export interface ImportProjectOptions {
    * indicates what should happen to old data when new api spec is imported
    */
   importOption?: ImportOption;
+
+  /**
+   * Additional import metadata/information
+   */
+  importMetadata?: ImportMetadata;
 }

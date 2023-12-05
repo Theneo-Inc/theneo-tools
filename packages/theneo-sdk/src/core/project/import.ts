@@ -29,8 +29,8 @@ export function importProject(
     importInput.postmanCollections = options.data.postman.collectionIds;
   }
 
-  if (options.importOption !== undefined) {
-    importInput.importOption = options.importOption;
-  }
+  importInput.importOption = options.importOption;
+  importInput.importMetadata = options.importMetadata;
+
   return callImportProjectApi(baseUrl, headers, options.projectId, importInput);
 }

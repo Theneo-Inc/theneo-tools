@@ -1,5 +1,11 @@
 # @theneo/sdk
 
+## 0.6.0
+
+### Minor Changes
+
+- 4f6673b: Updated dependencies and added import metadata for sdk import project function
+
 ## 0.5.1
 
 ### Patch Changes

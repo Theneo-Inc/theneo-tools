@@ -1,6 +1,7 @@
 import {
   CreateOtherTypeOfDocOptions,
   DescriptionGenerationType,
+  ImportMetadata,
   ImportOption,
 } from '../../schema';
 
@@ -10,8 +11,9 @@ export interface ImportProjectInput {
   text?: string;
   postmanKey?: string;
   postmanCollections?: string[];
-  importOption?: ImportOption;
+  importOption?: ImportOption | undefined;
   publish: boolean;
+  importMetadata?: ImportMetadata | undefined;
 }
 
 export type FileInfo = {

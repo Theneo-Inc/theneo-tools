@@ -32,26 +32,45 @@ import {
   ApiHeaders,
   THENEO_API_CLIENT_KEY_HEADER_NAME,
   THENEO_API_CLIENT_NAME_HEADER_NAME,
+  THENEO_API_CLIENT_VERSION_HEADER_NAME,
 } from 'theneo/requests/base';
 import { ExportProjectInput } from 'theneo/models';
 import { ExportedProject } from 'theneo/schema/export';
 import { createFiles } from 'theneo/utils/file';
+
+export interface ApiClientMetadata {
+  /**
+   * Name of the client making the API call.
+   * This will be sent to the server as part of the request headers.
+   * If not provided, the SDK will use the default value of `theneo-sdk`
+   */
+  apiClientName: string;
+
+  /**
+   * Version of the client making the API call.
+   */
+  apiClientVersion: string;
+}
 
 export interface TheneoOptions {
   /**
    * API key for the Theneo application
    */
   apiKey?: string;
+
   /**
-   * Name of the client making the API call.
-   * This will be sent to the server as part of the request headers.
-   * If not provided, the SDK will use the default value of `theneo-sdk:${SDK_VERSION}
+   * API client metadata, that indicates source and version,
+   *
+   * e.g theneo-cli, github-action, vscode-extension
    */
-  apiClientName?: string;
+
+  apiClientMetadata?: ApiClientMetadata;
+
   /**
    * @internal Theneo API URL
    */
   baseApiUrl?: string;
+
   /**
    * @internal Theneo APP URL
    */
@@ -62,7 +81,7 @@ export class Theneo {
   private readonly baseApiUrl: string;
   private readonly baseAppUrl: string;
   private readonly apiKey: string;
-  private readonly apiClientName: string;
+  private readonly apiClientMetadata: ApiClientMetadata;
 
   constructor(options: TheneoOptions) {
     this.baseApiUrl =
@@ -85,7 +104,10 @@ export class Theneo {
       this.apiKey = options.apiKey;
     }
 
-    this.apiClientName = options.apiClientName ?? `theneo-sdk:${SDK_VERSION}`;
+    this.apiClientMetadata = options.apiClientMetadata ?? {
+      apiClientName: 'theneo-sdk',
+      apiClientVersion: SDK_VERSION,
+    };
   }
 
   /**
@@ -217,15 +239,14 @@ export class Theneo {
     );
   }
 
-  private getUserAgent(): string {
-    return this.apiClientName;
-  }
-
   private defaultHeaders(): ApiHeaders {
     return {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      [THENEO_API_CLIENT_NAME_HEADER_NAME]: this.getUserAgent(),
+      [THENEO_API_CLIENT_NAME_HEADER_NAME]:
+        this.apiClientMetadata.apiClientName,
+      [THENEO_API_CLIENT_VERSION_HEADER_NAME]:
+        this.apiClientMetadata.apiClientVersion,
     };
   }
 

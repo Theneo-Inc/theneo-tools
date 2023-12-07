@@ -6,6 +6,8 @@ export type ApiHeaders = Record<string, string>;
 export type ApiQueryParams = Record<string, string | undefined>;
 export const THENEO_API_CLIENT_KEY_HEADER_NAME = 'x-theneo-api-key';
 export const THENEO_API_CLIENT_NAME_HEADER_NAME = 'x-theneo-api-client';
+export const THENEO_API_CLIENT_VERSION_HEADER_NAME =
+  'x-theneo-api-client-version';
 
 const UNKNOWN_ERROR_MESSAGE = 'Unknown error';
 const EMPTY_DATA_ERROR_MESSAGE = 'No data returned from API';

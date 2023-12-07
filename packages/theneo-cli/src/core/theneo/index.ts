@@ -7,6 +7,9 @@ export function createTheneo(profile: Profile): Theneo {
     baseApiUrl: profile.apiUrl,
     baseAppUrl: profile.appUrl,
     apiKey: profile.token,
-    apiClientName: `theneo-cli:${CLI_VERSION}`,
+    apiClientMetadata: {
+      apiClientName: 'theneo-cli',
+      apiClientVersion: CLI_VERSION,
+    },
   });
 }

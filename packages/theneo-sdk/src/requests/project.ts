@@ -118,6 +118,13 @@ export function callImportProjectApi(
     bodyFormData.append('importOption', options.importOption);
   }
 
+  if (options.importMetadata) {
+    bodyFormData.append(
+      'importMetadata',
+      JSON.stringify(options.importMetadata)
+    );
+  }
+
   return postRequest<FormData, ImportResponse>({
     url,
     headers: {

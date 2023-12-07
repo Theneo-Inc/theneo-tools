@@ -25,13 +25,13 @@
     "*.ts": "eslint --cache --cache-location .eslintcache --fix"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.26.2",
+    "@changesets/cli": "^2.27.1",
     "@manypkg/cli": "latest",
-    "eslint": "^8.50.0",
+    "eslint": "^8.55.0",
     "husky": "^8.0.3",
-    "lint-staged": "^14.0.1",
-    "prettier": "^3.0.3",
-    "turbo": "^1.10.15"
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.1.0",
+    "turbo": "^1.10.16"
   },
   "packageManager": "npm@9.6.7"
 }

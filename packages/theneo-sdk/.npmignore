@@ -6,3 +6,4 @@ tsconfig.build.json
 .eslintrc.js
 .eslintignore
 jest.config.js
+examples

@@ -19,7 +19,8 @@
     "lint": "turbo run lint",
     "prepare": "husky install",
     "publish-packages": "turbo run build lint && changeset publish",
-    "sort": "npx sort-package-json"
+    "sort": "npx sort-package-json",
+    "changeset": "changeset"
   },
   "lint-staged": {
     "*.ts": "eslint --cache --cache-location .eslintcache --fix"

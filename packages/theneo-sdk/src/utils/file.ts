@@ -7,7 +7,7 @@ export function createFiles(
     fileName: string;
     content: string;
   }[]
-) {
+): void {
   for (const sectionContent of fileContents) {
     const filePath = path.join(baseDirectory, sectionContent.fileName);
     console.log(filePath);

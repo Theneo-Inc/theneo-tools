@@ -5,7 +5,7 @@ import { createTheneo } from '../../core/theneo';
 import { getProject } from '../../core/cli/project/project';
 import { tryCatch } from '../../utils/exception';
 
-export function initProjectPublishCommand() {
+export function initProjectPublishCommand(): Command {
   return new Command('publish')
     .description('Publish project')
     .option('--key <project-key>', 'project key to publish')

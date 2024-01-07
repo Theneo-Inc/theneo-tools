@@ -87,7 +87,7 @@ function createProjectFromDirectory(
   workspaceId: string | undefined,
   baseUrl: string,
   headers: ApiHeaders
-) {
+): Promise<Result<CreateProjectResponse, Error>> | Result<never, Error> {
   if (!options.data?.directory) {
     return Err(`Directory not provided ${options.data?.directory}`);
   }

@@ -4,7 +4,7 @@ import { Theneo, ProjectSchema } from '@theneo/sdk';
 function findProjectsFromList(
   projects: ProjectSchema[],
   options: { projectKey: string | undefined; workspaceKey: string | undefined }
-) {
+): ProjectSchema {
   const project: ProjectSchema[] | undefined = projects.filter(
     (project: ProjectSchema) => {
       return (

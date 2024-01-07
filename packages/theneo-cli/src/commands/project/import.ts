@@ -15,7 +15,7 @@ import {
 } from '../../core/cli/project';
 import { tryCatch } from '../../utils/exception';
 
-export function initProjectImportCommand() {
+export function initProjectImportCommand(): Command {
   return new Command('import')
     .description('Update theneo project with a updated API file')
     .option(

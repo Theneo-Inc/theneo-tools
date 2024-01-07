@@ -30,6 +30,7 @@ export interface ImportCommandOptions {
   publish: boolean;
   profile: string | undefined;
 }
+
 export interface ChosenInputType {
   file?: string;
   link?: string;
@@ -43,16 +44,13 @@ export interface PostmanData {
   collectionIds: string[];
 }
 
-export function createImportTypeOption() {
+export function createImportTypeOption(): Option {
   return new Option(
     '--import-type <import-type>',
     'Indicates how should the new api spec be imported'
   )
-    .choices([
-      ImportOption.OVERWRITE,
-      ImportOption.MERGE,
-      ImportOption.ENDPOINTS_ONLY,
-    ])
+    .default(ImportOption.OVERWRITE)
+    .choices(Object.values(ImportOption))
     .argParser((value, previous) => {
       if (value !== undefined) {
         return value;
@@ -64,7 +62,7 @@ export function createImportTypeOption() {
     });
 }
 
-export function getDescriptionGenerationOption() {
+export function getDescriptionGenerationOption(): Option {
   return new Option(
     '--generate-description <generate-description>',
     'Indicates if AI should be used for description generation'
@@ -122,7 +120,7 @@ export async function inputPostmanInfo(): Promise<PostmanData> {
   };
 }
 
-export function getImportLink() {
+export function getImportLink(): Promise<string> {
   return input({
     message: 'API file URL (eg: https://example.com/openapi.yml): ',
     validate: value => {
@@ -131,7 +129,8 @@ export function getImportLink() {
     },
   });
 }
-export function getInputFileLocation() {
+
+export function getInputFileLocation(): Promise<string> {
   return input({
     message: 'API file name (eg: openapi.yml): ',
     validate: value => {
@@ -176,25 +175,25 @@ export async function getImportSource(
   }
 }
 
-export function createFileOption() {
+export function createFileOption(): Option {
   return new Option(
     '-f, --file <file>',
     'API file path to import (eg: docs/openapi.yml)'
   );
 }
 
-export function createLinkOption() {
+export function createLinkOption(): Option {
   return new Option('--link <link>', 'API file URL to create project using it');
 }
 
-export function getPostmanApiKeyOption() {
+export function getPostmanApiKeyOption(): Option {
   return new Option(
     '--postman-api-key <postman-api-key>',
     'Postman API Key'
   ).env('THENEO_POSTMAN_API_KEY');
 }
 
-export function getPostmanCollectionsOption() {
+export function getPostmanCollectionsOption(): Option {
   return new Option(
     '--postman-collection <postman-collection>',
     'Postman collection id, you can use multiple times'

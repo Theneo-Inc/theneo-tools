@@ -3,7 +3,7 @@ import { lintFile } from 'yaml-lint';
 import path from 'path';
 import { Err, Ok, Result } from '@theneo/sdk';
 
-export function createDirectorySync(path: string) {
+export function createDirectorySync(path: string): void {
   if (!existsSync(path)) {
     mkdirSync(path, { recursive: true });
   }

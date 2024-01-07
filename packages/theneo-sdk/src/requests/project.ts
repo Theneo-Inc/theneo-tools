@@ -157,7 +157,7 @@ export function callCreateProjectFromDirectoryApi(
   baseUrl: string,
   headers: ApiHeaders,
   options: CreateProjectFromDirectoryInput
-) {
+): Promise<Result<CreateProjectResponse, Error>> {
   const url = new URL(`${baseUrl}/api/project/create`);
   const bodyFormData = new FormData();
   bodyFormData.append('projectName', options.name);

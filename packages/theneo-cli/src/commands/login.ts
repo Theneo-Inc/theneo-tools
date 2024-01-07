@@ -3,8 +3,9 @@ import { setApiKeyAndSave } from '../context/auth';
 import { password, confirm } from '@inquirer/prompts';
 import { configManager } from '../config-manager';
 import { tryCatch } from '../utils/exception';
+import { DEFAULT_PROFILE } from '../consts';
 
-async function getApiKeyToken(options: { token: string }) {
+async function getApiKeyToken(options: { token: string }): Promise<string> {
   let token = options.token;
   if (!token) {
     token = await password({
@@ -25,8 +26,9 @@ export function initLogin(program: Command): Command {
     .description('Login in theneo cli')
     .option('-t, --token <token>', 'Specify a Theneo API token')
     .option(
-      '-profile <profile>',
-      'Use a specific profile from your config file.'
+      '--profile <profile>',
+      'Use a specific profile from your config file.',
+      DEFAULT_PROFILE
     )
     .action(
       tryCatch(

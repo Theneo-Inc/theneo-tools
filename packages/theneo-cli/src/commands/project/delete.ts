@@ -4,7 +4,7 @@ import { createTheneo } from '../../core/theneo';
 import { getProject } from '../../core/cli/project/project';
 import { tryCatch } from '../../utils/exception';
 
-export function initProjectDeleteCommand() {
+export function initProjectDeleteCommand(): Command {
   return new Command('delete')
     .description('Delete project')
     .option('--key <project-key>', 'Project key')

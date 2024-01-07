@@ -208,6 +208,7 @@ export interface CreateProjectOptions {
 export enum ImportOption {
   ENDPOINTS_ONLY = 'endpoints',
   OVERWRITE = 'overwrite',
+  APPEND = 'append',
   MERGE = 'merge',
 }
 

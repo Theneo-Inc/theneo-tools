@@ -5,7 +5,7 @@ import { createTheneo } from '../../core/theneo';
 import { ProjectSchema } from '@theneo/sdk';
 import { tryCatch } from '../../utils/exception';
 
-export function initProjectListCommand() {
+export function initProjectListCommand(): Command {
   return new Command('list')
     .description('List projects')
     .option('--json', 'Output as JSON', false)

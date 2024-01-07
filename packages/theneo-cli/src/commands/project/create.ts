@@ -28,7 +28,9 @@ import { Profile } from '../../config';
 import { getShouldPublish } from '../../core/cli/project/project';
 import { tryCatch } from '../../utils/exception';
 
-function getProjectName(options: CreateCommandOptions) {
+function getProjectName(
+  options: CreateCommandOptions
+): string | Promise<string> {
   return (
     options.name ??
     input({
@@ -41,7 +43,7 @@ function getProjectName(options: CreateCommandOptions) {
   );
 }
 
-export function initProjectCreateCommand() {
+export function initProjectCreateCommand(): Command {
   return new Command('create')
     .description('Create new project')
     .option('--name <name>', 'Project name')
@@ -173,7 +175,7 @@ export function initProjectCreateCommand() {
     );
 }
 
-function validateOptions(options: CreateCommandOptions) {
+function validateOptions(options: CreateCommandOptions): void {
   if (options.name !== undefined && options.name.length === 0) {
     console.error('--name flag cannot be empty');
     process.exit(1);
@@ -203,7 +205,7 @@ async function createProject(
   options: CreateProjectOptions,
   theneo: Theneo,
   profile: Profile
-) {
+): Promise<void> {
   const res = await theneo.createProject(options);
   if (res.err) {
     spinner.error({ text: res.error.message });

@@ -8,7 +8,7 @@ import { CreateCommandOptions } from './index';
 
 export async function getDocumentationFileLocation(
   options: CreateCommandOptions
-) {
+): Promise<string> {
   const specFileName =
     options.file ??
     (await input({

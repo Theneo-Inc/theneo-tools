@@ -2,7 +2,7 @@
 
 import { initializeProgram } from './commands';
 
-function runCli() {
+function runCli(): void {
   const program = initializeProgram();
   program.parse(process.argv);
 

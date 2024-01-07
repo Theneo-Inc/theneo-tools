@@ -47,5 +47,12 @@ module.exports = {
     "security/detect-non-literal-require": 'off',
     "no-constant-condition": "warn",
     "@typescript-eslint/no-unused-vars":"warn",
+    "@typescript-eslint/explicit-function-return-type": ["error", {
+      "allowExpressions": true,
+      "allowTypedFunctionExpressions": true
+    }],
+    "@typescript-eslint/explicit-module-boundary-types": ["error", {
+      "allowArgumentsExplicitlyTypedAsAny": true
+    }]
   },
 };

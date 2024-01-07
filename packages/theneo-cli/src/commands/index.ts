@@ -17,7 +17,7 @@ export function createProgram(): Command {
   return program;
 }
 
-export function initializeProgram() {
+export function initializeProgram(): Command {
   const program = createProgram();
   initLogin(program);
   initProjectCommand(program);

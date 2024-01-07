@@ -21,7 +21,7 @@ import {
 } from 'theneo/models';
 import { ApiHeaders } from 'theneo/requests/base';
 import path from 'path';
-import { convertFilePath } from 'theneo/utils/file';
+import { convertFilePath, getFilePath } from 'theneo/utils/file';
 
 async function getWorkspaceId(
   baseUrl: string,
@@ -87,7 +87,7 @@ function createProjectFromDirectory(
   workspaceId: string | undefined,
   baseUrl: string,
   headers: ApiHeaders
-) {
+): Promise<Result<CreateProjectResponse, Error>> | Result<never, Error> {
   if (!options.data?.directory) {
     return Err(`Directory not provided ${options.data?.directory}`);
   }
@@ -138,10 +138,11 @@ export async function createProject(
     createInput.sampleFile = options.sampleData;
   }
   if (options.data?.file !== undefined) {
-    if (!fs.existsSync(options.data.file)) {
-      return Err(new Error('File does not exist'));
+    const filePath = getFilePath(options.data.file);
+    if (filePath.err) {
+      return Promise.resolve(Err(filePath.error));
     }
-    createInput.file = fs.readFileSync(options.data.file);
+    createInput.file = fs.readFileSync(filePath.unwrap());
   }
 
   if (options.data?.link !== undefined) {

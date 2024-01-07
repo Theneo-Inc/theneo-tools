@@ -30,6 +30,7 @@ export interface ImportCommandOptions {
   publish: boolean;
   profile: string | undefined;
 }
+
 export interface ChosenInputType {
   file?: string;
   link?: string;
@@ -48,11 +49,8 @@ export function createImportTypeOption(): Option {
     '--import-type <import-type>',
     'Indicates how should the new api spec be imported'
   )
-    .choices([
-      ImportOption.OVERWRITE,
-      ImportOption.MERGE,
-      ImportOption.ENDPOINTS_ONLY,
-    ])
+    .default(ImportOption.OVERWRITE)
+    .choices(Object.values(ImportOption))
     .argParser((value, previous) => {
       if (value !== undefined) {
         return value;

@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import { Err, ImportProjectOptions, ImportResponse, Result } from 'theneo';
 import { ImportProjectInput } from 'theneo/models';
 import { ApiHeaders } from '../../requests/base';
+import { getFilePath } from 'theneo/utils/file';
 
 export function importProject(
   baseUrl: string,
@@ -13,10 +14,11 @@ export function importProject(
     publish: options.publish ?? false,
   };
   if (options.data.file !== undefined) {
-    if (!fs.existsSync(options.data.file)) {
-      return Promise.resolve(Err(new Error('File does not exist')));
+    const filePath = getFilePath(options.data.file);
+    if (filePath.err) {
+      return Promise.resolve(Err(filePath.error));
     }
-    importInput.file = fs.readFileSync(options.data.file);
+    importInput.file = fs.readFileSync(filePath.unwrap());
   }
   if (options.data.link !== undefined) {
     importInput.link = options.data.link.toString();

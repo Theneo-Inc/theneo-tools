@@ -1,5 +1,7 @@
 import path from 'path';
 import * as fse from 'fs-extra';
+import fs from 'fs';
+import { Err, Ok, Result } from 'theneo';
 
 export function createFiles(
   baseDirectory: string,
@@ -23,4 +25,11 @@ export function convertFilePath(filePath: string, separator: string): string {
   filePath = filePath.replace(/^\./, '').replace(/\//g, separator);
 
   return filePath;
+}
+
+export function getFilePath(filePath: string): Result<string> {
+  if (!fs.existsSync(filePath)) {
+    return Err(`File does not exist at ${filePath}`);
+  }
+  return Ok(filePath);
 }

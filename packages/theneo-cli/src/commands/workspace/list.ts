@@ -5,7 +5,7 @@ import { createTheneo } from '../../core/theneo';
 import { Workspace } from '@theneo/sdk';
 import { tryCatch } from '../../utils/exception';
 
-export function initWorkspaceListCommand() {
+export function initWorkspaceListCommand(): Command {
   return new Command('list')
     .description('List workspaces')
     .option('--json', 'Output as JSON', false)

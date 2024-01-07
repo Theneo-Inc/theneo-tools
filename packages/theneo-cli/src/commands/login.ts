@@ -5,7 +5,7 @@ import { configManager } from '../config-manager';
 import { tryCatch } from '../utils/exception';
 import { DEFAULT_PROFILE } from '../consts';
 
-async function getApiKeyToken(options: { token: string }) {
+async function getApiKeyToken(options: { token: string }): Promise<string> {
   let token = options.token;
   if (!token) {
     token = await password({

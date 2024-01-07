@@ -5,7 +5,7 @@ import { createSpinner } from 'nanospinner';
 import { getProject } from '../../core/cli/project/project';
 import { tryCatch } from '../../utils/exception';
 
-export function initProjectPreviewCommand() {
+export function initProjectPreviewCommand(): Command {
   return new Command('preview')
     .description(
       'Preview project, this command is used to validate published page before actually publishing it'

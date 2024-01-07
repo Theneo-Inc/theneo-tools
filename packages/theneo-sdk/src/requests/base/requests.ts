@@ -12,7 +12,7 @@ export const THENEO_API_CLIENT_VERSION_HEADER_NAME =
 const UNKNOWN_ERROR_MESSAGE = 'Unknown error';
 const EMPTY_DATA_ERROR_MESSAGE = 'No data returned from API';
 
-function addQueryParameters(url: URL, queryParams: ApiQueryParams) {
+function addQueryParameters(url: URL, queryParams: ApiQueryParams): void {
   Object.keys(queryParams).forEach(key => {
     const queryParam = queryParams[String(key)];
     if (queryParam !== undefined && queryParam !== null && queryParam !== '') {

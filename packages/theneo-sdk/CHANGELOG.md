@@ -1,5 +1,12 @@
 # @theneo/sdk
 
+## 0.7.0
+
+### Minor Changes
+
+- 9f1056b: Added append option for file import type
+  Updated cli login flag
+
 ## 0.6.0
 
 ### Minor Changes

@@ -7,6 +7,7 @@ import {
   createFileOption,
   createImportTypeOption,
   createLinkOption,
+  getImportOption,
   getImportSource,
   getPostmanApiKeyOption,
   getPostmanCollectionsOption,
@@ -14,6 +15,7 @@ import {
   ImportOptionsEnum,
 } from '../../core/cli/project';
 import { tryCatch } from '../../utils/exception';
+import { ImportOption } from '@theneo/sdk';
 
 export function initProjectImportCommand(): Command {
   return new Command('import')
@@ -66,6 +68,10 @@ export function initProjectImportCommand(): Command {
           options = { ...options, ...inputSource };
         }
 
+        const importOption: ImportOption = await getImportOption(
+          options,
+          isInteractive
+        );
         const shouldPublish = await getShouldPublish(options, isInteractive);
 
         const spinner = createSpinner('Updating documentation').start();
@@ -83,7 +89,7 @@ export function initProjectImportCommand(): Command {
                   }
                 : undefined,
           },
-          importOption: options.importType,
+          importOption: importOption,
         });
         if (res.err) {
           spinner.error({ text: res.error.message });
@@ -96,7 +102,7 @@ export function initProjectImportCommand(): Command {
         } else {
           const editorLink = `${profile.appUrl}/editor/${project.id}`;
           spinner.success({
-            text: `Project created, you can make changes via editor before publishing. Editor link: ${editorLink}`,
+            text: `Project updated, you can make changes via editor before publishing. Editor link: ${editorLink}`,
           });
         }
       })

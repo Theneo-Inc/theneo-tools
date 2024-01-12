@@ -49,7 +49,6 @@ export function createImportTypeOption(): Option {
     '--import-type <import-type>',
     'Indicates how should the new api spec be imported'
   )
-    .default(ImportOption.OVERWRITE)
     .choices(Object.values(ImportOption))
     .argParser((value, previous) => {
       if (value !== undefined) {
@@ -173,6 +172,50 @@ export async function getImportSource(
     default:
       throw new Error('Invalid import type');
   }
+}
+
+export const IMPORT_OPTIONS_AND_DESCRIPTIONS: {
+  option: ImportOption;
+  description: string;
+}[] = [
+  {
+    option: ImportOption.OVERWRITE,
+    description: 'Overwrite the current API spec in theneo',
+  },
+  {
+    option: ImportOption.APPEND,
+    description: 'Append the new API spec to the current API spec',
+  },
+  {
+    option: ImportOption.ENDPOINTS_ONLY,
+    description:
+      "Import only the endpoints from the new API spec, doesn't update the API spec",
+  },
+  {
+    option: ImportOption.MERGE,
+    description:
+      'Merge the current API spec with the new API spec - experimental',
+  },
+];
+
+export function getImportOption(
+  options: ImportCommandOptions,
+  isInteractive: boolean
+): Promise<ImportOption> | ImportOption {
+  if (options.importType !== undefined) {
+    return options.importType;
+  }
+  if (isInteractive) {
+    return select({
+      message: 'Select import type',
+      default: ImportOption.OVERWRITE,
+      choices: IMPORT_OPTIONS_AND_DESCRIPTIONS.map(option => ({
+        value: option.option,
+        description: option.description,
+      })),
+    });
+  }
+  return ImportOption.OVERWRITE;
 }
 
 export function createFileOption(): Option {

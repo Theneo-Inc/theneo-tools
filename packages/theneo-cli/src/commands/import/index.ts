@@ -2,12 +2,22 @@ import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
 import { createTheneo } from '../../core/theneo';
 import { getProject, getShouldPublish } from '../../core/cli/project/project';
-import {
-  createImportTypeOption,
-  getImportOption,
-} from '../../core/cli/project';
+import { getInputDirectoryLocation } from '../../core/cli/project';
 import { ImportOption } from '@theneo/sdk';
 import { createSpinner } from 'nanospinner';
+
+function getDirectory(
+  dir: string | undefined,
+  isInteractive: boolean
+): Promise<string> | string {
+  if (dir) {
+    return dir;
+  }
+  if (isInteractive) {
+    return getInputDirectoryLocation();
+  }
+  throw new Error('Directory is required');
+}
 
 export function initImportCommand(program: Command): Command {
   return program
@@ -20,7 +30,6 @@ export function initImportCommand(program: Command): Command {
     )
     .option('--dir <directory>', 'Generated theneo project directory')
     .option('--publish', 'Automatically publish the project', false)
-    .addOption(createImportTypeOption())
     .option(
       '--profile <string>',
       'Use a specific profile from your config file.'
@@ -29,8 +38,8 @@ export function initImportCommand(program: Command): Command {
       async (options: {
         key: string | undefined;
         workspace: string | undefined;
-        importType: ImportOption | undefined;
-        dir: string;
+        // importType: ImportOption | undefined;
+        dir: string | undefined;
         publish: boolean;
         profile: string | undefined;
       }) => {
@@ -41,11 +50,11 @@ export function initImportCommand(program: Command): Command {
           projectKey: options.key,
           workspaceKey: options.workspace,
         });
-
-        const importOption: ImportOption = await getImportOption(
-          options,
-          isInteractive
-        );
+        const directory = await getDirectory(options.dir, isInteractive);
+        // const importOption: ImportOption = await getImportOption(
+        //   options,
+        //   isInteractive
+        // );
         const shouldPublish = await getShouldPublish(options, isInteractive);
 
         const spinner = createSpinner('Updating documentation').start();
@@ -53,9 +62,9 @@ export function initImportCommand(program: Command): Command {
           projectId: project.id,
           publish: shouldPublish,
           data: {
-            directory: options.dir,
+            directory,
           },
-          importOption: importOption,
+          importOption: ImportOption.OVERWRITE,
         });
 
         if (res.err) {

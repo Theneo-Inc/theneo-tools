@@ -43,10 +43,10 @@ export interface CreateOtherTypeOfDocOptions {
 }
 
 export enum CreatedProjectStatusEnum {
-  Created = 'CREATED',
-  Started = 'STARTED',
-  Finished = 'FINISHED',
-  Error = 'ERROR',
+  CREATED = 'CREATED',
+  STARTED = 'STARTED',
+  FINISHED = 'FINISHED',
+  ERROR = 'ERROR',
   CREATED_WITHOUT_AI_GENERATION = 'CREATED_WITHOUT_AI_GENERATION',
 }
 

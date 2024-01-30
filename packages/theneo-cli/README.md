@@ -33,7 +33,7 @@ Commands:
 ```bash
 theneo login
 #or 
-theneo login -token <theneo-api-key>
+theneo login --token <theneo-api-key>
 ```
 
 ### Create new project

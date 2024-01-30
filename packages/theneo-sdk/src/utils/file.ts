@@ -2,6 +2,7 @@ import path from 'path';
 import * as fse from 'fs-extra';
 import fs from 'fs';
 import { Err, Ok, Result } from 'theneo';
+import { FileInfo } from 'theneo/models';
 
 export function createFiles(
   baseDirectory: string,
@@ -32,4 +33,36 @@ export function getFilePath(filePath: string): Result<string> {
     return Err(`File does not exist at ${filePath}`);
   }
   return Ok(filePath);
+}
+
+export const FILE_SEPARATOR = '__';
+
+export function getAllFilesFromDirectory(
+  directory: string,
+  originalDirectory: string = directory,
+  filesList: FileInfo[] = []
+): FileInfo[] {
+  const files = fs.readdirSync(directory);
+
+  for (const file of files) {
+    const filePath = path.join(directory, file);
+    const stat = fs.statSync(filePath);
+    const relativeFilePath = path.relative(originalDirectory, filePath);
+    if (stat.isDirectory()) {
+      getAllFilesFromDirectory(filePath, originalDirectory, filesList);
+    } else {
+      const convertedFilename = convertFilePath(
+        relativeFilePath,
+        FILE_SEPARATOR
+      );
+      filesList.push({
+        fileName: file,
+        directory,
+        convertedFilename: convertedFilename,
+        filePath: filePath,
+      });
+    }
+  }
+
+  return filesList;
 }

@@ -133,7 +133,17 @@ export function getInputFileLocation(): Promise<string> {
   return input({
     message: 'API file name (eg: openapi.yml): ',
     validate: value => {
-      if (value.length === 0) return 'Link is required!';
+      if (value.length === 0) return 'File is required!';
+      return true;
+    },
+  });
+}
+
+export function getInputDirectoryLocation(): Promise<string> {
+  return input({
+    message: 'Provide directory location of theneo markdown files: ',
+    validate: value => {
+      if (value.length === 0) return 'Directory is required!';
       return true;
     },
   });
@@ -199,7 +209,7 @@ export const IMPORT_OPTIONS_AND_DESCRIPTIONS: {
 ];
 
 export function getImportOption(
-  options: ImportCommandOptions,
+  options: { importType: ImportOption | undefined },
   isInteractive: boolean
 ): Promise<ImportOption> | ImportOption {
   if (options.importType !== undefined) {

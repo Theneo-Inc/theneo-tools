@@ -5,7 +5,13 @@ import {
   ImportOption,
 } from '../../schema';
 
-export interface ImportProjectInput {
+export interface ImportProjectBaseInput {
+  publish: boolean;
+  importOption?: ImportOption | undefined;
+  importMetadata?: ImportMetadata | undefined;
+}
+
+export interface ImportProjectInput extends ImportProjectBaseInput {
   file?: Buffer;
   link?: string;
   text?: string;
@@ -13,6 +19,15 @@ export interface ImportProjectInput {
   postmanCollections?: string[];
   importOption?: ImportOption | undefined;
   publish: boolean;
+  importMetadata?: ImportMetadata | undefined;
+}
+
+export interface ImportProjectFromDirectoryInput
+  extends ImportProjectBaseInput {
+  files: FileInfo[];
+  filePathSeparator: string;
+  publish: boolean;
+  importOption?: ImportOption | undefined;
   importMetadata?: ImportMetadata | undefined;
 }
 

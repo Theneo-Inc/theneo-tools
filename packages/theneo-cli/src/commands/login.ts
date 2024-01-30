@@ -37,7 +37,7 @@ export function initLogin(program: Command): Command {
             const profileRes = configManager.getProfile(options.profile);
             if (profileRes.ok) {
               const overwrite = await confirm({
-                message: `profile -${options.profile} - already exists. Do you want to overwrite it?`,
+                message: `profile called - ${options.profile} - already exists. Do you want to overwrite it?`,
               });
               if (!overwrite) {
                 return;

@@ -1,5 +1,16 @@
 # @theneo/cli
 
+## 0.9.0
+
+### Minor Changes
+
+- 0a4c8c3: Added import option from directory of markdown files
+
+### Patch Changes
+
+- Updated dependencies [0a4c8c3]
+  - @theneo/sdk@0.8.0
+
 ## 0.8.0
 
 ### Minor Changes

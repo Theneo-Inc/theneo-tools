@@ -17,11 +17,13 @@ import {
 import {
   CreateProjectFromDirectoryInput,
   CreateProjectInput,
-  FileInfo,
 } from 'theneo/models';
 import { ApiHeaders } from 'theneo/requests/base';
-import path from 'path';
-import { convertFilePath, getFilePath } from 'theneo/utils/file';
+import {
+  FILE_SEPARATOR,
+  getAllFilesFromDirectory,
+  getFilePath,
+} from 'theneo/utils/file';
 
 async function getWorkspaceId(
   baseUrl: string,
@@ -48,38 +50,6 @@ async function getWorkspaceId(
   }
   return workspacesResult.value.find(ws => ws.slug === workspace.key)
     ?.workspaceId;
-}
-
-const FILE_SEPARATOR = '__';
-
-function getAllFilesFromDirectory(
-  directory: string,
-  originalDirectory: string = directory,
-  filesList: FileInfo[] = []
-): FileInfo[] {
-  const files = fs.readdirSync(directory);
-
-  for (const file of files) {
-    const filePath = path.join(directory, file);
-    const stat = fs.statSync(filePath);
-    const relativeFilePath = path.relative(originalDirectory, filePath);
-    if (stat.isDirectory()) {
-      getAllFilesFromDirectory(filePath, originalDirectory, filesList);
-    } else {
-      const convertedFilename = convertFilePath(
-        relativeFilePath,
-        FILE_SEPARATOR
-      );
-      filesList.push({
-        fileName: file,
-        directory,
-        convertedFilename: convertedFilename,
-        filePath: filePath,
-      });
-    }
-  }
-
-  return filesList;
 }
 
 function createProjectFromDirectory(
@@ -134,10 +104,10 @@ export async function createProject(
       DescriptionGenerationType.NO_GENERATION,
   };
   // TODO validate
-  if (options?.sampleData !== undefined) {
+  if (options?.sampleData) {
     createInput.sampleFile = options.sampleData;
   }
-  if (options.data?.file !== undefined) {
+  if (options.data?.file) {
     const filePath = getFilePath(options.data.file);
     if (filePath.err) {
       return Promise.resolve(Err(filePath.error));
@@ -145,13 +115,13 @@ export async function createProject(
     createInput.file = fs.readFileSync(filePath.unwrap());
   }
 
-  if (options.data?.link !== undefined) {
+  if (options.data?.link) {
     createInput.link = options.data.link.toString();
   }
-  if (options.data?.text !== undefined) {
+  if (options.data?.text) {
     createInput.text = options.data.text;
   }
-  if (options.data?.postman !== undefined) {
+  if (options.data?.postman) {
     createInput.postmanKey = options.data.postman.apiKey;
     createInput.postmanCollections = options.data.postman.collectionIds;
   }

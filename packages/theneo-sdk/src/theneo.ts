@@ -26,7 +26,10 @@ import { SDK_VERSION } from './utils/version';
 import { createProject } from './core/project/create';
 import { sleep } from './utils';
 import { callPublishProjectApi } from './requests/publish';
-import { importProject } from './core/project/import';
+import {
+  importProject,
+  importProjectFromDirectory,
+} from './core/project/import';
 import { getPostmanCollections } from 'theneo/requests/postman';
 import {
   ApiHeaders,
@@ -105,7 +108,7 @@ export class Theneo {
     }
 
     this.apiClientMetadata = options.apiClientMetadata ?? {
-      apiClientName: 'theneo-sdk',
+      apiClientName: 'theneo-typescript-sdk',
       apiClientVersion: SDK_VERSION,
     };
   }
@@ -154,7 +157,14 @@ export class Theneo {
    */
   public importProjectDocument(
     options: ImportProjectOptions
-  ): Promise<Result<ImportResponse>> {
+  ): Promise<Result<ImportResponse>> | Result<never> {
+    if (options.data.directory) {
+      return importProjectFromDirectory(
+        this.baseApiUrl,
+        this.getHeaders(),
+        options
+      );
+    }
     return importProject(this.baseApiUrl, this.getHeaders(), options);
   }
 
@@ -277,13 +287,13 @@ export class Theneo {
       }
       if (
         generateDescriptionsResult.value.creationStatus ===
-        CreatedProjectStatusEnum.Finished
+        CreatedProjectStatusEnum.FINISHED
       ) {
         return Ok(null as never);
       }
       if (
         generateDescriptionsResult.value.creationStatus ===
-        CreatedProjectStatusEnum.Error
+        CreatedProjectStatusEnum.ERROR
       ) {
         return Err(new Error('Error while generating descriptions'));
       }

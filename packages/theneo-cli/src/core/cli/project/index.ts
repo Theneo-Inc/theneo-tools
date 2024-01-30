@@ -199,7 +199,7 @@ export const IMPORT_OPTIONS_AND_DESCRIPTIONS: {
 ];
 
 export function getImportOption(
-  options: ImportCommandOptions,
+  options: { importType: ImportOption | undefined },
   isInteractive: boolean
 ): Promise<ImportOption> | ImportOption {
   if (options.importType !== undefined) {

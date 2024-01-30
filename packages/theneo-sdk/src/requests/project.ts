@@ -15,6 +15,7 @@ import {
 import {
   CreateProjectFromDirectoryInput,
   CreateProjectInput,
+  ImportProjectFromDirectoryInput,
   ImportProjectInput,
 } from 'theneo/models';
 import * as fs from 'fs';
@@ -177,6 +178,43 @@ export function callCreateProjectFromDirectoryApi(
   });
 
   return postRequest<FormData, CreateProjectResponse>({
+    url,
+    headers: {
+      ...headers,
+      ...bodyFormData.getHeaders(),
+    },
+    requestBody: bodyFormData,
+  });
+}
+
+export function callImportProjectFromDirectoryApi(
+  baseUrl: string,
+  headers: ApiHeaders,
+  projectId: string,
+  options: ImportProjectFromDirectoryInput
+): Promise<Result<ImportResponse, Error>> {
+  const url = new URL(`${baseUrl}/api/project/${projectId}/markdown`);
+  const bodyFormData = new FormData();
+  bodyFormData.append('publish', JSON.stringify(options.publish));
+  bodyFormData.append('filePathSeparator', options.filePathSeparator);
+
+  if (options.importOption) {
+    bodyFormData.append('importOption', options.importOption);
+  }
+
+  if (options.importMetadata) {
+    bodyFormData.append(
+      'importMetadata',
+      JSON.stringify(options.importMetadata)
+    );
+  }
+  options.files.map(fileInfo => {
+    bodyFormData.append('files', fs.createReadStream(fileInfo.filePath), {
+      filepath: fileInfo.convertedFilename,
+    });
+  });
+
+  return postRequest<FormData, ImportResponse>({
     url,
     headers: {
       ...headers,

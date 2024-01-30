@@ -1,5 +1,11 @@
 # @theneo/sdk
 
+## 0.8.0
+
+### Minor Changes
+
+- 0a4c8c3: Added import option from directory of markdown files
+
 ## 0.7.0
 
 ### Minor Changes

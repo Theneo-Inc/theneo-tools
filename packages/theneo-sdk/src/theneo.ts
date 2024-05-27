@@ -40,6 +40,8 @@ import {
 import { ExportProjectInput } from 'theneo/models';
 import { ExportedProject } from 'theneo/schema/export';
 import { createFiles } from 'theneo/utils/file';
+import { ProjectVersion } from 'theneo/schema/version';
+import { callGetProjectVersionsApi } from 'theneo/requests/version';
 
 export interface ApiClientMetadata {
   /**
@@ -128,6 +130,15 @@ export class Theneo {
     return callGetProjectListApi(this.baseApiUrl, this.getHeaders());
   }
 
+  public listProjectVersions(
+    projectId: string
+  ): Promise<Result<ProjectVersion[]>> {
+    return callGetProjectVersionsApi(
+      this.baseApiUrl,
+      this.getHeaders(),
+      projectId
+    );
+  }
   /**
    * deletes project
    * @param projectId

@@ -17,9 +17,6 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "dev": "npm run build -- --watch",
@@ -31,8 +28,8 @@
     "fs-extra": "^11.2.0"
   },
   "devDependencies": {
-    "@types/node": "^18.19.2",
     "@types/fs-extra": "^11.0.4",
+    "@types/node": "^18.19.2",
     "@typescript-eslint/eslint-plugin": "^6.13.2",
     "@typescript-eslint/parser": "^6.13.2",
     "eslint": "^8.55.0",
@@ -48,5 +45,8 @@
   },
   "engines": {
     "node": ">=16.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

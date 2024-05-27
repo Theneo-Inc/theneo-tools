@@ -2,7 +2,11 @@ import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
 import { createSpinner } from 'nanospinner';
 import { createTheneo } from '../../core/theneo';
-import { getProject, getShouldPublish } from '../../core/cli/project/project';
+import {
+  getProject,
+  getProjectVersion,
+  getShouldPublish,
+} from '../../core/cli/project/project';
 import {
   createFileOption,
   createImportTypeOption,
@@ -39,6 +43,7 @@ export function initProjectImportCommand(): Command {
     .addOption(createImportTypeOption())
     .option('--publish', 'Automatically publish the project', false)
     .option('--workspace <workspace-key>', 'Workspace key')
+    .option('--version <version>', 'Project version slug')
     .option(
       '--profile <string>',
       'Use a specific profile from your config file.'
@@ -52,6 +57,12 @@ export function initProjectImportCommand(): Command {
           projectKey: options.key,
           workspaceKey: options.workspace,
         });
+
+        const projectVersion = await getProjectVersion(
+          theneo,
+          project,
+          options.version
+        );
 
         if (
           !options.file &&
@@ -77,6 +88,7 @@ export function initProjectImportCommand(): Command {
         const spinner = createSpinner('Updating documentation').start();
         const res = await theneo.importProjectDocument({
           projectId: project.id,
+          versionId: projectVersion.id,
           publish: shouldPublish,
           data: {
             file: options.file,

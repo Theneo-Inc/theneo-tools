@@ -19,11 +19,18 @@ with the required options.
 Then, you can use the methods provided by the SDK to interact with the Theneo API.
 
 ```typescript
-import { Theneo, TheneoOptions, Result, Workspace, ProjectSchema, CreateProjectOptions } from "@theneo/sdk";
+import {
+  Theneo,
+  TheneoOptions,
+  Result,
+  Workspace,
+  ProjectSchema,
+  CreateProjectOptions,
+} from '@theneo/sdk';
 
 // Define Theneo options
 const options: TheneoOptions = {
-  apiKey: "YOUR_API_KEY"
+  apiKey: 'YOUR_API_KEY',
 };
 
 // Create a Theneo instance
@@ -34,44 +41,42 @@ async function listWorkspaces() {
   const result: Result<Workspace[]> = await theneo.listWorkspaces();
   if (result.ok) {
     const workspaces: Workspace[] = result.unwrap();
-    console.log("Workspaces:", workspaces);
+    console.log('Workspaces:', workspaces);
   } else {
-    console.error("Error:", result.unwrap());
+    console.error('Error:', result.unwrap());
   }
 }
 
 // Create a new project
 async function createProject() {
   const projectOptions: CreateProjectOptions = {
-    name: "My Project",
-    workspace: { key: "workspace-key" },
+    name: 'My Project',
+    workspace: { key: 'workspace-key' },
     publish: true,
     isPublic: true,
     data: {
       // Specify the data source using one of the following attributes:
       // 1. Import from a file
       // file: '/path/to/api-documentation.json',
-
       // 2. Import from a URL
       // link: 'https://example.com/api-documentation.json',
-
       // 3. Import from a text string
       // text: 'API documentation content as a string',
-
       // 4. Import from a Postman collection
       // postman: {
       //   apiKey: 'YOUR_POSTMAN_API_KEY',
       //   collectionIds: ['collection-id-1', 'collection-id-2'],
       // },
-    } as ApiDataInputOption
+    } as ApiDataInputOption,
   };
 
-  const result: Result<CreateProjectResponse> = await theneo.createProject(projectOptions);
+  const result: Result<CreateProjectResponse> =
+    await theneo.createProject(projectOptions);
   if (result.ok) {
     const createdProject: CreateProjectResponse = result.unwrap();
-    console.log("Created Project:", createdProject);
+    console.log('Created Project:', createdProject);
   } else {
-    console.error("Error:", result.unwrap());
+    console.error('Error:', result.unwrap());
   }
 }
 
@@ -87,11 +92,18 @@ demonstrating how to use the `importProjectDocument` method
 to import API documentation to an existing project using the Theneo SDK in TypeScript:
 
 ```typescript
-import { Theneo, TheneoOptions, Result, ImportProjectOptions, ImportResponse, ApiDataInputOption } from "@theneo/sdk";
+import {
+  Theneo,
+  TheneoOptions,
+  Result,
+  ImportProjectOptions,
+  ImportResponse,
+  ApiDataInputOption,
+} from '@theneo/sdk';
 
 // Define Theneo options
 const options: TheneoOptions = {
-  apiKey: "YOUR_API_KEY"
+  apiKey: 'YOUR_API_KEY',
 };
 
 // Create a Theneo instance
@@ -99,35 +111,33 @@ const theneo = new Theneo(options);
 
 // Define the import options
 const importOptions: ImportProjectOptions = {
-  projectId: "project-id", // Replace with the actual project ID
+  projectId: 'project-id', // Replace with the actual project ID
   publish: true, // Set to true if you want to publish the imported data
   data: {
     // Specify the data source using one of the following attributes:
     // 1. Import from a file
     // file: '/path/to/api-documentation.json',
-
     // 2. Import from a URL
     // link: 'https://example.com/api-documentation.json',
-
     // 3. Import from a text string
     // text: 'API documentation content as a string',
-
     // 4. Import from a Postman collection
     // postman: {
     //   apiKey: 'YOUR_POSTMAN_API_KEY',
     //   collectionIds: ['collection-id-1', 'collection-id-2'],
     // },
-  } as ApiDataInputOption
+  } as ApiDataInputOption,
 };
 
 // Import API documentation to the project
 async function importApiDocumentation() {
-  const result: Result<ImportResponse> = await theneo.importProjectDocument(importOptions);
+  const result: Result<ImportResponse> =
+    await theneo.importProjectDocument(importOptions);
   if (result.ok) {
     const importResponse: ImportResponse = result.unwrap();
-    console.log("Imported API Documentation:", importResponse);
+    console.log('Imported API Documentation:', importResponse);
   } else {
-    console.error("Error:", result.unwrap());
+    console.error('Error:', result.unwrap());
   }
 }
 
@@ -144,6 +154,7 @@ In this example:
 
 - Inside the `data` attribute of `importOptions`, you can specify the source of the API documentation to be imported.
   You can choose one of the four options:
+
   1. Import from a file (specify the file path).
   2. Import from a URL (specify the URL).
   3. Import from a text string (specify the content as a string).
@@ -176,7 +187,7 @@ The main class for interacting with the Theneo API.
 - `deleteProjectById(projectId: string): Promise<Result<void>>`: Deletes a project by ID.
 - `publishProject(projectId: string): Promise<Result<PublishProjectResponse>>`: Publishes API documentation for a
   project.
-- `getPreviewProjectLink(projectId: string): string` returns preview link for a project. 
+- `getPreviewProjectLink(projectId: string): string` returns preview link for a project.
 - `importProjectDocument(options: ImportProjectOptions): Promise<Result<ImportResponse>>`: Imports API documentation to
   an existing project.
 - `createProject(options: CreateProjectOptions): Promise<Result<CreateProjectResponse>>`: Creates a new project on the

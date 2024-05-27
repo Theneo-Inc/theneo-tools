@@ -1,5 +1,6 @@
 import { confirm, select } from '@inquirer/prompts';
 import { Theneo, ProjectSchema } from '@theneo/sdk';
+import { ProjectVersion } from '@theneo/sdk/src/schema/version';
 
 function findProjectsFromList(
   projects: ProjectSchema[],
@@ -71,6 +72,57 @@ export async function getProject(
   } else {
     return findProjectsFromList(projects, options);
   }
+}
+
+function selectVersions(
+  projectVersions: ProjectVersion[]
+): Promise<ProjectVersion> | ProjectVersion {
+  if (projectVersions.length === 1) {
+    const projectVersion = projectVersions[0];
+    if (projectVersion) {
+      console.log('using default version', projectVersion.name);
+      return projectVersion;
+    }
+  }
+
+  return select({
+    message: 'Select version:',
+    choices: projectVersions.map((version, index) => {
+      return {
+        value: version,
+        name: `${index + 1}. ${version.name}`,
+        description: version.isDefaultVersion ? 'default' : '',
+      };
+    }),
+  });
+}
+
+export async function getProjectVersion(
+  theneo: Theneo,
+  project: ProjectSchema,
+  version: string | undefined
+): Promise<ProjectVersion> {
+  const versions = await theneo.listProjectVersions(project.id);
+  if (versions.err) {
+    console.error('error getting project versions:', versions.error.message);
+    process.exit(1);
+  }
+  const projectVersions = versions.unwrap();
+
+  if (projectVersions.length === 0) {
+    console.error('No versions found for this project');
+    process.exit(1);
+  }
+
+  if (!version) {
+    return selectVersions(projectVersions);
+  }
+  const projectVersion = projectVersions.find(v => v.name === version);
+  if (!projectVersion) {
+    console.error(`Version ${version} not found`);
+    process.exit(1);
+  }
+  return projectVersion;
 }
 
 export function getShouldPublish(

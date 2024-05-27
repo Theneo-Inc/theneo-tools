@@ -45,10 +45,12 @@ Before you begin, ensure you have met the following requirements:
    git clone https://github.com/Theneo-Inc/theneo-tools.git
    cd theneo-tools
    ```
+
 2. Install cli from the repository
    ```shell
    npm run cli
    ```
+
 ### Usage
 
 Describe how to use your packages here. Provide examples and instructions for using @theneo/cli and @theneo/sdk.
@@ -67,8 +69,3 @@ We welcome contributions from the community. To contribute to this project, plea
 # License
 
 This project is licensed under the MIT License - see the LICENSE.md file for details.
-
-
-
-
-

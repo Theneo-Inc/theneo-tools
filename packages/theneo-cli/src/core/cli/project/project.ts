@@ -65,7 +65,7 @@ export async function getProject(
         return {
           value: project,
           name: `${index + 1}. ${project.name}`,
-          description: project.key,
+          description: `${project.key} (${project.company.name})`,
         };
       }),
     });

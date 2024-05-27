@@ -12,15 +12,15 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "changeset": "changeset",
     "check:packages": "manypkg check",
     "cli": "turbo build lint && npm i -g ./packages/theneo-cli",
+    "dev": "turbo run dev",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "lint": "turbo run lint",
     "prepare": "husky install",
     "publish-packages": "turbo run build lint && changeset publish",
-    "sort": "npx sort-package-json",
-    "changeset": "changeset"
+    "sort": "npx sort-package-json"
   },
   "lint-staged": {
     "*.ts": "eslint --cache --cache-location .eslintcache --fix"

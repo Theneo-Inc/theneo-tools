@@ -224,6 +224,7 @@ export interface ImportMetadata {
 
 export interface ImportProjectOptions {
   projectId: string;
+  versionId?: string;
   publish: boolean;
   data: ApiDataInputOption;
   /**

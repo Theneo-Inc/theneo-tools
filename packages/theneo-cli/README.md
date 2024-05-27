@@ -32,7 +32,7 @@ Commands:
 
 ```bash
 theneo login
-#or 
+#or
 theneo login --token <theneo-api-key>
 ```
 
@@ -61,22 +61,23 @@ Options:
 ```
 
 1. create new project interactively
-    ```bash
-    theneo project create
-    ```
+   ```bash
+   theneo project create
+   ```
 2. Create the project directly using api spec file
 
-    ```bash
-    theneo project create --name api-documentation --generate-description overwrite --publish --public --file ./examples/openapi-spec.json
-    ```
+   ```bash
+   theneo project create --name api-documentation --generate-description overwrite --publish --public --file ./examples/openapi-spec.json
+   ```
+
 3. Create project using a link to api documentation
-    ```bash
-    theneo project create --name api-documentation --generate-description fill --publish --public --link https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/uspto.json 
-    ```
+   ```bash
+   theneo project create --name api-documentation --generate-description fill --publish --public --link https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/examples/v3.0/uspto.json
+   ```
 4. Create a project from Postman collections
-    ```bash
-     theneo project create --name api-documentation --postman-api-key <key> --postman-collection <id-1> --postman-collection <id-2>
-    ```
+   ```bash
+    theneo project create --name api-documentation --postman-api-key <key> --postman-collection <id-1> --postman-collection <id-2>
+   ```
 
 ### Update api documentation from api spec file
 
@@ -113,4 +114,3 @@ theneo project publish --key <project-key>
 ```bash
 theneo project delete --key <project-key>
 ```
-

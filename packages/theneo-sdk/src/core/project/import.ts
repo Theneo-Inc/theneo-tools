@@ -42,7 +42,8 @@ export function importProjectFromDirectory(
     baseUrl,
     headers,
     options.projectId,
-    createInput
+    createInput,
+    options.versionId
   );
 }
 
@@ -75,5 +76,11 @@ export function importProject(
   importInput.importOption = options.importOption;
   importInput.importMetadata = options.importMetadata;
 
-  return callImportProjectApi(baseUrl, headers, options.projectId, importInput);
+  return callImportProjectApi(
+    baseUrl,
+    headers,
+    options.projectId,
+    importInput,
+    options.versionId
+  );
 }

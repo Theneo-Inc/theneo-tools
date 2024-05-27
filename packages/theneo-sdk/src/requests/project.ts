@@ -90,9 +90,14 @@ export function callImportProjectApi(
   baseUrl: string,
   headers: ApiHeaders,
   projectId: string,
-  options: ImportProjectInput
+  options: ImportProjectInput,
+  versionId?: string
 ): Promise<Result<ImportResponse, Error>> {
   const url = new URL(`${baseUrl}/api/project/${projectId}/import`);
+  if (versionId) {
+    url.searchParams.append('versionId', versionId);
+  }
+
   const bodyFormData = new FormData();
   bodyFormData.append('publish', JSON.stringify(options.publish));
 
@@ -191,9 +196,15 @@ export function callImportProjectFromDirectoryApi(
   baseUrl: string,
   headers: ApiHeaders,
   projectId: string,
-  options: ImportProjectFromDirectoryInput
+  options: ImportProjectFromDirectoryInput,
+  versionId?: string
 ): Promise<Result<ImportResponse, Error>> {
   const url = new URL(`${baseUrl}/api/project/${projectId}/markdown`);
+
+  if (versionId) {
+    url.searchParams.append('versionId', versionId);
+  }
+
   const bodyFormData = new FormData();
   bodyFormData.append('publish', JSON.stringify(options.publish));
   bodyFormData.append('filePathSeparator', options.filePathSeparator);

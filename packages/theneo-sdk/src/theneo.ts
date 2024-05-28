@@ -2,6 +2,7 @@ import {
   CreatedProjectStatusEnum,
   CreateProjectOptions,
   CreateProjectResponse,
+  CreateProjectVersionOptions,
   DescriptionGenerationProgressHandler,
   DescriptionGenerationType,
   ImportProjectOptions,
@@ -41,7 +42,11 @@ import { ExportProjectInput } from 'theneo/models';
 import { ExportedProject } from 'theneo/schema/export';
 import { createFiles } from 'theneo/utils/file';
 import { ProjectVersion } from 'theneo/schema/version';
-import { callGetProjectVersionsApi } from 'theneo/requests/version';
+import {
+  callGetProjectVersionsApi,
+  createProjectVersion,
+  deleteProjectVersion,
+} from 'theneo/requests/version';
 
 export interface ApiClientMetadata {
   /**
@@ -273,6 +278,16 @@ export class Theneo {
 
   private authHeaders(): ApiHeaders {
     return { [THENEO_API_CLIENT_KEY_HEADER_NAME]: this.apiKey };
+  }
+
+  public createProjectVersion(
+    options: CreateProjectVersionOptions
+  ): Promise<Result<ProjectVersion>> {
+    return createProjectVersion(this.baseApiUrl, this.getHeaders(), options);
+  }
+
+  public deleteProjectVersion(versionId: string): Promise<Result<void>> {
+    return deleteProjectVersion(this.baseApiUrl, this.getHeaders(), versionId);
   }
 
   /**

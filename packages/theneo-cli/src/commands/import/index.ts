@@ -1,7 +1,11 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
 import { createTheneo } from '../../core/theneo';
-import { getProject, getShouldPublish } from '../../core/cli/project/project';
+import {
+  getProject,
+  getProjectVersion,
+  getShouldPublish,
+} from '../../core/cli/project/project';
 import { getInputDirectoryLocation } from '../../core/cli/project';
 import { ImportOption } from '@theneo/sdk';
 import { createSpinner } from 'nanospinner';
@@ -30,6 +34,7 @@ export function initImportCommand(program: Command): Command {
     )
     .option('--dir <directory>', 'Generated theneo project directory')
     .option('--publish', 'Automatically publish the project', false)
+    .option('--versionSlug <version>', 'Project version slug')
     .option(
       '--profile <string>',
       'Use a specific profile from your config file.'
@@ -38,6 +43,7 @@ export function initImportCommand(program: Command): Command {
       async (options: {
         key: string | undefined;
         workspace: string | undefined;
+        versionSlug: string | undefined;
         // importType: ImportOption | undefined;
         dir: string | undefined;
         publish: boolean;
@@ -50,6 +56,12 @@ export function initImportCommand(program: Command): Command {
           projectKey: options.key,
           workspaceKey: options.workspace,
         });
+        const version = await getProjectVersion(
+          theneo,
+          project,
+          options.versionSlug
+        );
+
         const directory = await getDirectory(options.dir, isInteractive);
         // const importOption: ImportOption = await getImportOption(
         //   options,
@@ -60,6 +72,7 @@ export function initImportCommand(program: Command): Command {
         const spinner = createSpinner('Updating documentation').start();
         const res = await theneo.importProjectDocument({
           projectId: project.id,
+          versionId: version.id,
           publish: shouldPublish,
           data: {
             directory,

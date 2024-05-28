@@ -9,3 +9,11 @@ export interface ProjectVersion {
   publishedAt?: string;
   isPublished?: boolean;
 }
+
+export interface CreateProjectVersionOptions {
+  name: string;
+  projectId: string;
+  previousVersionId?: string;
+  isNewVersion?: boolean;
+  isEmpty?: boolean;
+}

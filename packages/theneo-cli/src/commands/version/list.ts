@@ -75,6 +75,6 @@ function getProjectVersionRow(
     `${appUrl}/${project.company.slug}/${project.key}/${version.slug}`,
     version.isPublished ? 'YES' : 'NO',
     version.isDefaultVersion ? '*' : '',
-    String(project.id),
+    String(version.id),
   ];
 }

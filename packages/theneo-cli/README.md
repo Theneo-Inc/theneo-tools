@@ -20,9 +20,10 @@ Options:
   -h, --help          display help for command
 
 Commands:
-  login               Login in theneo cli
+  login [options]     Login in theneo cli
   project <action>    Theneo's project related commands
   workspace <action>  Theneo's workspace related commands
+  version <action>    Theneo's project version related commands
   help [command]      display help for command
 ```
 
@@ -87,20 +88,21 @@ Usage: theneo project import [options]
 Update theneo project with a updated API file
 
 Options:
-  --key <project-key>                              Specify the project key to import updated documentation in
-  -f, --file <file>                                API file path to import (eg: docs/openapi.yml)
-  --link <link>                                    API file URL to create project using it
-  --postman-api-key <postman-api-key>              Postman API Key (env: THENEO_POSTMAN_API_KEY)
-  --postman-collection <postman-collection-id>  Postman collection id
-  --import-type <import-type>                      Indicates how should the new api spec be imported (choices: "overwrite", "merge", "endpoints")
-  --publish                                        Automatically publish the project (default: false)
-  --profile <string>                               Use a specific profile from your config file.
-  -h, --help                                       display help for command
-
+  --key <project-key>                        Specify the project key to import updated documentation in
+  -f, --file <file>                          API file path to import (eg: docs/openapi.yml)
+  --link <link>                              API file URL to create project using it
+  --postman-api-key <postman-api-key>        Postman API Key (env: THENEO_POSTMAN_API_KEY)
+  --postman-collection <postman-collection>  Postman collection id, you can use multiple times
+  --import-type <import-type>                Indicates how should the new api spec be imported (choices: "endpoints", "overwrite", "append", "merge")
+  --publish                                  Automatically publish the project (default: false)
+  --workspace <workspace-key>                Workspace key
+  --versionSlug <version>                    Project version slug
+  --profile <string>                         Use a specific profile from your config file.
+  -h, --help                                 display help for command
 ```
 
 ```bash
-theneo project import --file <file> --project <project-key> --publish
+theneo project import --file <file> --key <project-key> --publish
 ```
 
 ### Publish document

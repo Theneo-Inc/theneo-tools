@@ -43,7 +43,7 @@ export function initProjectImportCommand(): Command {
     .addOption(createImportTypeOption())
     .option('--publish', 'Automatically publish the project', false)
     .option('--workspace <workspace-key>', 'Workspace key')
-    .option('--version <version>', 'Project version slug')
+    .option('--versionSlug <version>', 'Project version slug')
     .option(
       '--profile <string>',
       'Use a specific profile from your config file.'
@@ -61,7 +61,7 @@ export function initProjectImportCommand(): Command {
         const projectVersion = await getProjectVersion(
           theneo,
           project,
-          options.version
+          options.versionSlug
         );
 
         if (

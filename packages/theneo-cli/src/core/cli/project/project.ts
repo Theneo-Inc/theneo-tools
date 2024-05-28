@@ -74,7 +74,7 @@ export async function getProject(
   }
 }
 
-function selectVersions(
+export function selectVersions(
   projectVersions: ProjectVersion[]
 ): Promise<ProjectVersion> | ProjectVersion {
   if (projectVersions.length === 1) {

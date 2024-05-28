@@ -94,9 +94,6 @@ export function callImportProjectApi(
   versionId?: string
 ): Promise<Result<ImportResponse, Error>> {
   const url = new URL(`${baseUrl}/api/project/${projectId}/import`);
-  if (versionId) {
-    url.searchParams.append('versionId', versionId);
-  }
 
   const bodyFormData = new FormData();
   bodyFormData.append('publish', JSON.stringify(options.publish));
@@ -123,7 +120,9 @@ export function callImportProjectApi(
   if (options.importOption) {
     bodyFormData.append('importOption', options.importOption);
   }
-
+  if (versionId) {
+    bodyFormData.append('versionId', versionId);
+  }
   if (options.importMetadata) {
     bodyFormData.append(
       'importMetadata',
@@ -201,16 +200,15 @@ export function callImportProjectFromDirectoryApi(
 ): Promise<Result<ImportResponse, Error>> {
   const url = new URL(`${baseUrl}/api/project/${projectId}/markdown`);
 
-  if (versionId) {
-    url.searchParams.append('versionId', versionId);
-  }
-
   const bodyFormData = new FormData();
   bodyFormData.append('publish', JSON.stringify(options.publish));
   bodyFormData.append('filePathSeparator', options.filePathSeparator);
 
   if (options.importOption) {
     bodyFormData.append('importOption', options.importOption);
+  }
+  if (versionId) {
+    bodyFormData.append('versionId', versionId);
   }
 
   if (options.importMetadata) {

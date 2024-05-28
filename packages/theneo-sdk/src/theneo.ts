@@ -158,9 +158,15 @@ export class Theneo {
    * @param projectId
    */
   public publishProject(
-    projectId: string
+    projectId: string,
+    versionId?: string
   ): Promise<Result<PublishProjectResponse>> {
-    return callPublishProjectApi(this.baseApiUrl, this.getHeaders(), projectId);
+    return callPublishProjectApi(
+      this.baseApiUrl,
+      this.getHeaders(),
+      projectId,
+      versionId
+    );
   }
 
   public getPreviewProjectLink(projectId: string): string {

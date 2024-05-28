@@ -59,7 +59,8 @@ export function initImportCommand(program: Command): Command {
         const version = await getProjectVersion(
           theneo,
           project,
-          options.versionSlug
+          options.versionSlug,
+          isInteractive
         );
 
         const directory = await getDirectory(options.dir, isInteractive);
@@ -72,7 +73,7 @@ export function initImportCommand(program: Command): Command {
         const spinner = createSpinner('Updating documentation').start();
         const res = await theneo.importProjectDocument({
           projectId: project.id,
-          versionId: version.id,
+          versionId: version?.id,
           publish: shouldPublish,
           data: {
             directory,

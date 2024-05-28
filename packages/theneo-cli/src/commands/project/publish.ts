@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
 import { createSpinner } from 'nanospinner';
 import { createTheneo } from '../../core/theneo';
-import { getProject } from '../../core/cli/project/project';
+import { getProject, getProjectVersion } from '../../core/cli/project/project';
 import { tryCatch } from '../../utils/exception';
 
 export function initProjectPublishCommand(): Command {
@@ -10,6 +10,7 @@ export function initProjectPublishCommand(): Command {
     .description('Publish project')
     .option('--key <project-key>', 'project key to publish')
     .option('--workspace <workspace-key>', 'Workspace key')
+    .option('--versionSlug <version-slug>', 'Version slug to publish')
     .option(
       '--profile <string>',
       'Use a specific profile from your config file.'
@@ -20,6 +21,7 @@ export function initProjectPublishCommand(): Command {
           key: string | undefined;
           workspace: string | undefined;
           profile: string | undefined;
+          versionSlug: string | undefined;
         }) => {
           const profile = getProfile(options.profile);
           const theneo = createTheneo(profile);
@@ -27,8 +29,19 @@ export function initProjectPublishCommand(): Command {
             projectKey: options.key,
             workspaceKey: options.workspace,
           });
+          const isInteractive = options.key === undefined;
+
+          const version = await getProjectVersion(
+            theneo,
+            project,
+            options.versionSlug,
+            isInteractive
+          );
           const spinner = createSpinner('Publishing project').start();
-          const publishResult = await theneo.publishProject(project.id);
+          const publishResult = await theneo.publishProject(
+            project.id,
+            version?.id
+          );
           if (publishResult.err) {
             console.error(publishResult.error.message);
             process.exit(1);

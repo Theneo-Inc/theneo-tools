@@ -61,7 +61,8 @@ export function initProjectImportCommand(): Command {
         const projectVersion = await getProjectVersion(
           theneo,
           project,
-          options.versionSlug
+          options.versionSlug,
+          isInteractive
         );
 
         if (
@@ -88,7 +89,7 @@ export function initProjectImportCommand(): Command {
         const spinner = createSpinner('Updating documentation').start();
         const res = await theneo.importProjectDocument({
           projectId: project.id,
-          versionId: projectVersion.id,
+          versionId: projectVersion?.id,
           publish: shouldPublish,
           data: {
             file: options.file,

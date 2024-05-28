@@ -100,8 +100,9 @@ export function selectVersions(
 export async function getProjectVersion(
   theneo: Theneo,
   project: ProjectSchema,
-  version: string | undefined
-): Promise<ProjectVersion> {
+  version: string | undefined,
+  isInteractive: boolean
+): Promise<ProjectVersion | null> {
   const versions = await theneo.listProjectVersions(project.id);
   if (versions.err) {
     console.error('error getting project versions:', versions.error.message);
@@ -114,15 +115,18 @@ export async function getProjectVersion(
     process.exit(1);
   }
 
-  if (!version) {
-    return selectVersions(projectVersions);
+  if (isInteractive) {
+    if (!version) {
+      return selectVersions(projectVersions);
+    }
+    const projectVersion = projectVersions.find(v => v.name === version);
+    if (!projectVersion) {
+      console.error(`Version ${version} not found`);
+      process.exit(1);
+    }
+    return projectVersion;
   }
-  const projectVersion = projectVersions.find(v => v.name === version);
-  if (!projectVersion) {
-    console.error(`Version ${version} not found`);
-    process.exit(1);
-  }
-  return projectVersion;
+  return null;
 }
 
 export function getShouldPublish(

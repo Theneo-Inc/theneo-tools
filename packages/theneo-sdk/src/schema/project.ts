@@ -236,4 +236,21 @@ export interface ImportProjectOptions {
    * Additional import metadata/information
    */
   importMetadata?: ImportMetadata;
+  importOptionAdditionalData?: ImportOptionAdditionalData;
+}
+
+export enum MergingStrategy {
+  KEEP_OLD = 'keep_old',
+  KEEP_NEW = 'keep_new',
+}
+
+export interface ImportOptionAdditionalData {
+  /**
+   * Control parameter description merging, default is `KEEP_NEW`
+   */
+  parameterDescriptionMergeStrategy?: MergingStrategy;
+  /**
+   * Control section description merging, default is `KEEP_NEW`
+   */
+  sectionDescriptionMergeStrategy?: MergingStrategy;
 }

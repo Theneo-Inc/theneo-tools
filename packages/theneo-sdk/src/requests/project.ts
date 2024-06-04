@@ -129,7 +129,12 @@ export function callImportProjectApi(
       JSON.stringify(options.importMetadata)
     );
   }
-
+  if (options.importOptionAdditionalData) {
+    bodyFormData.append(
+      'importOptionAdditionalData',
+      JSON.stringify(options.importOptionAdditionalData)
+    );
+  }
   return postRequest<FormData, ImportResponse>({
     url,
     headers: {
@@ -215,6 +220,12 @@ export function callImportProjectFromDirectoryApi(
     bodyFormData.append(
       'importMetadata',
       JSON.stringify(options.importMetadata)
+    );
+  }
+  if (options.importOptionAdditionalData) {
+    bodyFormData.append(
+      'importOptionAdditionalData',
+      JSON.stringify(options.importOptionAdditionalData)
     );
   }
   options.files.map(fileInfo => {

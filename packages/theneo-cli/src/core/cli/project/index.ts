@@ -30,6 +30,8 @@ export interface ImportCommandOptions {
   importType: ImportOption | undefined;
   publish: boolean;
   profile: string | undefined;
+  keepOldParameterDescription: boolean | undefined;
+  keepOldSectionDescription: boolean | undefined;
 }
 
 export interface ChosenInputType {

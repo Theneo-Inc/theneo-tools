@@ -20,13 +20,16 @@ import {
   callDescriptionGenerationStatusApi,
   callGetProjectListApi,
   callUserWorkspacesApi,
+  callPublishProjectApi,
   exportProjectData,
+  callGetProjectVersionsApi,
+  createProjectVersion,
+  deleteProjectVersion,
 } from './requests';
 import { SDK_VERSION } from './utils/version';
 
 import { createProject } from './core/project/create';
 import { sleep } from './utils';
-import { callPublishProjectApi } from './requests/publish';
 import {
   importProject,
   importProjectFromDirectory,
@@ -42,11 +45,6 @@ import { ExportProjectInput } from 'theneo/models';
 import { ExportedProject } from 'theneo/schema/export';
 import { createFiles } from 'theneo/utils/file';
 import { ProjectVersion } from 'theneo/schema/version';
-import {
-  callGetProjectVersionsApi,
-  createProjectVersion,
-  deleteProjectVersion,
-} from 'theneo/requests/version';
 
 export interface ApiClientMetadata {
   /**

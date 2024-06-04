@@ -3,11 +3,13 @@ import {
   DescriptionGenerationType,
   ImportMetadata,
   ImportOption,
+  ImportOptionAdditionalData,
 } from '../../schema';
 
 export interface ImportProjectBaseInput {
   publish: boolean;
   importOption?: ImportOption | undefined;
+  importOptionAdditionalData?: ImportOptionAdditionalData | undefined;
   importMetadata?: ImportMetadata | undefined;
 }
 
@@ -18,6 +20,7 @@ export interface ImportProjectInput extends ImportProjectBaseInput {
   postmanKey?: string;
   postmanCollections?: string[];
   importOption?: ImportOption | undefined;
+  importOptionAdditionalData?: ImportOptionAdditionalData | undefined;
   publish: boolean;
   importMetadata?: ImportMetadata | undefined;
 }
@@ -28,6 +31,7 @@ export interface ImportProjectFromDirectoryInput
   filePathSeparator: string;
   publish: boolean;
   importOption?: ImportOption | undefined;
+  importOptionAdditionalData?: ImportOptionAdditionalData | undefined;
   importMetadata?: ImportMetadata | undefined;
 }
 

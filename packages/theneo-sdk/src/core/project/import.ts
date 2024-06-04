@@ -3,7 +3,14 @@ import {
   callImportProjectFromDirectoryApi,
 } from 'theneo/requests';
 import * as fs from 'fs';
-import { Err, ImportProjectOptions, ImportResponse, Result } from 'theneo';
+import {
+  Err,
+  ImportOption,
+  ImportProjectOptions,
+  ImportResponse,
+  MergingStrategy,
+  Result,
+} from 'theneo';
 import {
   ImportProjectFromDirectoryInput,
   ImportProjectInput,
@@ -75,6 +82,25 @@ export function importProject(
 
   importInput.importOption = options.importOption;
   importInput.importMetadata = options.importMetadata;
+
+  if (options.importOption == ImportOption.MERGE) {
+    importInput.importOptionAdditionalData = options.importOptionAdditionalData;
+    if (!importInput.importOptionAdditionalData) {
+      importInput.importOptionAdditionalData = {};
+    }
+    if (
+      !importInput.importOptionAdditionalData.parameterDescriptionMergeStrategy
+    ) {
+      importInput.importOptionAdditionalData.parameterDescriptionMergeStrategy =
+        MergingStrategy.KEEP_NEW;
+    }
+    if (
+      !importInput.importOptionAdditionalData.sectionDescriptionMergeStrategy
+    ) {
+      importInput.importOptionAdditionalData.sectionDescriptionMergeStrategy =
+        MergingStrategy.KEEP_NEW;
+    }
+  }
 
   return callImportProjectApi(
     baseUrl,

@@ -19,7 +19,48 @@ import {
   ImportOptionsEnum,
 } from '../../core/cli/project';
 import { tryCatch } from '../../utils/exception';
-import { ImportOption } from '@theneo/sdk';
+import {
+  ImportOption,
+  ImportOptionAdditionalData,
+  MergingStrategy,
+} from '@theneo/sdk';
+import { confirm } from '@inquirer/prompts';
+
+async function getImportOptionAdditionalData(
+  importOption: ImportOption,
+  options: ImportCommandOptions,
+  isInteractive: boolean
+): Promise<ImportOptionAdditionalData | undefined> {
+  if (isInteractive && importOption === ImportOption.MERGE) {
+    if (options.keepOldParameterDescription === undefined) {
+      options.keepOldParameterDescription = await confirm({
+        message: 'Keep old parameter descriptions?',
+      });
+    }
+
+    if (options.keepOldSectionDescription === undefined) {
+      options.keepOldSectionDescription = await confirm({
+        message: 'Keep old parameter descriptions?',
+      });
+    }
+  }
+
+  if (
+    options.keepOldParameterDescription === undefined &&
+    options.keepOldSectionDescription === undefined
+  ) {
+    return undefined;
+  }
+
+  return {
+    parameterDescriptionMergeStrategy: options.keepOldParameterDescription
+      ? MergingStrategy.KEEP_OLD
+      : MergingStrategy.KEEP_NEW,
+    sectionDescriptionMergeStrategy: options.keepOldSectionDescription
+      ? MergingStrategy.KEEP_OLD
+      : MergingStrategy.KEEP_NEW,
+  };
+}
 
 export function initProjectImportCommand(): Command {
   return new Command('import')
@@ -43,7 +84,14 @@ export function initProjectImportCommand(): Command {
     .addOption(createImportTypeOption())
     .option('--publish', 'Automatically publish the project', false)
     .option('--workspace <workspace-key>', 'Workspace key')
-    .option('--versionSlug <version>', 'Project version slug')
+    .option(
+      '--keepOldParameterDescription',
+      'Additional flag during merging import option, it will keep old parameter descriptions'
+    )
+    .option(
+      '--keepOldSectionDescription',
+      'Additional flag during merging import option, it will keep old section descriptions'
+    )
     .option(
       '--profile <string>',
       'Use a specific profile from your config file.'
@@ -84,6 +132,13 @@ export function initProjectImportCommand(): Command {
           options,
           isInteractive
         );
+        const importOptionAdditionalData:
+          | ImportOptionAdditionalData
+          | undefined = await getImportOptionAdditionalData(
+          importOption,
+          options,
+          isInteractive
+        );
         const shouldPublish = await getShouldPublish(options, isInteractive);
 
         const spinner = createSpinner('Updating documentation').start();
@@ -103,6 +158,7 @@ export function initProjectImportCommand(): Command {
                 : undefined,
           },
           importOption: importOption,
+          importOptionAdditionalData,
         });
         if (res.err) {
           spinner.error({ text: res.error.message });

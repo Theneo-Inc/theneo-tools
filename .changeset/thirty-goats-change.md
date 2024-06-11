@@ -3,4 +3,6 @@
 '@theneo/sdk': minor
 ---
 
-Added project version operations
+* Added project version operations
+* Added merge options
+* Update package versions

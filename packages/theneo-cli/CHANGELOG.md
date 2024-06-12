@@ -1,5 +1,18 @@
 # @theneo/cli
 
+## 0.10.0
+
+### Minor Changes
+
+- 149bb2a: \* Added project version operations
+  - Added merge options
+  - Update package versions
+
+### Patch Changes
+
+- Updated dependencies [149bb2a]
+  - @theneo/sdk@0.9.0
+
 ## 0.9.0
 
 ### Minor Changes

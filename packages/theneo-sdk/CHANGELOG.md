@@ -1,5 +1,13 @@
 # @theneo/sdk
 
+## 0.9.0
+
+### Minor Changes
+
+- 149bb2a: \* Added project version operations
+  - Added merge options
+  - Update package versions
+
 ## 0.8.0
 
 ### Minor Changes

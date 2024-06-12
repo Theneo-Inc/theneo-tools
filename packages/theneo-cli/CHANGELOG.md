@@ -1,5 +1,11 @@
 # @theneo/cli
 
+## 0.10.1
+
+### Patch Changes
+
+- edd69fd: Update CLI documentation
+
 ## 0.10.0
 
 ### Minor Changes

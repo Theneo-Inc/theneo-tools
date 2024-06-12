@@ -6,7 +6,7 @@ import { initProjectVersionDeleteCommand } from './delete';
 export function initProjectVersionCommand(program: Command): Command {
   return program
     .command('version <action>')
-    .description("Theneo's project version related commands")
+    .description('Project version related commands')
     .addCommand(initProjectVersionListCommand())
     .addCommand(initProjectVersionCreateCommand())
     .addCommand(initProjectVersionDeleteCommand());

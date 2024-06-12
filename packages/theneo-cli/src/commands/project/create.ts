@@ -48,7 +48,7 @@ export function initProjectCreateCommand(): Command {
     .description('Create new project')
     .option('--name <name>', 'Project name')
     .option(
-      '--workspace <workspace>',
+      '--workspace <workspace-slug>',
       'Enter workspace slug where the project should be created in, if not present uses default workspace'
     )
     .addOption(

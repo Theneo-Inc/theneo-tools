@@ -29,7 +29,10 @@ export function initProjectVersionCreateCommand(): Command {
   return (
     new Command('create')
       .option('--name <name>', 'Name of the version')
-      .option('--projectKey <project-key>', 'project key to create version for')
+      .option(
+        '--projectKey <project-slug>',
+        'Project slug to create version for'
+      )
       .option(
         '--workspace <workspace-slug>',
         'Workspace slug where the project is'

@@ -6,9 +6,9 @@ import { getProject } from '../../core/cli/project/project';
 export function initExportCommand(program: Command): Command {
   return program
     .command('export', { hidden: true })
-    .option('--key <project-key>', 'project key')
+    .option('--key <project-slug>', 'project slug')
     .option(
-      '--workspace <workspace>',
+      '--workspace <workspace-slug>',
       'Enter workspace slug where the project should be created in, if not present uses default workspace'
     )
     .option(

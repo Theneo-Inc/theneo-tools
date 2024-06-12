@@ -8,8 +8,8 @@ import { tryCatch } from '../../utils/exception';
 export function initProjectPublishCommand(): Command {
   return new Command('publish')
     .description('Publish project')
-    .option('--key <project-key>', 'project key to publish')
-    .option('--workspace <workspace-key>', 'Workspace key')
+    .option('--key <project-slug>', 'Project slug to publish')
+    .option('--workspace <workspace-slug>', 'Workspace slug')
     .option('--versionSlug <version-slug>', 'Version slug to publish')
     .option(
       '--profile <string>',

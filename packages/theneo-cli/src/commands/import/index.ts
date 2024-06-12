@@ -27,9 +27,9 @@ export function initImportCommand(program: Command): Command {
   return program
     .command('import', { hidden: true })
     .description('Update theneo project from generated markdown directory')
-    .option('--key <project-key>', 'project key')
+    .option('--key <project-slug>', 'project key')
     .option(
-      '--workspace <workspace>',
+      '--workspace <workspace-slug>',
       'Enter workspace slug where the project should be created in, if not present uses default workspace'
     )
     .option('--dir <directory>', 'Generated theneo project directory')

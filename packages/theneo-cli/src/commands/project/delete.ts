@@ -7,8 +7,8 @@ import { tryCatch } from '../../utils/exception';
 export function initProjectDeleteCommand(): Command {
   return new Command('delete')
     .description('Delete project')
-    .option('--key <project-key>', 'Project key')
-    .option('--workspace <workspace-key>', 'Workspace key')
+    .option('--key <project-slug>', 'Project slug')
+    .option('--workspace <workspace-slug>', 'Workspace slug')
     .option(
       '--profile <string>',
       'Use a specific profile from your config file.'

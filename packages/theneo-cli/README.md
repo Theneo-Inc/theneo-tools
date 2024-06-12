@@ -21,9 +21,9 @@ Options:
 
 Commands:
   login [options]     Login in theneo cli
-  project <action>    Theneo's project related commands
-  workspace <action>  Theneo's workspace related commands
-  version <action>    Theneo's project version related commands
+  project <action>    Project related commands
+  workspace <action>  Workspace related commands
+  version <action>    Project Version related commands
   help [command]      display help for command
 ```
 
@@ -88,31 +88,85 @@ Usage: theneo project import [options]
 Update theneo project with a updated API file
 
 Options:
-  --key <project-key>                        Specify the project key to import updated documentation in
+  --key <project-slug>                       Specify the project slug to import updated documentation in
   -f, --file <file>                          API file path to import (eg: docs/openapi.yml)
   --link <link>                              API file URL to create project using it
   --postman-api-key <postman-api-key>        Postman API Key (env: THENEO_POSTMAN_API_KEY)
   --postman-collection <postman-collection>  Postman collection id, you can use multiple times
   --import-type <import-type>                Indicates how should the new api spec be imported (choices: "endpoints", "overwrite", "append", "merge")
   --publish                                  Automatically publish the project (default: false)
-  --workspace <workspace-key>                Workspace key
-  --versionSlug <version>                    Project version slug
+  --workspace <workspace-slug>               Workspace slug where the project is located
+  --versionSlug <version-slug>               Project version slug to import to, if not provided then default version will be used
+  --keepOldParameterDescription              Additional flag during merging import option, it will keep old parameter descriptions
+  --keepOldSectionDescription                Additional flag during merging import option, it will keep old section descriptions
   --profile <string>                         Use a specific profile from your config file.
   -h, --help                                 display help for command
 ```
 
 ```bash
-theneo project import --file <file> --key <project-key> --publish
+theneo project import
+# or
+theneo project import --file <file> --key <project-slug> --publish
+```
+
+#### Example import with merge option
+
+```bash
+theneo project import --key <project-slug> \
+--workspace <workspace-slug> \
+--versionSlug <version-slug> \
+--publish \
+--file ./api-spec.json \
+--import-type merge \
+--keepOldParameterDescription \
+--keepOldSectionDescription
 ```
 
 ### Publish document
 
 ```bash
-theneo project publish --key <project-key>
+theneo project publish --key <project-slug>
 ```
 
 ### Delete project
 
 ```bash
-theneo project delete --key <project-key>
+theneo project delete --key <project-slug>
+```
+
+## Project version
+
+```bash
+theneo version --help
+Usage: theneo version [options] [command] <action>
+
+Project version related commands
+
+Options:
+  -h, --help        display help for command
+
+Commands:
+  list [options]    List project versions
+  create [options]
+  delete [options]
+  help [command]    display help for command
+```
+
+### Create
+
+```bash
+theneo version create --help
+Usage: theneo version create [options]
+
+Options:
+  --name <name>                              Name of the version
+  --projectKey <project-slug>                Project slug to create version for
+  --workspace <workspace-slug>               Workspace slug where the project is
+  --previousVersion <previous-version-slug>  Previous version slug to duplicate the content from
+  --profile <string>                         Use a specific profile from your config file.
+  -h, --help                                 display help for command
+```
+
+```bash
+theneo version create
 ```

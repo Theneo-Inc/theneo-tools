@@ -11,7 +11,7 @@ export function initCreateCommand(program: Command): Command {
     )
     .requiredOption('--name <project-name>', 'project key')
     .option(
-      '--workspace <workspace>',
+      '--workspace <workspace-slug>',
       'Enter workspace slug where the project should be created in, if not present uses default workspace'
     )
     .option(

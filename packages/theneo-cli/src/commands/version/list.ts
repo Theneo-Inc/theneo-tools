@@ -10,7 +10,7 @@ import { ProjectVersion } from '@theneo/sdk/src/schema/version';
 export function initProjectVersionListCommand(): Command {
   return new Command('list')
     .description('List project versions')
-    .option('--key <project-key>', 'Project key')
+    .option('--key <project-slug>', 'Project slug')
     .option('--workspace <workspace-key>', 'Workspace key')
     .option('--json', 'Output as JSON', false)
     .option(

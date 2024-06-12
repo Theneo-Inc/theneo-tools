@@ -9,7 +9,7 @@ import { initProjectPreviewCommand } from './preview';
 export function initProjectCommand(program: Command): Command {
   return program
     .command('project <action>')
-    .description("Theneo's project related commands")
+    .description('Project related commands')
     .addCommand(initProjectListCommand())
     .addCommand(initProjectCreateCommand())
     .addCommand(initProjectImportCommand())

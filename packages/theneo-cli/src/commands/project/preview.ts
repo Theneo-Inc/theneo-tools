@@ -10,8 +10,8 @@ export function initProjectPreviewCommand(): Command {
     .description(
       'Preview project, this command is used to validate published page before actually publishing it'
     )
-    .option('--key <project-key>', 'project key to preview')
-    .option('--workspace <workspace-key>', 'Workspace key')
+    .option('--key <project-slug>', 'Project slug to preview')
+    .option('--workspace <workspace-slug>', 'Workspace slug')
     .option(
       '--profile <string>',
       'Use a specific profile from your config file.'

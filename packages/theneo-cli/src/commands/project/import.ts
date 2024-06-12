@@ -64,10 +64,14 @@ async function getImportOptionAdditionalData(
 
 export function initProjectImportCommand(): Command {
   return new Command('import')
-    .description('Update theneo project with a updated API file')
+    .description(
+      `Import updated documentation into Theneo using file, link or postman collection
+
+Note: Published document link has this pattern: https://app.theneo.io/<workspace-slug>/<project-slug>/<version-slug>`
+    )
     .option(
-      '--key <project-key>',
-      'Specify the project key to import updated documentation in'
+      '--key <project-slug>',
+      'Specify the project slug to import updated documentation in'
     )
     .addOption(
       createFileOption().conflicts([
@@ -83,7 +87,14 @@ export function initProjectImportCommand(): Command {
     .addOption(getPostmanCollectionsOption())
     .addOption(createImportTypeOption())
     .option('--publish', 'Automatically publish the project', false)
-    .option('--workspace <workspace-key>', 'Workspace key')
+    .option(
+      '--workspace <workspace-slug>',
+      'Workspace slug, where the project is located'
+    )
+    .option(
+      '--versionSlug <version-slug>',
+      'Project version slug to import to, if not provided then default version will be used'
+    )
     .option(
       '--keepOldParameterDescription',
       'Additional flag during merging import option, it will keep old parameter descriptions'

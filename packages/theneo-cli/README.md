@@ -37,6 +37,9 @@ theneo login
 theneo login --token <theneo-api-key>
 ```
 
+You can also set the `THENEO_API_KEY` environment variable.
+
+
 ### Create new project
 
 ```bash

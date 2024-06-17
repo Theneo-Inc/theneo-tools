@@ -1,5 +1,11 @@
 # @theneo/cli
 
+## 0.12.1
+
+### Patch Changes
+
+- 2d2b1ba: Set specific theneo sdk version instead of asterisk
+
 ## 0.12.0
 
 ### Minor Changes

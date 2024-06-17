@@ -35,7 +35,7 @@ For more, see [this](packages/theneo-sdk/README.md)
 
 Before you begin, ensure you have met the following requirements:
 
-- Node.js >= 16.x and npm installed
+- Node.js >= 18.x and npm installed
 
 ### Installation
 

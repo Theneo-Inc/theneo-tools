@@ -1,5 +1,11 @@
 # @theneo/sdk
 
+## 0.10.0
+
+### Minor Changes
+
+- 4a1c89a: Update minimum node version to 18
+
 ## 0.9.0
 
 ### Minor Changes

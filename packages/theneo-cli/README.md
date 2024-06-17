@@ -3,7 +3,7 @@
 ## Install
 
 ```bash
-npm install -g @theneo/cli
+npm install -g @theneo/cli@latest
 ```
 
 ## Usage

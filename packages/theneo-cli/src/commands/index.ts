@@ -13,7 +13,11 @@ export function createProgram(): Command {
   const program = new Command();
 
   program
-    .version(CLI_VERSION)
+    .version(
+      CLI_VERSION,
+      '-v, -V, --version',
+      'Output the current version of the CLI'
+    )
     .name(THENEO_CLI_APP)
     .description('A CLI for the Theneo application');
   return program;

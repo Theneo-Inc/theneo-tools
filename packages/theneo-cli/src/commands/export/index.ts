@@ -6,7 +6,8 @@ import { getProject } from '../../core/cli/project/project';
 export function initExportCommand(program: Command): Command {
   return program
     .command('export', { hidden: true })
-    .option('--key <project-slug>', 'project slug')
+    .option('--key <project-slug>', 'project slug - deprecated')
+    .option('--project <project-slug>', 'project slug')
     .option(
       '--workspace <workspace-slug>',
       'Enter workspace slug where the project should be created in, if not present uses default workspace'
@@ -23,6 +24,7 @@ export function initExportCommand(program: Command): Command {
     .action(
       async (options: {
         key: string | undefined;
+        project: string | undefined;
         workspace: string | undefined;
         profile: string | undefined;
         dir: string;
@@ -30,7 +32,7 @@ export function initExportCommand(program: Command): Command {
         const profile = getProfile(options.profile);
         const theneo = createTheneo(profile);
         const project = await getProject(theneo, {
-          projectKey: options.key,
+          projectKey: options.key || options.project,
           workspaceKey: options.workspace,
         });
 

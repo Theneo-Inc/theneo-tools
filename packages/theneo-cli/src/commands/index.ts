@@ -15,7 +15,7 @@ export function createProgram(): Command {
   program
     .version(
       CLI_VERSION,
-      '-v, -V, --version',
+      '-v, --version',
       'Output the current version of the CLI'
     )
     .name(THENEO_CLI_APP)

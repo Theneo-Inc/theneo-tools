@@ -10,7 +10,8 @@ import { ProjectVersion } from '@theneo/sdk/src/schema/version';
 export function initProjectVersionListCommand(): Command {
   return new Command('list')
     .description('List project versions')
-    .option('--key <project-slug>', 'Project slug')
+    .option('--key <project-slug>', 'Project slug - deprecated')
+    .option('--project <project-slug>', 'Project slug')
     .option('--workspace <workspace-key>', 'Workspace key')
     .option('--json', 'Output as JSON', false)
     .option(
@@ -21,6 +22,7 @@ export function initProjectVersionListCommand(): Command {
       tryCatch(
         async (options: {
           key: string | undefined;
+          project: string | undefined;
           workspaceKey: string | undefined;
           json: boolean;
           profile: string | undefined;
@@ -28,7 +30,7 @@ export function initProjectVersionListCommand(): Command {
           const profile = getProfile(options.profile);
           const theneo = createTheneo(profile);
           const project = await getProject(theneo, {
-            projectKey: options.key,
+            projectKey: options.key || options.project,
             workspaceKey: options.workspaceKey,
           });
           const projectVersionsResult = await theneo.listProjectVersions(

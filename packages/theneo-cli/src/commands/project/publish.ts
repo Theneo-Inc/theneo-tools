@@ -8,7 +8,8 @@ import { tryCatch } from '../../utils/exception';
 export function initProjectPublishCommand(): Command {
   return new Command('publish')
     .description('Publish project')
-    .option('--key <project-slug>', 'Project slug to publish')
+    .option('--key <project-slug>', 'Project slug to publish - deprecated')
+    .option('--project <project-slug>', 'project slug')
     .option('--workspace <workspace-slug>', 'Workspace slug')
     .option('--versionSlug <version-slug>', 'Version slug to publish')
     .option(
@@ -19,6 +20,7 @@ export function initProjectPublishCommand(): Command {
       tryCatch(
         async (options: {
           key: string | undefined;
+          project: string | undefined;
           workspace: string | undefined;
           profile: string | undefined;
           versionSlug: string | undefined;
@@ -26,7 +28,7 @@ export function initProjectPublishCommand(): Command {
           const profile = getProfile(options.profile);
           const theneo = createTheneo(profile);
           const project = await getProject(theneo, {
-            projectKey: options.key,
+            projectKey: options.key || options.project,
             workspaceKey: options.workspace,
           });
           const isInteractive = options.key === undefined;

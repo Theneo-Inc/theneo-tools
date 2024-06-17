@@ -71,6 +71,10 @@ Note: Published document link has this pattern: https://app.theneo.io/<workspace
     )
     .option(
       '--key <project-slug>',
+      'Specify the project slug to import updated documentation in - deprecated'
+    )
+    .option(
+      '--project <project-slug>',
       'Specify the project slug to import updated documentation in'
     )
     .addOption(
@@ -113,7 +117,7 @@ Note: Published document link has this pattern: https://app.theneo.io/<workspace
         const profile = getProfile(options.profile);
         const theneo = createTheneo(profile);
         const project = await getProject(theneo, {
-          projectKey: options.key,
+          projectKey: options.key || options.project,
           workspaceKey: options.workspace,
         });
 

@@ -7,7 +7,8 @@ import { tryCatch } from '../../utils/exception';
 export function initProjectDeleteCommand(): Command {
   return new Command('delete')
     .description('Delete project')
-    .option('--key <project-slug>', 'Project slug')
+    .option('--key <project-slug>', 'Project slug - deprecated')
+    .option('--project <project-slug>', 'project slug')
     .option('--workspace <workspace-slug>', 'Workspace slug')
     .option(
       '--profile <string>',
@@ -17,13 +18,14 @@ export function initProjectDeleteCommand(): Command {
       tryCatch(
         async (options: {
           key: string | undefined;
+          project: string | undefined;
           workspace: string | undefined;
           profile: string | undefined;
         }) => {
           const profile = getProfile(options.profile);
           const theneo = createTheneo(profile);
           const project = await getProject(theneo, {
-            projectKey: options.key,
+            projectKey: options.key || options.project,
             workspaceKey: options.workspace,
           });
           const projectsResult = await theneo.deleteProjectById(project.id);

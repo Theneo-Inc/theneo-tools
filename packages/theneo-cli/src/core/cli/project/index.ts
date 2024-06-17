@@ -21,6 +21,7 @@ export interface CreateCommandOptions {
 
 export interface ImportCommandOptions {
   key: string | undefined;
+  project: string | undefined;
   versionSlug: string | undefined;
   workspace: string | undefined;
   file: string | undefined;

@@ -31,8 +31,9 @@ export function initProjectVersionCreateCommand(): Command {
       .option('--name <name>', 'Name of the version')
       .option(
         '--projectKey <project-slug>',
-        'Project slug to create version for'
+        'Project slug to create version for - deprecated'
       )
+      .option('--project <project-slug>', 'Project slug to create version for')
       .option(
         '--workspace <workspace-slug>',
         'Workspace slug where the project is'
@@ -51,6 +52,7 @@ export function initProjectVersionCreateCommand(): Command {
           async (options: {
             name: string | undefined;
             projectKey: string | undefined;
+            project: string | undefined;
             workspaceSlug: string | undefined;
             previousVersionSlug: string | undefined;
             profile: string | undefined;
@@ -60,7 +62,7 @@ export function initProjectVersionCreateCommand(): Command {
 
             const isInteractive = !options.name;
             const project = await getProject(theneo, {
-              projectKey: options.projectKey,
+              projectKey: options.projectKey || options.project,
               workspaceKey: options.workspaceSlug,
             });
 

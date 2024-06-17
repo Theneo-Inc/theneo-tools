@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "@inquirer/prompts": "^5.0.5",
-    "@theneo/sdk": "*",
+    "@theneo/sdk": "^0.10.0",
     "axios": "^1.7.2",
     "chalk": "^5.3.0",
     "cli-table": "^0.3.11",

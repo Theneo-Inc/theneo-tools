@@ -1,5 +1,17 @@
 # @theneo/cli
 
+## 0.11.0
+
+### Minor Changes
+
+- 4a1c89a: Update minimum node version to 18
+
+### Patch Changes
+
+- a88fc7f: Update version flag
+- Updated dependencies [4a1c89a]
+  - @theneo/sdk@0.10.0
+
 ## 0.10.1
 
 ### Patch Changes

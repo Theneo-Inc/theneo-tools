@@ -1,5 +1,11 @@
 # @theneo/cli
 
+## 0.12.0
+
+### Minor Changes
+
+- ecefbc9: Deprecate project key flag
+
 ## 0.11.0
 
 ### Minor Changes

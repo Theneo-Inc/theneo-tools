@@ -9,6 +9,7 @@ import {
 import { getInputDirectoryLocation } from '../../core/cli/project';
 import { ImportOption } from '@theneo/sdk';
 import { createSpinner } from 'nanospinner';
+import { isInteractiveFlow } from '../../utils';
 
 function getDirectory(
   dir: string | undefined,
@@ -51,7 +52,7 @@ export function initImportCommand(program: Command): Command {
         publish: boolean;
         profile: string | undefined;
       }) => {
-        const isInteractive = options.key === undefined;
+        const isInteractive = isInteractiveFlow(options);
         const profile = getProfile(options.profile);
         const theneo = createTheneo(profile);
         const project = await getProject(theneo, {

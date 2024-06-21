@@ -194,7 +194,9 @@ export class Theneo {
     const result = await exportProjectData(
       this.baseApiUrl,
       this.getHeaders(),
-      input.projectId
+      input.projectId,
+      input.versionId,
+      input.shouldGetPublicViewData
     );
     if (result.err) {
       return result;

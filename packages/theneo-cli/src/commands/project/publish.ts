@@ -4,6 +4,7 @@ import { createSpinner } from 'nanospinner';
 import { createTheneo } from '../../core/theneo';
 import { getProject, getProjectVersion } from '../../core/cli/project/project';
 import { tryCatch } from '../../utils/exception';
+import { isInteractiveFlow } from '../../utils';
 
 export function initProjectPublishCommand(): Command {
   return new Command('publish')
@@ -31,7 +32,7 @@ export function initProjectPublishCommand(): Command {
             projectKey: options.key || options.project,
             workspaceKey: options.workspace,
           });
-          const isInteractive = options.key === undefined;
+          const isInteractive = isInteractiveFlow(options);
 
           const version = await getProjectVersion(
             theneo,

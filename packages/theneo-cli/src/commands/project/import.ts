@@ -25,6 +25,7 @@ import {
   MergingStrategy,
 } from '@theneo/sdk';
 import { confirm } from '@inquirer/prompts';
+import { isInteractiveFlow } from '../../utils';
 
 async function getImportOptionAdditionalData(
   importOption: ImportOption,
@@ -113,7 +114,7 @@ Note: Published document link has this pattern: https://app.theneo.io/<workspace
     )
     .action(
       tryCatch(async (options: ImportCommandOptions) => {
-        const isInteractive = options.key === undefined;
+        const isInteractive = isInteractiveFlow(options);
         const profile = getProfile(options.profile);
         const theneo = createTheneo(profile);
         const project = await getProject(theneo, {

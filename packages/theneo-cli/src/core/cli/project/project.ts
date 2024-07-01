@@ -115,18 +115,19 @@ export async function getProjectVersion(
     process.exit(1);
   }
 
-  if (isInteractive) {
-    if (!version) {
+  if (!version) {
+    if (isInteractive) {
       return selectVersions(projectVersions);
     }
-    const projectVersion = projectVersions.find(v => v.name === version);
-    if (!projectVersion) {
-      console.error(`Version ${version} not found`);
-      process.exit(1);
-    }
-    return projectVersion;
+    return null;
   }
-  return null;
+
+  const projectVersion = projectVersions.find(v => v.name === version);
+  if (!projectVersion) {
+    console.error(`Version ${version} not found`);
+    process.exit(1);
+  }
+  return projectVersion;
 }
 
 export function getShouldPublish(

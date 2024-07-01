@@ -5,3 +5,4 @@
 
 * Add version support to export functional
 * Add different api support when using login command
+* Fix version import for cli

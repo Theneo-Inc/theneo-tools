@@ -3,4 +3,5 @@
 '@theneo/sdk': minor
 ---
 
-Add verion support to export functional
+* Add version support to export functional
+* Add different api support when using login command

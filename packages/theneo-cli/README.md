@@ -173,3 +173,42 @@ Options:
 ```bash
 theneo version create
 ```
+
+### Use the main branch changes
+
+#### Clone the repository
+```bash
+git clone git@github.com:Theneo-Inc/theneo-tools.git
+```
+
+#### install packages
+
+```bash
+nvm use 
+npm install
+```
+
+#### install the cli
+
+```bash
+npm run cli
+```
+#### Run the cli
+
+```bash
+theneo help
+```
+
+### Change theneo API endpoint
+
+* Using environment variable
+  ```bash
+  THENEO_API_KEY=<theneo-api-key> THENEO_API_URL=https://api.theneo.io THENEO_APP_URL=https://app.theneo.io \
+  theneo <command>
+  ```
+
+* Using theneo config file and profile
+  ```bash
+  theneo login --profile <profile-name> --token <theneo-api-key> --api-url https://api.theneo.io --app-url https://app.theneo.io
+  ```
+  check the config file at `.config/theneo/config`

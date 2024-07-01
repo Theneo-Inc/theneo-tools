@@ -9,10 +9,12 @@ import { Result } from '@theneo/sdk';
 
 export function setApiKeyAndSave(
   token: string,
-  profile?: string
+  profile?: string,
+  apiUrl?: string,
+  appUrl?: string
 ): Result<null, Error> {
   profile = profile ?? DEFAULT_PROFILE;
-  configManager.setProfile(profile, { token });
+  configManager.setProfile(profile, { token, apiUrl, appUrl });
   return configManager.save();
 }
 

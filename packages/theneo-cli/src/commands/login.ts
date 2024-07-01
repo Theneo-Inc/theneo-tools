@@ -30,9 +30,16 @@ export function initLogin(program: Command): Command {
       'Use a specific profile from your config file.',
       DEFAULT_PROFILE
     )
+    .option('--api-url <apiUrl>', 'Specify a Theneo API URL')
+    .option('--app-url <appUrl>', 'Specify a Theneo APP URL')
     .action(
       tryCatch(
-        async (options: { token: string; profile: string | undefined }) => {
+        async (options: {
+          token: string;
+          profile: string | undefined;
+          apiUrl: string | undefined;
+          appUrl: string | undefined;
+        }) => {
           if (options.profile) {
             const profileRes = configManager.getProfile(options.profile);
             if (profileRes.ok) {
@@ -46,7 +53,12 @@ export function initLogin(program: Command): Command {
           }
 
           const token = await getApiKeyToken(options);
-          const result = setApiKeyAndSave(token, options.profile);
+          const result = setApiKeyAndSave(
+            token,
+            options.profile,
+            options.apiUrl,
+            options.appUrl
+          );
 
           // Save the token to the config file
           if (result.err) {

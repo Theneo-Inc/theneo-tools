@@ -98,6 +98,10 @@ Note: Published document link has this pattern: https://app.theneo.io/<workspace
     )
     .option(
       '--versionSlug <version-slug>',
+      'Project version slug to import to, if not provided then default version will be used - deprecated'
+    )
+    .option(
+      '--projectVersion <version-slug>',
       'Project version slug to import to, if not provided then default version will be used'
     )
     .option(
@@ -125,7 +129,7 @@ Note: Published document link has this pattern: https://app.theneo.io/<workspace
         const projectVersion = await getProjectVersion(
           theneo,
           project,
-          options.versionSlug,
+          options.versionSlug || options.projectVersion,
           isInteractive
         );
 

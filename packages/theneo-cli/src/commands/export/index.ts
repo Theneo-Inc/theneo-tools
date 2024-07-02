@@ -11,8 +11,9 @@ export function initExportCommand(program: Command): Command {
     .option('--project <project-slug>', 'project slug')
     .option(
       '--versionSlug <version-slug>',
-      'version slug to get the exported data for'
+      'version slug to get the exported data for - deprecated'
     )
+    .option('--projectVersion <version-slug>', 'Version slug to publish')
     .option(
       '--workspace <workspace-slug>',
       'Enter workspace slug where the project should be created in, if not present uses default workspace'
@@ -40,6 +41,7 @@ export function initExportCommand(program: Command): Command {
         profile: string | undefined;
         dir: string;
         versionSlug: string | undefined;
+        projectVersion: string | undefined;
         publishedView: boolean | undefined;
       }) => {
         const profile = getProfile(options.profile);
@@ -53,7 +55,7 @@ export function initExportCommand(program: Command): Command {
         const version = await getProjectVersion(
           theneo,
           project,
-          options.versionSlug,
+          options.versionSlug || options.projectVersion,
           isInteractive
         );
         const res = await theneo.exportProject({

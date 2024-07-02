@@ -22,7 +22,9 @@ export interface CreateCommandOptions {
 export interface ImportCommandOptions {
   key: string | undefined;
   project: string | undefined;
+  // @deprecated
   versionSlug: string | undefined;
+  projectVersion: string | undefined;
   workspace: string | undefined;
   file: string | undefined;
   link: string | undefined;

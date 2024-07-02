@@ -36,7 +36,8 @@ export function initImportCommand(program: Command): Command {
     )
     .option('--dir <directory>', 'Generated theneo project directory')
     .option('--publish', 'Automatically publish the project', false)
-    .option('--versionSlug <version>', 'Project version slug')
+    .option('--versionSlug <version>', 'Project version slug - deprecated')
+    .option('--projectVersion <version-slug>', 'Version slug to publish')
     .option(
       '--profile <string>',
       'Use a specific profile from your config file.'
@@ -47,6 +48,7 @@ export function initImportCommand(program: Command): Command {
         project: string | undefined;
         workspace: string | undefined;
         versionSlug: string | undefined;
+        projectVersion: string | undefined;
         // importType: ImportOption | undefined;
         dir: string | undefined;
         publish: boolean;
@@ -62,7 +64,7 @@ export function initImportCommand(program: Command): Command {
         const version = await getProjectVersion(
           theneo,
           project,
-          options.versionSlug,
+          options.versionSlug || options.projectVersion,
           isInteractive
         );
 

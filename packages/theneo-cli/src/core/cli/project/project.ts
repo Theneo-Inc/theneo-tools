@@ -108,7 +108,7 @@ export async function getProjectVersion(
     console.error('error getting project versions:', versions.error.message);
     process.exit(1);
   }
-  const projectVersions = versions.unwrap();
+  const projectVersions: ProjectVersion[] = versions.unwrap();
 
   if (projectVersions.length === 0) {
     console.error('No versions found for this project');
@@ -122,7 +122,7 @@ export async function getProjectVersion(
     return null;
   }
 
-  const projectVersion = projectVersions.find(v => v.name === version);
+  const projectVersion = projectVersions.find(v => v.slug === version);
   if (!projectVersion) {
     console.error(`Version ${version} not found`);
     process.exit(1);

@@ -1,13 +1,21 @@
 # Theneo CLI
+The Theneo CLI (Command Line Interface) is s a command-line tool for effortless management of the Theneo platform from your terminal.
+Create, manage, and publish API documentation with ease, all without leaving your terminal.
+
+You can find the npm package [here](https://www.npmjs.com/package/@theneo/cli)
+## Pre-requisites
+- Node.js v18 or higher
 
 ## Install
+To install the Theneo CLI, use the following command:
 
 ```bash
 npm install -g @theneo/cli@latest
 ```
+This command installs the Theneo CLI globally on your machine, allowing it to be run from any directory.
 
 ## Usage
-
+To get started with Theneo CLI, you can use the help command:
 ```bash
 theneo help
 
@@ -30,10 +38,14 @@ Commands:
 ## Examples
 
 ### Login
-
+Standard Login:
 ```bash
 theneo login
-#or
+```
+
+
+Login with an API Key:
+```bash
 theneo login --token <theneo-api-key>
 ```
 
@@ -111,10 +123,13 @@ Options:
   -h, --help                                 display help for command
 ```
 
+#### Updating a Project:
+
 ```bash
+# interactive
 theneo project import
 # or
-theneo project import --file <file> --key <project-slug> --publish
+theneo project import --file <file> --project <project-slug> --publish
 ```
 
 #### Example import with merge option

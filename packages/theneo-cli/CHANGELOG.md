@@ -1,5 +1,18 @@
 # @theneo/cli
 
+## 0.13.0
+
+### Minor Changes
+
+- 40da0a5: \* Add version support to export functional
+  - Add different api support when using login command
+  - Fix version import for cli
+
+### Patch Changes
+
+- Updated dependencies [40da0a5]
+  - @theneo/sdk@0.11.0
+
 ## 0.12.1
 
 ### Patch Changes

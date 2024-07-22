@@ -5,6 +5,10 @@ on:
       - "main"
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
+permissions:
+  packages: write
+  contents: write
+  pull-requests: write
 
 jobs:
   build:
@@ -25,5 +29,5 @@ jobs:
         with:
           publish: npm run publish-packages
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT}}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

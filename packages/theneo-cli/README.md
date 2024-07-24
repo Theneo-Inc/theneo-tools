@@ -97,16 +97,14 @@ Options:
    ```
 
 ### Update api documentation from api spec file
-
-```bash
-Usage: theneo project import [options]
-
 Import updated documentation into Theneo using file, link or postman collection
 
 Note: Published document link has this pattern: https://app.theneo.io/<workspace-slug>/<project-slug>/<version-slug>
 
+```bash
+Usage: theneo project import [options]
+
 Options:
-  --key <project-slug>                       Specify the project slug to import updated documentation in - deprecated
   --project <project-slug>                   Specify the project slug to import updated documentation in
   -f, --file <file>                          API file path to import (eg: docs/openapi.yml)
   --link <link>                              API file URL to create project using it
@@ -115,7 +113,6 @@ Options:
   --import-type <import-type>                Indicates how should the new api spec be imported (choices: "endpoints", "overwrite", "append", "merge")
   --publish                                  Automatically publish the project (default: false)
   --workspace <workspace-slug>               Workspace slug, where the project is located
-  --versionSlug <version-slug>               Project version slug to import to, if not provided then default version will be used - deprecated
   --projectVersion <version-slug>            Project version slug to import to, if not provided then default version will be used
   --keepOldParameterDescription              Additional flag during merging import option, it will keep old parameter descriptions
   --keepOldSectionDescription                Additional flag during merging import option, it will keep old section descriptions
@@ -182,7 +179,6 @@ Usage: theneo version create [options]
 
 Options:
   --name <name>                              Name of the version
-  --projectKey <project-slug>                Project slug to create version for - deprecated
   --project <project-slug>                   Project slug to create version for
   --workspace <workspace-slug>               Workspace slug where the project is
   --previousVersion <previous-version-slug>  Previous version slug to duplicate the content from
@@ -232,3 +228,66 @@ theneo help
   theneo login --profile <profile-name> --token <theneo-api-key> --api-url https://api.theneo.io --app-url https://app.theneo.io
   ```
   check the config file at `.config/theneo/config`
+
+
+## Export and Import project data in Markdown format
+
+### Export project data in Markdown format and JSON files
+
+```bash
+Usage: theneo export [options]
+
+Options:
+  --project <project-slug>         project slug
+  --projectVersion <version-slug>  Version slug
+  --workspace <workspace-slug>     Enter workspace slug where the project should be created in, if not present uses default workspace
+  --profile <string>               Use a specific profile from your config file.
+  --dir <directory>                directory location where the project will be exported (default: "docs")
+  --publishedView                  By default it will export data from editor, pass this flag to get published project data (default: false)
+  -h, --help                       display help for command
+```
+
+```shell
+theneo export --project <project-slug> --projectVersion <version-slug> --dir <directory>
+```
+
+### Import project data from Markdown files
+
+import exported markdown files back to theneo
+
+```bash
+Usage: theneo import [options]
+
+Update theneo project from generated markdown directory
+
+Options:
+  --project <project-slug>         project slug
+  --workspace <workspace-slug>     Enter workspace slug where the project should be created in, if not present uses default workspace
+  --dir <directory>                Generated theneo project directory
+  --publish                        Automatically publish the project (default: false)
+  --projectVersion <version-slug>  Version slug
+  --profile <string>               Use a specific profile from your config file.
+  -h, --help                       display help for command
+```
+
+```shell
+theneo export --project <project-slug> --projectVersion <version-slug> --dir <directory>
+```
+
+
+### Create a new project from markdown files
+
+```bash
+Usage: theneo create [options]
+
+Options:
+  --dir <directory>             directory location where the project will be exported
+  --name <project-name>         project key
+  --workspace <workspace-slug>  Enter workspace slug where the project should be created in, if not present uses default workspace
+  --profile <string>            Use a specific profile from your config file.
+  -h, --help                    display help for command
+```
+
+```shell
+theneo create --dir <directory> --name <project-name>
+```

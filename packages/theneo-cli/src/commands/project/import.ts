@@ -26,6 +26,7 @@ import {
 } from '@theneo/sdk';
 import { confirm } from '@inquirer/prompts';
 import { isInteractiveFlow } from '../../utils';
+import { createNewProjectVersion } from '../../core/cli/version/create';
 
 async function getImportOptionAdditionalData(
   importOption: ImportOption,
@@ -126,13 +127,20 @@ Note: Published document link has this pattern: https://app.theneo.io/<workspace
           workspaceKey: options.workspace,
         });
 
+        const projectVersionSlug =
+          options.versionSlug || options.projectVersion;
         const projectVersion = await getProjectVersion(
           theneo,
           project,
-          options.versionSlug || options.projectVersion,
+          projectVersionSlug,
           isInteractive
         );
-
+        const projectVersionId = await createNewProjectVersion(
+          theneo,
+          project.id,
+          projectVersion,
+          projectVersionSlug
+        );
         if (
           !options.file &&
           !options.link &&
@@ -164,7 +172,7 @@ Note: Published document link has this pattern: https://app.theneo.io/<workspace
         const spinner = createSpinner('Updating documentation').start();
         const res = await theneo.importProjectDocument({
           projectId: project.id,
-          versionId: projectVersion?.id,
+          versionId: projectVersionId,
           publish: shouldPublish,
           data: {
             file: options.file,

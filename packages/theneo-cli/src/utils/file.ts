@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync } from 'fs';
+import fs, { existsSync, mkdirSync } from 'fs';
 import { lintFile } from 'yaml-lint';
 import path from 'path';
 import { Err, Ok, Result } from '@theneo/sdk';
@@ -36,4 +36,8 @@ export async function checkDocumentationFile(
     // TODO ADD checks for other type of files
   }
   return Ok(true);
+}
+
+export function isDirectoryEmpty(dir: string): boolean {
+  return !fs.existsSync(dir) || fs.readdirSync(dir).length === 0;
 }

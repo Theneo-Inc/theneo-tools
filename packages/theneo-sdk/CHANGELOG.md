@@ -1,5 +1,11 @@
 # @theneo/sdk
 
+## 0.12.0
+
+### Minor Changes
+
+- 855f5e2: fix markdown file import for windows
+
 ## 0.11.0
 
 ### Minor Changes

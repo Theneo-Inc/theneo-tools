@@ -3,6 +3,7 @@ import * as fse from 'fs-extra';
 import fs from 'fs';
 import { Err, Ok, Result } from 'theneo';
 import { FileInfo } from 'theneo/models';
+import { isWindows } from 'theneo/utils/index';
 
 export function createFiles(
   baseDirectory: string,
@@ -24,6 +25,12 @@ export function convertFilePath(filePath: string, separator: string): string {
 
   // Replace '/' with '_' and remove leading '.'
   filePath = filePath.replace(/^\./, '').replace(/\//g, separator);
+  if (isWindows()) {
+    // Replace it for windows
+    filePath = filePath.replace(/\\/g, separator);
+    // remove c: d: patterns
+    filePath = filePath.replace(/^[a-z]:/g, '');
+  }
 
   return filePath;
 }

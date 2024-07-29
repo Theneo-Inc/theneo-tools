@@ -1,6 +1,6 @@
 import { confirm, select } from '@inquirer/prompts';
 import { Theneo, ProjectSchema } from '@theneo/sdk';
-import { ProjectVersion } from '@theneo/sdk/src/schema/version';
+import { ProjectVersion } from '@theneo/sdk';
 
 function findProjectsFromList(
   projects: ProjectSchema[],

@@ -15,14 +15,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
         with:
-          node-version: 18.x
-          cache: "npm"
+          fetch-depth: 2
+      - uses: pnpm/action-setup@v4
 
-      - run: npm ci
-      - run: npm run build
-      - run: npm run lint
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: pnpm install
+      - run: pnpm build
+      - run: pnpm lint
       - name: Create Release Pull Request or Publish
         id: changesets
         uses: changesets/action@v1
@@ -31,3 +36,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+

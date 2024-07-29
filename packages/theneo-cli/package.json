@@ -31,13 +31,13 @@
   ],
   "scripts": {
     "build": "tsc",
-    "ci": "npm run build",
+    "ci": "pnpm run build",
     "clean": "rm -rf ./dist/",
-    "dev": "npm run build -- --watch",
-    "install-locally": "npm run lint && npm run build && npm i -g ../theneo-cli",
+    "dev": "pnpm run build -- --watch",
+    "install-locally": "pnpm run lint && pnpm run build && pnpm i -g ../theneo-cli",
     "lint": "eslint ./src/  --fix",
-    "release": "npm run ci && changeset publish",
-    "start": "npm run build && ts-node -T ./src/bin.ts",
+    "release": "pnpm run ci && changeset publish",
+    "start": "pnpm run build && ts-node -T ./src/bin.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "typecheck": "tsc --noEmit"

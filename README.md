@@ -48,7 +48,7 @@ Before you begin, ensure you have met the following requirements:
 
 2. Install cli from the repository
    ```shell
-   npm run cli
+   pnpm run cli
    ```
 
 ### Usage

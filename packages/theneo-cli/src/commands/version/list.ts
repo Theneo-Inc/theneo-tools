@@ -5,7 +5,7 @@ import { createTheneo } from '../../core/theneo';
 import { ProjectSchema } from '@theneo/sdk';
 import { tryCatch } from '../../utils/exception';
 import { getProject } from '../../core/cli/project/project';
-import { ProjectVersion } from '@theneo/sdk/src/schema/version';
+import { ProjectVersion } from '@theneo/sdk';
 
 export function initProjectVersionListCommand(): Command {
   return new Command('list')

@@ -1,5 +1,11 @@
 # @theneo/sdk
 
+## 0.13.0
+
+### Minor Changes
+
+- dc70020: Change npm with pnpm
+
 ## 0.12.0
 
 ### Minor Changes

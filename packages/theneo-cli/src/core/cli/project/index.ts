@@ -91,7 +91,7 @@ export function getDescriptionGenerationOption(): Option {
 
 export async function inputPostmanInfo(): Promise<PostmanData> {
   const postmanApiKey = await password({
-    message: 'Postman Api Key: ',
+    message: 'Postman API Key: ',
     validate: value => {
       if (value.length === 0) return 'Postman Key is required!';
       return true;

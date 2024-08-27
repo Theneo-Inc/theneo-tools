@@ -16,4 +16,10 @@ export interface CreateProjectVersionOptions {
   previousVersionId?: string;
   isNewVersion?: boolean;
   isEmpty?: boolean;
+  isDefault?: boolean;
+}
+
+export interface AddSubscriberToProjectVersionQuery {
+  email: string;
+  projectVersionId: string;
 }

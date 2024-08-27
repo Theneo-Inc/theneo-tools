@@ -4,7 +4,11 @@ import {
   getRequest,
   postRequest,
 } from 'theneo/requests/base';
-import { CreateProjectVersionOptions, Result } from 'theneo';
+import {
+  AddSubscriberToProjectVersionQuery,
+  CreateProjectVersionOptions,
+  Result,
+} from 'theneo';
 import { ProjectVersion } from 'theneo/schema/version';
 
 export async function callGetProjectVersionsApi(
@@ -43,5 +47,20 @@ export function deleteProjectVersion(
   return deleteRequest({
     url,
     headers,
+  });
+}
+
+export function addSubscriberToProjectVersion(
+  baseApiUrl: string,
+  headers: ApiHeaders,
+  options: AddSubscriberToProjectVersionQuery
+): Promise<Result<never>> {
+  const url = new URL(
+    `${baseApiUrl}/api/project-version/${options.projectVersionId}/subscriber`
+  );
+  return postRequest<{ email: string }, never>({
+    url,
+    headers,
+    requestBody: { email: options.email },
   });
 }

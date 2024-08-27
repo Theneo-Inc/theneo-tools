@@ -9,7 +9,7 @@ import { CreateProjectVersionOptions } from '@theneo/sdk';
 async function getVersionName(options: {
   name: string | undefined;
   projectKey: string | undefined;
-  workspaceSlug: string | undefined;
+  workspace: string | undefined;
   previousVersionSlug: string | undefined;
   profile: string | undefined;
 }): Promise<string> {
@@ -42,6 +42,7 @@ export function initProjectVersionCreateCommand(): Command {
         '--previousVersion <previous-version-slug>',
         'Previous version slug to duplicate the content from'
       )
+      .option('--default', 'set as default version')
       .option(
         '--profile <string>',
         'Use a specific profile from your config file.'
@@ -53,17 +54,19 @@ export function initProjectVersionCreateCommand(): Command {
             name: string | undefined;
             projectKey: string | undefined;
             project: string | undefined;
-            workspaceSlug: string | undefined;
+            workspace: string | undefined;
             previousVersionSlug: string | undefined;
             profile: string | undefined;
+            default?: boolean | undefined;
           }) => {
+            console.log('Creating version', options);
             const profile = getProfile(options.profile);
             const theneo = createTheneo(profile);
 
             const isInteractive = !options.name;
             const project = await getProject(theneo, {
               projectKey: options.projectKey || options.project,
-              workspaceKey: options.workspaceSlug,
+              workspaceKey: options.workspace,
             });
 
             const projectVersionsResult = await theneo.listProjectVersions(
@@ -79,6 +82,7 @@ export function initProjectVersionCreateCommand(): Command {
             const createOptions: CreateProjectVersionOptions = {
               projectId: project.id,
               name: versionName,
+              isDefault: options.default || false,
             };
             if (options.previousVersionSlug) {
               const previousVersion = projectVersions.find(

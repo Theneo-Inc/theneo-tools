@@ -3,23 +3,44 @@ import { tryCatch } from '../../utils/exception';
 import { getProfile } from '../../context/auth';
 import { createTheneo } from '../../core/theneo';
 import { getProject, getProjectVersion } from '../../core/cli/project/project';
+import { input } from '@inquirer/prompts';
+
+async function getEmail(
+  options: {
+    email: string | undefined;
+  },
+  isInteractive: boolean
+): Promise<string> {
+  if (options.email) {
+    return options.email;
+  }
+
+  if (!isInteractive) {
+    console.error('Email is required');
+    process.exit(1);
+  }
+
+  const email = await input({
+    message: 'Enter the email of the subscriber',
+  });
+  if (!email) {
+    console.error('Email is required');
+    process.exit(1);
+  }
+  return email;
+}
 
 export function initAddSubscriberCreateCommand(): Command {
   return (
     new Command('add-subscriber')
-      .description(
-        "Add a subscriber to a project's version in order to receive documentation updates"
-      )
+      .description('Add a subscriber for project changelog')
       .option('--project <project-slug>', 'Project slug')
+      .option('--workspace <workspace-slug>', 'Workspace slug')
       .option(
-        '--workspace <workspace-slug>',
-        'Workspace slug where the project is created'
+        '--projectVersion <previous-version-slug>',
+        'Project version slug'
       )
-      .option(
-        '--previousVersion <previous-version-slug>',
-        'Project version slug to subscribe to'
-      )
-      .option('--email <email>', 'email to subscribe the project version')
+      .option('--email <email>', 'Email of the new subscriber to change log')
       .option(
         '--profile <string>',
         'Use a specific profile from your config file.'
@@ -30,7 +51,7 @@ export function initAddSubscriberCreateCommand(): Command {
           async (options: {
             project: string | undefined;
             workspace: string | undefined;
-            previousVersion: string | undefined;
+            projectVersion: string | undefined;
             email: string | undefined;
             profile: string | undefined;
           }) => {
@@ -43,7 +64,7 @@ export function initAddSubscriberCreateCommand(): Command {
               workspaceKey: options.workspace,
             });
 
-            const projectVersionSlug = options.previousVersion;
+            const projectVersionSlug = options.projectVersion;
             const projectVersion = await getProjectVersion(
               theneo,
               project,
@@ -55,10 +76,20 @@ export function initAddSubscriberCreateCommand(): Command {
               process.exit(1);
             }
 
-            await theneo.addSubscriberToProjectVersion({
-              versionId: projectVersion.id,
-              email: options.email,
+            const email = await getEmail(options, isInteractive);
+
+            const result = await theneo.addSubscriberToProjectVersion({
+              projectVersionId: projectVersion.id,
+              email: email,
             });
+
+            if (result.err) {
+              console.error(result.error.message);
+              process.exit(1);
+            }
+            console.log(
+              `Subscriber - ${email} was added successfully to ${projectVersionSlug}`
+            );
           }
         )
       )

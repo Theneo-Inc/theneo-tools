@@ -30,7 +30,7 @@
 -->
 
 - [ ] Code is up-to-date with the `main` branch
-- [ ] `pnpm run lint` passes with this change
+- [ ] `npm run lint` passes with this change
 - [ ] This pull request links relevant issues as `Fixes #0000`
 - [ ] There are new or updated unit tests validating the change
 - [ ] Documentation has been updated to reflect this change

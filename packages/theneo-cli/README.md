@@ -201,13 +201,13 @@ git clone git@github.com:Theneo-Inc/theneo-tools.git
 
 ```bash
 nvm use 
-pnpm install
+npm install
 ```
 
 #### install the cli
 
 ```bash
-pnpm run cli
+npm run cli
 ```
 #### Run the cli
 

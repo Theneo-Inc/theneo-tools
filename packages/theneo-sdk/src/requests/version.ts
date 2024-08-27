@@ -56,7 +56,7 @@ export function addSubscriberToProjectVersion(
   options: AddSubscriberToProjectVersionQuery
 ): Promise<Result<never>> {
   const url = new URL(
-    `${baseApiUrl}/api/project-version/${options.projectVersionId}/subscriber`
+    `${baseApiUrl}/api/project-version/${options.projectVersionId}/changelog-subscriber`
   );
   return postRequest<{ email: string }, never>({
     url,

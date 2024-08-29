@@ -88,7 +88,7 @@ export function initAddSubscriberCreateCommand(): Command {
               process.exit(1);
             }
             console.log(
-              `Subscriber - ${email} was added successfully to ${projectVersionSlug}`
+              `Subscriber - ${email} was added successfully to ${projectVersion.slug}`
             );
           }
         )

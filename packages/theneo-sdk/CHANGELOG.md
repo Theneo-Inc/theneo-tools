@@ -1,5 +1,13 @@
 # @theneo/sdk
 
+## 0.14.0
+
+### Minor Changes
+
+- 2943104: \* Revert back to npm
+  - Add default project version flag
+  - Add subscribe to changelog command
+
 ## 0.13.0
 
 ### Minor Changes

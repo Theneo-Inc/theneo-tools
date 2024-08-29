@@ -1,5 +1,18 @@
 # @theneo/cli
 
+## 0.16.0
+
+### Minor Changes
+
+- 2943104: \* Revert back to npm
+  - Add default project version flag
+  - Add subscribe to changelog command
+
+### Patch Changes
+
+- Updated dependencies [2943104]
+  - @theneo/sdk@0.14.0
+
 ## 0.15.0
 
 ### Minor Changes

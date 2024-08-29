@@ -1,5 +1,11 @@
 # @theneo/cli
 
+## 0.16.1
+
+### Patch Changes
+
+- 47503a9: versionSlug is undefined for add-subscribers
+
 ## 0.16.0
 
 ### Minor Changes

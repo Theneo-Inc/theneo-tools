@@ -2,14 +2,18 @@ import { Command } from 'commander';
 import { createTheneo } from '../../core/theneo';
 import { getProfile } from '../../context/auth';
 import { getProject, selectVersions } from '../../core/cli/project/project';
-import { input, confirm } from '@inquirer/prompts';
+import { confirm, input } from '@inquirer/prompts';
 import { tryCatch } from '../../utils/exception';
-import { CreateProjectVersionOptions } from '@theneo/sdk';
+import {
+  CreateProjectVersionOptions,
+  ProjectSchema,
+  ProjectVersion,
+} from '@theneo/sdk';
 
 async function getVersionName(options: {
   name: string | undefined;
   projectKey: string | undefined;
-  workspaceSlug: string | undefined;
+  workspace: string | undefined;
   previousVersionSlug: string | undefined;
   profile: string | undefined;
 }): Promise<string> {
@@ -23,6 +27,62 @@ async function getVersionName(options: {
     process.exit(1);
   }
   return versionName;
+}
+
+async function buildVersionCreateOptions(
+  project: ProjectSchema,
+  versionName: string,
+  options: {
+    name: string | undefined;
+    projectKey: string | undefined;
+    project: string | undefined;
+    workspace: string | undefined;
+    previousVersionSlug: string | undefined;
+    profile: string | undefined;
+    default?: boolean | undefined;
+  },
+  projectVersions: ProjectVersion[],
+  isInteractive: boolean
+): Promise<CreateProjectVersionOptions> {
+  const createOptions: CreateProjectVersionOptions = {
+    projectId: project.id,
+    name: versionName,
+    isDefault: options.default || false,
+  };
+  if (options.previousVersionSlug) {
+    const previousVersion = projectVersions.find(
+      version => version.slug === options.previousVersionSlug
+    );
+    if (!previousVersion) {
+      console.error(
+        `Previous version with slug ${options.previousVersionSlug} not found`
+      );
+      process.exit(1);
+    }
+    console.log('Creating version from previous version', previousVersion.id);
+    createOptions.previousVersionId = previousVersion.id;
+  } else {
+    createOptions.isNewVersion = true;
+    createOptions.isEmpty = true;
+    if (isInteractive) {
+      const shouldDuplicate = await confirm({
+        message: 'Do you want to duplicate content from a previous version?',
+      });
+      if (shouldDuplicate) {
+        const previousVersion = await selectVersions(projectVersions);
+        createOptions.previousVersionId = previousVersion.id;
+        createOptions.isNewVersion = false;
+        createOptions.isEmpty = false;
+      }
+
+      if (!options.default) {
+        createOptions.isDefault = await confirm({
+          message: 'Do you want to set this as the default version?',
+        });
+      }
+    }
+  }
+  return createOptions;
 }
 
 export function initProjectVersionCreateCommand(): Command {
@@ -42,6 +102,7 @@ export function initProjectVersionCreateCommand(): Command {
         '--previousVersion <previous-version-slug>',
         'Previous version slug to duplicate the content from'
       )
+      .option('--default', 'set as default version')
       .option(
         '--profile <string>',
         'Use a specific profile from your config file.'
@@ -53,17 +114,19 @@ export function initProjectVersionCreateCommand(): Command {
             name: string | undefined;
             projectKey: string | undefined;
             project: string | undefined;
-            workspaceSlug: string | undefined;
+            workspace: string | undefined;
             previousVersionSlug: string | undefined;
             profile: string | undefined;
+            default?: boolean | undefined;
           }) => {
+            console.log('Creating version', options);
             const profile = getProfile(options.profile);
             const theneo = createTheneo(profile);
 
             const isInteractive = !options.name;
             const project = await getProject(theneo, {
               projectKey: options.projectKey || options.project,
-              workspaceKey: options.workspaceSlug,
+              workspaceKey: options.workspace,
             });
 
             const projectVersionsResult = await theneo.listProjectVersions(
@@ -76,41 +139,13 @@ export function initProjectVersionCreateCommand(): Command {
 
             const projectVersions = projectVersionsResult.value;
             const versionName = await getVersionName(options);
-            const createOptions: CreateProjectVersionOptions = {
-              projectId: project.id,
-              name: versionName,
-            };
-            if (options.previousVersionSlug) {
-              const previousVersion = projectVersions.find(
-                version => version.slug === options.previousVersionSlug
-              );
-              if (!previousVersion) {
-                console.error(
-                  `Previous version with slug ${options.previousVersionSlug} not found`
-                );
-                process.exit(1);
-              }
-              console.log(
-                'Creating version from previous version',
-                previousVersion.id
-              );
-              createOptions.previousVersionId = previousVersion.id;
-            } else {
-              createOptions.isNewVersion = true;
-              createOptions.isEmpty = true;
-              if (isInteractive) {
-                const shouldDuplicate = await confirm({
-                  message:
-                    'Do you want to duplicate content from a previous version?',
-                });
-                if (shouldDuplicate) {
-                  const previousVersion = await selectVersions(projectVersions);
-                  createOptions.previousVersionId = previousVersion.id;
-                  createOptions.isNewVersion = false;
-                  createOptions.isEmpty = false;
-                }
-              }
-            }
+            const createOptions = await buildVersionCreateOptions(
+              project,
+              versionName,
+              options,
+              projectVersions,
+              isInteractive
+            );
 
             const result = await theneo.createProjectVersion(createOptions);
 

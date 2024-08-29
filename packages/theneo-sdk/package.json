@@ -19,7 +19,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
-    "dev": "pnpm run build -- --watch",
+    "dev": "npm run build -- --watch",
     "lint": "eslint ./src/  --fix",
     "madge": "madge -c src/index.ts --ts-config tsconfig.build.json"
   },

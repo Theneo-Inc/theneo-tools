@@ -167,8 +167,9 @@ Options:
 
 Commands:
   list [options]    List project versions
-  create [options]
-  delete [options]
+  create [options]  Create new version
+  delete [options]  Delete a version
+  add-subscriber [options]  Add a subscriber for project changelog
   help [command]    display help for command
 ```
 
@@ -182,12 +183,28 @@ Options:
   --project <project-slug>                   Project slug to create version for
   --workspace <workspace-slug>               Workspace slug where the project is
   --previousVersion <previous-version-slug>  Previous version slug to duplicate the content from
+  --default                                  set as default version
   --profile <string>                         Use a specific profile from your config file.
   -h, --help                                 display help for command
 ```
 
 ```bash
 theneo version create
+```
+### Add ChangeLog subscriber
+
+```bash
+Usage: theneo version add-subscriber [options]
+
+Add a subscriber for project changelog
+
+Options:
+  --project <project-slug>                  Project slug
+  --workspace <workspace-slug>              Workspace slug
+  --projectVersion <previous-version-slug>  Project version slug
+  --email <email>                           Email of the new subscriber to change log
+  --profile <string>                        Use a specific profile from your config file.
+  -h, --help                                display help for command
 ```
 
 ### Use the main branch changes
@@ -201,13 +218,13 @@ git clone git@github.com:Theneo-Inc/theneo-tools.git
 
 ```bash
 nvm use 
-pnpm install
+npm install
 ```
 
 #### install the cli
 
 ```bash
-pnpm run cli
+npm run cli
 ```
 #### Run the cli
 
@@ -282,7 +299,7 @@ Usage: theneo create [options]
 
 Options:
   --dir <directory>             directory location where the project will be exported
-  --name <project-name>         project key
+  --name <project-name>         project name 
   --workspace <workspace-slug>  Enter workspace slug where the project should be created in, if not present uses default workspace
   --profile <string>            Use a specific profile from your config file.
   -h, --help                    display help for command

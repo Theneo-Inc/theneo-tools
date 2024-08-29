@@ -1,4 +1,5 @@
 import {
+  AddSubscriberToProjectVersionQuery,
   CreatedProjectStatusEnum,
   CreateProjectOptions,
   CreateProjectResponse,
@@ -25,6 +26,7 @@ import {
   callGetProjectVersionsApi,
   createProjectVersion,
   deleteProjectVersion,
+  addSubscriberToProjectVersion,
 } from './requests';
 import { SDK_VERSION } from './utils/version';
 
@@ -294,6 +296,16 @@ export class Theneo {
 
   public deleteProjectVersion(versionId: string): Promise<Result<void>> {
     return deleteProjectVersion(this.baseApiUrl, this.getHeaders(), versionId);
+  }
+
+  public addSubscriberToProjectVersion(
+    options: AddSubscriberToProjectVersionQuery
+  ): Promise<Result<never>> {
+    return addSubscriberToProjectVersion(
+      this.baseApiUrl,
+      this.getHeaders(),
+      options
+    );
   }
 
   /**

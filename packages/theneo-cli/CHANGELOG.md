@@ -1,5 +1,16 @@
 # @theneo/cli
 
+## 0.17.0
+
+### Minor Changes
+
+- a8cdc5d: Add OpenAPI export function
+
+### Patch Changes
+
+- Updated dependencies [a8cdc5d]
+  - @theneo/sdk@0.15.0
+
 ## 0.16.1
 
 ### Patch Changes

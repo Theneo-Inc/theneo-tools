@@ -1,5 +1,11 @@
 # @theneo/sdk
 
+## 0.15.0
+
+### Minor Changes
+
+- a8cdc5d: Add OpenAPI export function
+
 ## 0.14.0
 
 ### Minor Changes

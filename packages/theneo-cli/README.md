@@ -261,6 +261,9 @@ Options:
   --profile <string>               Use a specific profile from your config file.
   --dir <directory>                directory location where the project will be exported (default: "docs")
   --publishedView                  By default it will export data from editor, pass this flag to get published project data (default: false)
+  --force                          Overwrite existing files without prompting (default: false)
+  --openapi                        Export as OpenAPI spec
+  --format <format>                exported OpenAPI spec format (yaml or json) (default: "yaml")
   -h, --help                       display help for command
 ```
 

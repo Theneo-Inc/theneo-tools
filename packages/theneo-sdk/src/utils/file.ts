@@ -14,7 +14,6 @@ export function createFiles(
 ): void {
   for (const sectionContent of fileContents) {
     const filePath = path.join(baseDirectory, sectionContent.fileName);
-    console.log(filePath);
     fse.outputFileSync(filePath, sectionContent.content);
   }
 }

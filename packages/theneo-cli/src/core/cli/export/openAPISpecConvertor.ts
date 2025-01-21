@@ -61,6 +61,34 @@ function processSectionGroup(
 
   let hasContent = false;
 
+  // Process the main section.json in the current directory
+  const mainSectionJsonPath = path.join(directory, 'section.json');
+  if (fs.existsSync(mainSectionJsonPath)) {
+    const mainSectionJson: TheneoSection = loadJson(mainSectionJsonPath);
+    const path = mainSectionJson.endpoints?.path || '/';
+    const operationId = `${tagName.replace(/\//g, '_')}`;
+
+    if (mainSectionJson.endpoints?.method && path) {
+      addToOpenapi(
+        tagName,
+        sectionNameOrder[sectionGroupName] || 'No Summary Found',
+        mainSectionJson,
+        openapiSpec,
+        groupDescription,
+        groupDescription,
+        operationId
+      );
+
+      hasContent = true;
+      currentSection.subSections?.push({
+        name: sectionGroupName,
+        operationId: operationId,
+        description: groupDescription,
+      });
+    }
+  }
+
+  // Process the child sections
   sectionChildren.forEach((child: TheneoJsonSection) => {
     const slug = child.slug;
     const itemPath = path.join(directory, slug);
@@ -123,7 +151,12 @@ function processSectionGroup(
   });
 
   if (hasContent || currentSection.description) {
-    if (parentTags.length === 0) {
+    // Ensure no duplicate sections by checking the current section name
+    const existingSection = xTheneoMetadata.find(
+      section => section.name === sectionGroupName
+    );
+
+    if (!existingSection) {
       xTheneoMetadata.push(currentSection);
     }
     return currentSection;

@@ -384,16 +384,17 @@ function convertBodySchema(
     }
   });
 
-  if (requiredFields.length) {
+  if (requiredFields.length > 0) {
     schema.required = requiredFields;
   }
 
   return schema;
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 function convertArraySchemaItem(item: Parameter, schema: any): void {
   if (item.items && item.items.length > 0) {
-    // Handle the case where array items are objects (like in the users array)
+    // Handle the case where array items are objects or nested arrays
     if (
       item.items[0]?.valueType === 'object' ||
       item.items[0]?.valueType === 'array'
@@ -401,12 +402,17 @@ function convertArraySchemaItem(item: Parameter, schema: any): void {
       schema.items = {
         type: 'object',
         properties: {},
+        required: [],
       };
       item.items.forEach((subItem: Parameter) => {
         if (subItem.items && subItem.items.length > 0) {
           subItem.items.forEach((property: Parameter) => {
-            schema.items.properties[property.name] =
-              convertSchemaItem(property);
+            const propertySchema = convertSchemaItem(property);
+            schema.items.properties[property.name] = propertySchema;
+            if (property.isRequired) {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+              schema.items.required.push(property.name);
+            }
           });
         }
       });
@@ -438,9 +444,16 @@ function convertSchemaItem(item: Parameter): any {
     convertArraySchemaItem(item, schema);
   } else if (item.valueType === 'object') {
     schema.properties = {};
+    schema.required = [];
+
     if (item.items && item.items.length > 0) {
       item.items.forEach((property: Parameter) => {
-        schema.properties[property.name] = convertSchemaItem(property);
+        const propertySchema = convertSchemaItem(property);
+        schema.properties[property.name] = propertySchema;
+        if (property.isRequired) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          schema.required.push(property.name);
+        }
       });
     }
   }

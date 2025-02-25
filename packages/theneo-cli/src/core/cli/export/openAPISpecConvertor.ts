@@ -65,8 +65,8 @@ function processSectionGroup(
   const mainSectionJsonPath = path.join(directory, 'section.json');
   if (fs.existsSync(mainSectionJsonPath)) {
     const mainSectionJson: TheneoSection = loadJson(mainSectionJsonPath);
-    const path = mainSectionJson.endpoints?.path || '/';
-    const operationId = `${tagName.replace(/\//g, '_')}`;
+    const path = mainSectionJson.endpoints?.path;
+    const operationId = `${Date.now()}_${tagName.replace(/[^a-zA-Z0-9]/g, '_')}`;
 
     if (mainSectionJson.endpoints?.method && path) {
       addToOpenapi(

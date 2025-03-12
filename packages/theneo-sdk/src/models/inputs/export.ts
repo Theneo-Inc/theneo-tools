@@ -4,4 +4,5 @@ export interface ExportProjectInput {
   dir?: string;
   noGeneration?: boolean;
   shouldGetPublicViewData?: boolean;
+  openapi?: boolean;
 }

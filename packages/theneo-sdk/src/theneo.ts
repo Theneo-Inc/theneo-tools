@@ -198,11 +198,17 @@ export class Theneo {
       this.getHeaders(),
       input.projectId,
       input.versionId,
-      input.shouldGetPublicViewData
+      input.shouldGetPublicViewData,
+      input.openapi
     );
     if (result.err) {
       return result;
     }
+
+    if (input.openapi) {
+      return result;
+    }
+
     if (!input.noGeneration) {
       const dir = input.dir || './docs';
       createFiles(dir, result.unwrap().sectionContents);

@@ -7,10 +7,16 @@ export function exportProjectData(
   headers: ApiHeaders,
   projectId: string,
   versionId?: string,
-  shouldGetPublicViewData: boolean = false
+  shouldGetPublicViewData: boolean = false,
+  openapi: boolean = false
 ): Promise<Result<ExportedProject, Error>> {
   const url = new URL(`${baseUrl}/api/section/export`);
   url.searchParams.append('projectId', projectId);
+
+  if (openapi) {
+    url.searchParams.append('isOpenApi', 'true');
+  }
+
   if (versionId) {
     url.searchParams.append('versionId', versionId);
   }

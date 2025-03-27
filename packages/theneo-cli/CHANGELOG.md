@@ -1,5 +1,16 @@
 # @theneo/cli
 
+## 0.18.0
+
+### Minor Changes
+
+- CLI export feature improvements
+
+### Patch Changes
+
+- Updated dependencies
+  - @theneo/sdk@0.15.1
+
 ## 0.17.0
 
 ### Minor Changes

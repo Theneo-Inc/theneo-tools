@@ -1,5 +1,11 @@
 # @theneo/sdk
 
+## 0.15.1
+
+### Patch Changes
+
+- CLI export feature improvements
+
 ## 0.15.0
 
 ### Minor Changes

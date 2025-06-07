@@ -10,20 +10,27 @@ function runCli(): void {
   program
     .command('add <projectSlug>')
     .option('-p, --port <port>', 'Server port')
-    .action(async (projectSlug: string, options: { port?: string }) => {
-      if (!projectSlug) {
-        console.error('Invalid project slug.');
-        process.exit(1);
+    .option('-m, --mode <mode>', 'Server mode: local or cloud', 'local')
+    .action(
+      async (
+        projectSlug: string,
+        options: { port?: string; mode?: string }
+      ) => {
+        if (!projectSlug) {
+          console.error('Invalid project slug.');
+          process.exit(1);
+        }
+        const port = Number(options.port || process.env.PORT || 3000);
+        const mode = options.mode || process.env.MCP_MODE || 'local';
+        const dir = path.join(process.cwd(), `.mcp-${projectSlug}`);
+        try {
+          await startMcpServer(projectSlug, dir, port, mode);
+        } catch (err: any) {
+          console.error('Failed to start MCP server:', err.message);
+          process.exit(1);
+        }
       }
-      const port = Number(options.port || process.env.PORT || 3000);
-      const dir = path.join(process.cwd(), `.mcp-${projectSlug}`);
-      try {
-        await startMcpServer(projectSlug, dir, port);
-      } catch (err: any) {
-        console.error('Failed to start MCP server:', err.message);
-        process.exit(1);
-      }
-    });
+    );
 
   program.parse(process.argv);
 

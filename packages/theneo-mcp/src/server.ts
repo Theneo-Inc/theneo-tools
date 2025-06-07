@@ -4,16 +4,39 @@ import { exportOpenapi, loadSpec } from './exporter';
 export async function startMcpServer(
   projectSlug: string,
   dir: string,
-  port: number
+  port: number,
+  mode = 'local'
 ): Promise<void> {
+  if (mode !== 'local') {
+    console.warn(
+      `Mode ${mode} not fully supported. Falling back to local mode.`
+    );
+  }
   let specPath = await exportOpenapi(projectSlug, dir);
   let openapi = loadSpec(specPath);
   const context = { project: projectSlug };
+  const manifest = {
+    schema_version: 'v1',
+    name_for_human: `${projectSlug} MCP`,
+    name_for_model: `${projectSlug} MCP`,
+    description_for_human: `MCP server for project ${projectSlug}`,
+    description_for_model: `MCP server for project ${projectSlug}`,
+    api: {
+      openapi: '/openapi',
+    },
+    auth: {
+      type: 'none',
+    },
+  };
 
   const app = express();
 
   app.get('/openapi', (_req, res) => {
     res.json(openapi);
+  });
+
+  app.get('/.well-known/mcp/tool-manifest.json', (_req, res) => {
+    res.json(manifest);
   });
 
   app.get('/context', (_req, res) => {

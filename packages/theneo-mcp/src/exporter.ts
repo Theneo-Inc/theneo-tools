@@ -4,7 +4,8 @@ import { execa } from 'execa';
 
 export async function exportOpenapi(
   projectSlug: string,
-  dir: string
+  dir: string,
+  profile?: string
 ): Promise<string> {
   const args = [
     '@theneo/cli',
@@ -17,6 +18,10 @@ export async function exportOpenapi(
     '--dir',
     dir,
   ];
+
+  if (profile) {
+    args.push('--profile', profile);
+  }
 
   await execa('npx', args, { stdio: 'inherit' });
 

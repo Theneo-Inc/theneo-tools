@@ -11,10 +11,11 @@ function runCli(): void {
     .command('add <projectSlug>')
     .option('-p, --port <port>', 'Server port')
     .option('-m, --mode <mode>', 'Server mode: local or cloud', 'local')
+    .option('--profile <profile>', 'Use a specific profile from your config file.')
     .action(
       async (
         projectSlug: string,
-        options: { port?: string; mode?: string }
+        options: { port?: string; mode?: string; profile?: string }
       ) => {
         if (!projectSlug) {
           console.error('Invalid project slug.');
@@ -22,9 +23,10 @@ function runCli(): void {
         }
         const port = Number(options.port || process.env.PORT || 3000);
         const mode = options.mode || process.env.MCP_MODE || 'local';
+        const profile = options.profile;
         const dir = path.join(process.cwd(), `.mcp-${projectSlug}`);
         try {
-          await startMcpServer(projectSlug, dir, port, mode);
+          await startMcpServer(projectSlug, dir, port, mode, profile);
         } catch (err: any) {
           console.error('Failed to start MCP server:', err.message);
           process.exit(1);

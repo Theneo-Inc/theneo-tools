@@ -5,14 +5,15 @@ export async function startMcpServer(
   projectSlug: string,
   dir: string,
   port: number,
-  mode = 'local'
+  mode = 'local',
+  profile?: string
 ): Promise<void> {
   if (mode !== 'local') {
     console.warn(
       `Mode ${mode} not fully supported. Falling back to local mode.`
     );
   }
-  let specPath = await exportOpenapi(projectSlug, dir);
+  let specPath = await exportOpenapi(projectSlug, dir, profile);
   let openapi = loadSpec(specPath);
   const context = { project: projectSlug };
   const manifest = {
@@ -46,7 +47,7 @@ export async function startMcpServer(
   app.post('/refresh', (_req, res) => {
     void (async () => {
       try {
-        specPath = await exportOpenapi(projectSlug, dir);
+        specPath = await exportOpenapi(projectSlug, dir, profile);
         openapi = loadSpec(specPath);
         res.json({ status: 'refreshed' });
       } catch (err: any) {

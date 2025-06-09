@@ -1,12 +1,12 @@
 import path from 'path';
 import fs from 'fs';
-import { execa } from 'execa';
 
 export async function exportOpenapi(
   projectSlug: string,
   dir: string,
   profile?: string
 ): Promise<string> {
+  const { execa } = await import('execa');
   const args = [
     '@theneo/cli',
     'export',

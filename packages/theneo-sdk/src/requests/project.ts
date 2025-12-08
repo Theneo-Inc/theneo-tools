@@ -135,6 +135,9 @@ export function callImportProjectApi(
       JSON.stringify(options.importOptionAdditionalData)
     );
   }
+  if (options.tabSlug) {
+    bodyFormData.append('tabSlug', options.tabSlug);
+  }
   return postRequest<FormData, ImportResponse>({
     url,
     headers: {
@@ -227,6 +230,9 @@ export function callImportProjectFromDirectoryApi(
       'importOptionAdditionalData',
       JSON.stringify(options.importOptionAdditionalData)
     );
+  }
+  if (options.tabSlug) {
+    bodyFormData.append('tabSlug', options.tabSlug);
   }
   options.files.map(fileInfo => {
     bodyFormData.append('files', fs.createReadStream(fileInfo.filePath), {

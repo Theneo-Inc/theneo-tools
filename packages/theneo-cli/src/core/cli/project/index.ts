@@ -35,6 +35,7 @@ export interface ImportCommandOptions {
   profile: string | undefined;
   keepOldParameterDescription: boolean | undefined;
   keepOldSectionDescription: boolean | undefined;
+  tab: string | undefined;
 }
 
 export interface ChosenInputType {

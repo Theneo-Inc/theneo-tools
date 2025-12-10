@@ -1,5 +1,16 @@
 # @theneo/cli
 
+## 0.19.0
+
+### Minor Changes
+
+- a23ed39: new --tabs flag; ui enhancements
+
+### Patch Changes
+
+- Updated dependencies [a23ed39]
+  - @theneo/sdk@0.16.0
+
 ## 0.18.0
 
 ### Minor Changes

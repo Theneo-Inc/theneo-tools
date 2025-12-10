@@ -1,5 +1,11 @@
 # @theneo/sdk
 
+## 0.16.0
+
+### Minor Changes
+
+- a23ed39: new --tabs flag; ui enhancements
+
 ## 0.15.1
 
 ### Patch Changes

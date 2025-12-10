@@ -8,10 +8,68 @@ import {
 } from '../../core/cli/project/project';
 import { getInputDirectoryLocation } from '../../core/cli/project';
 import { ImportOption } from '@theneo/sdk';
-import { createSpinner } from 'nanospinner';
+import { createSpinner, Spinner } from 'nanospinner';
 import { isInteractiveFlow } from '../../utils';
 import { tryCatch } from '../../utils/exception';
 import { createNewProjectVersion } from '../../core/cli/version/create';
+import chalk from 'chalk';
+
+function handleImportError(
+  spinner: Spinner,
+  errorMsg: string,
+  tabSlug?: string
+): void {
+  if (errorMsg.includes('not found') && errorMsg.includes('Available tabs:')) {
+    const availableTabsMatch = errorMsg.match(/Available tabs:\s*([^"}\]]+)/);
+    const availableTabs = availableTabsMatch?.[1]?.trim() || 'none';
+
+    spinner.error({
+      text: chalk.red(`✖ Tab '${chalk.yellow(tabSlug)}' not found!`),
+    });
+    console.log(
+      chalk.dim('\nAvailable tabs:'),
+      availableTabs === '' || availableTabs === 'none'
+        ? chalk.yellow('No tabs found. Import without --tab flag first.')
+        : chalk.cyan(availableTabs)
+    );
+  } else if (errorMsg.includes('has no tabs')) {
+    spinner.error({
+      text: chalk.red('✖ Project has no tabs configured'),
+    });
+    console.log(
+      chalk.dim('\nTip:'),
+      chalk.yellow('Import the full project first without --tab flag')
+    );
+  } else {
+    spinner.error({ text: chalk.red(`✖ ${errorMsg}`) });
+  }
+}
+
+function handleImportSuccess(
+  spinner: Spinner,
+  publishData: any,
+  editorLink: string,
+  tabSlug?: string
+): void {
+  if (publishData?.publishedPageUrl) {
+    spinner.success({
+      text: chalk.green('✔ Project published successfully!'),
+    });
+    console.log(
+      chalk.dim('Published page:'),
+      chalk.cyan(publishData.publishedPageUrl)
+    );
+  } else {
+    const successMsg = tabSlug
+      ? `✔ Tab ${chalk.cyan(tabSlug)} updated successfully!`
+      : '✔ Project updated successfully!';
+
+    spinner.success({
+      text: chalk.green(successMsg),
+    });
+    console.log(chalk.dim('Editor link:'), chalk.cyan(editorLink));
+  }
+}
 
 function getDirectory(
   dir: string | undefined,
@@ -87,7 +145,12 @@ export function initImportCommand(program: Command): Command {
           // );
           const shouldPublish = await getShouldPublish(options, isInteractive);
 
-          const spinner = createSpinner('Updating documentation').start();
+          // Enhanced spinner with context
+          const spinnerText = options.tab
+            ? `Importing to tab ${chalk.cyan(options.tab)}...`
+            : 'Importing documentation...';
+          const spinner = createSpinner(spinnerText).start();
+
           const res = await theneo.importProjectDocument({
             projectId: project.id,
             versionId: projectVersionId,
@@ -100,19 +163,17 @@ export function initImportCommand(program: Command): Command {
           });
 
           if (res.err) {
-            spinner.error({ text: res.error.message });
+            handleImportError(spinner, res.error.message, options.tab);
             process.exit(1);
           }
-          if (res.value.publishData?.publishedPageUrl) {
-            spinner.success({
-              text: `Project published successfully! Published Page: ${res.value.publishData.publishedPageUrl}`,
-            });
-          } else {
-            const editorLink = `${profile.appUrl}/editor/${project.id}`;
-            spinner.success({
-              text: `Project updated, you can make changes via editor before publishing. Editor link: ${editorLink}`,
-            });
-          }
+
+          const editorLink = `${profile.appUrl}/editor/${project.id}`;
+          handleImportSuccess(
+            spinner,
+            res.value.publishData,
+            editorLink,
+            options.tab
+          );
         }
       )
     );

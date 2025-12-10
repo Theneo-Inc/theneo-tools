@@ -1,4 +1,5 @@
 import { ApiHeaders, getRequest } from 'theneo/requests/base';
+// eslint-disable-next-line node/no-extraneous-import
 import { Result } from 'theneo';
 import { ExportedProject } from 'theneo/schema/export';
 
@@ -8,7 +9,8 @@ export function exportProjectData(
   projectId: string,
   versionId?: string,
   shouldGetPublicViewData: boolean = false,
-  openapi: boolean = false
+  openapi: boolean = false,
+  tabSlug?: string
 ): Promise<Result<ExportedProject, Error>> {
   const url = new URL(`${baseUrl}/api/section/export`);
   url.searchParams.append('projectId', projectId);
@@ -25,6 +27,10 @@ export function exportProjectData(
     'shouldGetPublicViewData',
     String(shouldGetPublicViewData)
   );
+
+  if (tabSlug) {
+    url.searchParams.append('tabSlug', tabSlug);
+  }
 
   return getRequest<ExportedProject>({
     url,

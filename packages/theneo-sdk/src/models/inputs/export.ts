@@ -5,4 +5,5 @@ export interface ExportProjectInput {
   noGeneration?: boolean;
   shouldGetPublicViewData?: boolean;
   openapi?: boolean;
+  tabSlug?: string;
 }

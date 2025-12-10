@@ -1,7 +1,8 @@
 import { Command } from 'commander';
 import { getProfile } from '../../context/auth';
-import { createSpinner } from 'nanospinner';
+import { createSpinner, Spinner } from 'nanospinner';
 import { createTheneo } from '../../core/theneo';
+import chalk from 'chalk';
 import {
   getProject,
   getProjectVersion,
@@ -27,6 +28,63 @@ import {
 import { confirm } from '@inquirer/prompts';
 import { isInteractiveFlow } from '../../utils';
 import { createNewProjectVersion } from '../../core/cli/version/create';
+
+function handleProjectImportError(
+  spinner: Spinner,
+  errorMsg: string,
+  tabSlug?: string
+): void {
+  if (errorMsg.includes('not found') && errorMsg.includes('Available tabs:')) {
+    const availableTabsMatch = errorMsg.match(/Available tabs:\s*([^"}\]]+)/);
+    const availableTabs = availableTabsMatch?.[1]?.trim() || 'none';
+
+    spinner.error({
+      text: chalk.red(`✖ Tab '${chalk.yellow(tabSlug)}' not found!`),
+    });
+    console.log(
+      chalk.dim('\nAvailable tabs:'),
+      availableTabs === '' || availableTabs === 'none'
+        ? chalk.yellow('No tabs found. Import without --tab flag first.')
+        : chalk.cyan(availableTabs)
+    );
+  } else if (errorMsg.includes('has no tabs')) {
+    spinner.error({
+      text: chalk.red('✖ Project has no tabs configured'),
+    });
+    console.log(
+      chalk.dim('\nTip:'),
+      chalk.yellow('Import the full project first without --tab flag')
+    );
+  } else {
+    spinner.error({ text: chalk.red(`✖ ${errorMsg}`) });
+  }
+}
+
+function handleProjectImportSuccess(
+  spinner: Spinner,
+  publishData: any,
+  editorLink: string,
+  tabSlug?: string
+): void {
+  if (publishData?.publishedPageUrl) {
+    spinner.success({
+      text: chalk.green('✔ Project published successfully!'),
+    });
+    console.log(
+      chalk.dim('Published page:'),
+      chalk.cyan(publishData.publishedPageUrl)
+    );
+  } else {
+    const successMsg = tabSlug
+      ? `✔ Tab ${chalk.cyan(tabSlug)} updated successfully!`
+      : '✔ Project updated successfully!';
+
+    spinner.success({
+      text: chalk.green(successMsg),
+    });
+    console.log(chalk.dim('Editor link:'), chalk.cyan(editorLink));
+  }
+}
 
 async function getImportOptionAdditionalData(
   importOption: ImportOption,
@@ -170,7 +228,19 @@ Note: Published document link has this pattern: https://app.theneo.io/<workspace
         );
         const shouldPublish = await getShouldPublish(options, isInteractive);
 
-        const spinner = createSpinner('Updating documentation').start();
+        // Enhanced spinner with context
+        const importSource = options.file
+          ? `file ${chalk.cyan(options.file)}`
+          : options.link
+            ? `link ${chalk.cyan(options.link)}`
+            : 'Postman collection';
+
+        const spinnerText = options.tab
+          ? `Importing ${importSource} to tab ${chalk.cyan(options.tab)}...`
+          : `Importing ${importSource}...`;
+
+        const spinner = createSpinner(spinnerText).start();
+
         const res = await theneo.importProjectDocument({
           projectId: project.id,
           versionId: projectVersionId,
@@ -191,19 +261,17 @@ Note: Published document link has this pattern: https://app.theneo.io/<workspace
           tabSlug: options.tab,
         });
         if (res.err) {
-          spinner.error({ text: res.error.message });
+          handleProjectImportError(spinner, res.error.message, options.tab);
           process.exit(1);
         }
-        if (res.value.publishData?.publishedPageUrl) {
-          spinner.success({
-            text: `Project published successfully! Published Page: ${res.value.publishData.publishedPageUrl}`,
-          });
-        } else {
-          const editorLink = `${profile.appUrl}/editor/${project.id}`;
-          spinner.success({
-            text: `Project updated, you can make changes via editor before publishing. Editor link: ${editorLink}`,
-          });
-        }
+
+        const editorLink = `${profile.appUrl}/editor/${project.id}`;
+        handleProjectImportSuccess(
+          spinner,
+          res.value.publishData,
+          editorLink,
+          options.tab
+        );
       })
     );
 }

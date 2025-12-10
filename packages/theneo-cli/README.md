@@ -264,11 +264,16 @@ Options:
   --force                          Overwrite existing files without prompting (default: false)
   --openapi                        Export as OpenAPI spec
   --format <format>                exported OpenAPI spec format (yaml or json) (default: "yaml")
+  --tab <tab-slug>                 Export only a specific tab (optional)
   -h, --help                       display help for command
 ```
 
 ```shell
+# Export entire project
 theneo export --project <project-slug> --projectVersion <version-slug> --dir <directory>
+
+# Export only a specific tab
+theneo export --project <project-slug> --tab tab-1 --dir <directory>
 ```
 
 ### Import project data from Markdown files
@@ -287,12 +292,19 @@ Options:
   --publish                        Automatically publish the project (default: false)
   --projectVersion <version-slug>  Version slug
   --profile <string>               Use a specific profile from your config file.
+  --tab <tab-slug>                 Import into a specific tab only (optional)
   -h, --help                       display help for command
 ```
 
 ```shell
-theneo export --project <project-slug> --projectVersion <version-slug> --dir <directory>
+# Import entire project
+theneo import --project <project-slug> --projectVersion <version-slug> --dir <directory>
+
+# Import into a specific tab only
+theneo import --project <project-slug> --tab tab-2 --dir <directory>
 ```
+
+**Note on Tabs**: When using the `--tab` flag, only the specified tab will be updated during import, while other tabs remain unchanged. During export, only the sections belonging to the specified tab will be exported. Markdown files exported with tabs contain a `<!-- tab:tab-slug -->` marker at the beginning to indicate which tab they belong to.
 
 
 ### Create a new project from markdown files

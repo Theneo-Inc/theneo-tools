@@ -10,6 +10,7 @@ import {
   ImportResponse,
   MergingStrategy,
   Result,
+  // eslint-disable-next-line node/no-extraneous-import
 } from 'theneo';
 import {
   ImportProjectFromDirectoryInput,
@@ -43,6 +44,7 @@ export function importProjectFromDirectory(
     publish: options.publish ?? false,
     importOption: options.importOption,
     importMetadata: options.importMetadata,
+    tabSlug: options.tabSlug,
   };
 
   return callImportProjectFromDirectoryApi(
@@ -82,6 +84,7 @@ export function importProject(
 
   importInput.importOption = options.importOption;
   importInput.importMetadata = options.importMetadata;
+  importInput.tabSlug = options.tabSlug;
 
   if (options.importOption == ImportOption.MERGE) {
     importInput.importOptionAdditionalData = options.importOptionAdditionalData;

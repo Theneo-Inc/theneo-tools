@@ -11,6 +11,7 @@ export interface ImportProjectBaseInput {
   importOption?: ImportOption | undefined;
   importOptionAdditionalData?: ImportOptionAdditionalData | undefined;
   importMetadata?: ImportMetadata | undefined;
+  tabSlug?: string | undefined;
 }
 
 export interface ImportProjectInput extends ImportProjectBaseInput {

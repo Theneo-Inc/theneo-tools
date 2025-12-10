@@ -8,6 +8,31 @@ import { confirm } from '@inquirer/prompts';
 import { isDirectoryEmpty } from '../../utils/file';
 import { ProjectVersion } from '@theneo/sdk';
 import { saveOpenapiSpec } from '../../core/cli/export/openAPISpecConvertor';
+import { createSpinner, Spinner } from 'nanospinner';
+import chalk from 'chalk';
+
+function handleExportError(
+  spinner: Spinner,
+  errorMsg: string,
+  tabSlug?: string
+): void {
+  if (errorMsg.includes('not found') && errorMsg.includes('Available tabs:')) {
+    const availableTabsMatch = errorMsg.match(/Available tabs:\s*([^"}\]]+)/);
+    const availableTabs = availableTabsMatch?.[1]?.trim() || 'none';
+
+    spinner.error({
+      text: chalk.red(`✖ Tab '${chalk.yellow(tabSlug)}' not found!`),
+    });
+    console.log(
+      chalk.dim('\nAvailable tabs:'),
+      availableTabs === '' || availableTabs === 'none'
+        ? chalk.yellow('No tabs available')
+        : chalk.cyan(availableTabs)
+    );
+  } else {
+    spinner.error({ text: chalk.red(`✖ ${errorMsg}`) });
+  }
+}
 
 export function initExportCommand(program: Command): Command {
   return program
@@ -44,6 +69,7 @@ export function initExportCommand(program: Command): Command {
       'exported OpenAPI spec format (yaml or json)',
       'yaml'
     )
+    .option('--tab <tab-slug>', 'Export specific tab only (optional)')
     .action(
       tryCatch(
         async (options: {
@@ -58,6 +84,7 @@ export function initExportCommand(program: Command): Command {
           force: boolean | undefined;
           openapi: boolean | undefined;
           format: 'yaml' | 'json';
+          tab: string | undefined;
         }) => {
           const profile = getProfile(options.profile);
           const theneo = createTheneo(profile);
@@ -77,7 +104,9 @@ export function initExportCommand(program: Command): Command {
           if (!isDirectoryEmpty(options.dir) && !options.force) {
             if (process.env.CI) {
               console.error(
-                `The directory - ${options.dir} is not empty. Please provide an empty directory`
+                chalk.red(
+                  `✖ The directory ${chalk.yellow(options.dir)} is not empty. Please provide an empty directory`
+                )
               );
               process.exit(1);
             }
@@ -85,9 +114,17 @@ export function initExportCommand(program: Command): Command {
               message: `The directory ${options.dir} is not empty. Export will overwrite existing files. Continue?`,
             });
             if (!shouldContinue) {
+              console.log(chalk.dim('Export cancelled'));
               return;
             }
           }
+
+          // Enhanced spinner with context
+          const exportType = options.openapi ? 'OpenAPI spec' : 'documentation';
+          const spinnerText = options.tab
+            ? `Exporting tab ${chalk.cyan(options.tab)} as ${exportType}...`
+            : `Exporting ${exportType}...`;
+          const spinner = createSpinner(spinnerText).start();
 
           const res = await theneo.exportProject({
             projectId: project.id,
@@ -95,19 +132,34 @@ export function initExportCommand(program: Command): Command {
             versionId: version?.id,
             shouldGetPublicViewData: options.publishedView,
             openapi: options.openapi,
+            tabSlug: options.tab,
           });
+
+          if (res.err) {
+            handleExportError(spinner, res.error.message, options.tab);
+            process.exit(1);
+          }
 
           if (options.openapi) {
             const openapiResponse = res.unwrap();
             saveOpenapiSpec(openapiResponse, options.dir, options.format);
           }
 
-          if (res.err) {
-            console.error(res.error.message);
-            process.exit(1);
-          }
+          const successMsg = options.tab
+            ? `✔ Tab ${chalk.cyan(options.tab)} exported successfully!`
+            : '✔ Project exported successfully!';
 
-          console.log(`Project successfully exported to ${options.dir}`);
+          spinner.success({
+            text: chalk.green(successMsg),
+          });
+
+          console.log(chalk.dim('Export location:'), chalk.cyan(options.dir));
+          if (options.openapi) {
+            console.log(
+              chalk.dim('Format:'),
+              chalk.cyan(options.format.toUpperCase())
+            );
+          }
         }
       )
     );

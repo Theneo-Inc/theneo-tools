@@ -1,5 +1,6 @@
 import { Err, Ok, Result } from '../../results';
 import axios from 'axios';
+// eslint-disable-next-line node/no-extraneous-import
 import { ResponseSchema } from 'theneo';
 
 export type ApiHeaders = Record<string, string>;

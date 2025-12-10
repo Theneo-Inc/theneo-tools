@@ -199,7 +199,8 @@ export class Theneo {
       input.projectId,
       input.versionId,
       input.shouldGetPublicViewData,
-      input.openapi
+      input.openapi,
+      input.tabSlug
     );
     if (result.err) {
       return result;

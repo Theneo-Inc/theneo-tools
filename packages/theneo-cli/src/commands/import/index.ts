@@ -44,6 +44,7 @@ export function initImportCommand(program: Command): Command {
       '--profile <string>',
       'Use a specific profile from your config file.'
     )
+    .option('--tab <tab-slug>', 'Import into specific tab only (optional)')
     .action(
       tryCatch(
         async (options: {
@@ -56,6 +57,7 @@ export function initImportCommand(program: Command): Command {
           dir: string | undefined;
           publish: boolean;
           profile: string | undefined;
+          tab: string | undefined;
         }) => {
           const isInteractive = isInteractiveFlow(options);
           const profile = getProfile(options.profile);
@@ -94,6 +96,7 @@ export function initImportCommand(program: Command): Command {
               directory,
             },
             importOption: ImportOption.OVERWRITE,
+            tabSlug: options.tab,
           });
 
           if (res.err) {

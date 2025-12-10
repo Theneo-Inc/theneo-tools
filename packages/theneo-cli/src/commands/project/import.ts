@@ -117,6 +117,7 @@ Note: Published document link has this pattern: https://app.theneo.io/<workspace
       '--profile <string>',
       'Use a specific profile from your config file.'
     )
+    .option('--tab <tab-slug>', 'Import into specific tab only (optional)')
     .action(
       tryCatch(async (options: ImportCommandOptions) => {
         const isInteractive = isInteractiveFlow(options);
@@ -187,6 +188,7 @@ Note: Published document link has this pattern: https://app.theneo.io/<workspace
           },
           importOption: importOption,
           importOptionAdditionalData,
+          tabSlug: options.tab,
         });
         if (res.err) {
           spinner.error({ text: res.error.message });

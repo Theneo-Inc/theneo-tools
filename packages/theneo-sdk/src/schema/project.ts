@@ -237,6 +237,12 @@ export interface ImportProjectOptions {
    */
   importMetadata?: ImportMetadata;
   importOptionAdditionalData?: ImportOptionAdditionalData;
+
+  /**
+   * Import into specific tab only (optional)
+   * When provided, restricts the import to the specified tab
+   */
+  tabSlug?: string;
 }
 
 export enum MergingStrategy {

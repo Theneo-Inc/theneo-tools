@@ -24,17 +24,22 @@ function addQueryParameters(url: URL, queryParams: ApiQueryParams): void {
 
 export function handleApiThrownError(error: unknown): Result<never> {
   if (axios.isAxiosError(error)) {
-    return Err(
-      error.response
-        ? new Error(
-            JSON.stringify(
-              error.response.data?.message ||
-                error.response.data?.error?.message ||
-                error.response.data
-            )
-          )
-        : error
-    );
+    if (error.response) {
+      const data = error.response.data;
+      const rawMessage =
+        (typeof data === 'object' && data !== null
+          ? (data as Record<string, unknown>).message ||
+            (data as Record<string, unknown>).error
+          : null) ?? data;
+
+      const message =
+        typeof rawMessage === 'string'
+          ? rawMessage
+          : JSON.stringify(rawMessage);
+
+      return Err(new Error(message));
+    }
+    return Err(error);
   }
   if (error instanceof Error) {
     return Err(error);

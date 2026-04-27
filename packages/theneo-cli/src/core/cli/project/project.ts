@@ -1,6 +1,7 @@
 import { confirm, select } from '@inquirer/prompts';
 import { Theneo, ProjectSchema } from '@theneo/sdk';
 import { ProjectVersion } from '@theneo/sdk';
+import chalk from 'chalk';
 
 function findProjectsFromList(
   projects: ProjectSchema[],
@@ -17,23 +18,38 @@ function findProjectsFromList(
     }
   );
   if (!project || project.length === 0) {
-    console.error('No project found with this key!');
+    const wsHint = options.workspaceKey
+      ? ` in workspace ${chalk.cyan(options.workspaceKey)}`
+      : '';
+    const projectSlug = chalk.yellow(`'${options.projectKey}'`);
+    console.error(
+      chalk.red(`✖ No project found with slug ${projectSlug}${wsHint}`)
+    );
+    console.error(
+      chalk.dim('  Run'),
+      chalk.cyan('theneo project list'),
+      chalk.dim('to see available projects')
+    );
     process.exit(1);
   }
   if (project.length > 1) {
-    let message = `Multiple projects found with this project key ${options.projectKey}`;
+    const projectSlug = chalk.yellow(`'${options.projectKey}'`);
+    let message = `Multiple projects found with slug ${projectSlug}`;
     if (options.workspaceKey) {
-      message += ` and workspace key ${options.workspaceKey}! please contact theneo support at `;
+      const wsSlug = chalk.cyan(options.workspaceKey);
+      message += ` in workspace ${wsSlug}. Please contact Theneo support.`;
     } else {
-      message += '. Please specify workspace key using --workspace flag';
+      const flag = chalk.cyan('--workspace <workspace-slug>');
+      message += `. Specify a workspace using ${flag} to disambiguate.`;
     }
-
-    console.error(message);
+    console.error(chalk.red(`✖ ${message}`));
     process.exit(1);
   }
   const projectElement = project[0];
   if (!projectElement) {
-    console.error('No project found with this key!');
+    console.error(
+      chalk.red(`✖ No project found with slug '${options.projectKey}'`)
+    );
     process.exit(1);
   }
   return projectElement;
@@ -48,13 +64,20 @@ export async function getProject(
 ): Promise<ProjectSchema> {
   const projectsList = await theneo.listProjects();
   if (projectsList.err) {
-    console.error(projectsList.error.message);
+    console.error(
+      chalk.red(`✖ Failed to fetch projects: ${projectsList.error.message}`)
+    );
+    console.error(
+      chalk.dim('  Check your API key and network connection, then try again.')
+    );
     process.exit(1);
   }
   const projects = projectsList.value;
   if (projects.length === 0) {
+    console.error(chalk.red('✖ No projects found in your account.'));
     console.error(
-      'No project found! first create project using `theneo project create` command'
+      chalk.dim('  Create a project first with:'),
+      chalk.cyan('theneo project create')
     );
     process.exit(1);
   }
@@ -109,14 +132,20 @@ export async function getProjectVersion(
 
   const versions = await theneo.listProjectVersions(project.id);
   if (versions.err) {
-    console.error('error getting project versions:', versions.error.message);
+    const projectSlug = chalk.yellow(`'${project.key}'`);
+    console.error(
+      chalk.red(
+        `✖ Failed to fetch versions for project ${projectSlug}: ${versions.error.message}`
+      )
+    );
     process.exit(1);
   }
   const projectVersions: ProjectVersion[] = versions.unwrap();
 
   if (projectVersions.length === 0) {
     // this should not happen
-    console.error('No versions found for this project');
+    const projectSlug = chalk.yellow(`'${project.key}'`);
+    console.error(chalk.red(`✖ No versions found for project ${projectSlug}`));
     process.exit(1);
   }
 
@@ -125,7 +154,17 @@ export async function getProjectVersion(
   }
 
   const projectVersion = projectVersions.find(v => v.slug === version);
-  return projectVersion || null;
+  if (!projectVersion) {
+    const available = projectVersions.map(v => v.slug).join(', ');
+    const versionSlug = chalk.yellow(`'${version}'`);
+    const projectSlug = chalk.yellow(`'${project.key}'`);
+    console.error(
+      chalk.red(`✖ Version ${versionSlug} not found in project ${projectSlug}`)
+    );
+    console.error(chalk.dim(`  Available versions: ${chalk.cyan(available)}`));
+    process.exit(1);
+  }
+  return projectVersion;
 }
 
 export function getShouldPublish(

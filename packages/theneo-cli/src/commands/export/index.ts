@@ -16,21 +16,57 @@ function handleExportError(
   errorMsg: string,
   tabSlug?: string
 ): void {
-  if (errorMsg.includes('not found') && errorMsg.includes('Available tabs:')) {
-    const availableTabsMatch = errorMsg.match(/Available tabs:\s*([^"}\]]+)/);
-    const availableTabs = availableTabsMatch?.[1]?.trim() || 'none';
+  const coreMsg = errorMsg
+    .replace(/^"?(Error while exporting[^:]*:\s*)/i, '')
+    .replace(/^"|"$/g, '')
+    .trim();
 
+  if (
+    tabSlug &&
+    (coreMsg.includes('not found') || coreMsg.includes('no tabs'))
+  ) {
+    if (coreMsg.includes('no tabs') || coreMsg.includes('no tabs configured')) {
+      spinner.error({
+        text: chalk.red('✖ Project has no tabs configured'),
+      });
+      console.log(
+        chalk.dim('\nTip:'),
+        chalk.yellow('Export the full project first without --tab flag')
+      );
+    } else {
+      const availableTabsMatch = coreMsg.match(
+        /Available tabs:\s*([^\n"}\]]+)/
+      );
+      const availableTabs = availableTabsMatch?.[1]?.trim();
+      const tabLabel = `'${tabSlug}'`;
+      spinner.error({
+        text: chalk.red(
+          `✖ Tab ${chalk.yellow(tabLabel)} not found in project`
+        ),
+      });
+      if (availableTabs && availableTabs.length > 0) {
+        console.log(chalk.dim('\nAvailable tabs:'), chalk.cyan(availableTabs));
+      } else {
+        console.log(
+          chalk.dim('\nTip:'),
+          chalk.yellow('Run export without --tab to see all available tabs')
+        );
+      }
+    }
+  } else if (
+    coreMsg.toLowerCase().includes('unauthorized') ||
+    coreMsg.includes('401')
+  ) {
     spinner.error({
-      text: chalk.red(`✖ Tab '${chalk.yellow(tabSlug)}' not found!`),
+      text: chalk.red('✖ Unauthorized: invalid or expired API key'),
     });
     console.log(
-      chalk.dim('\nAvailable tabs:'),
-      availableTabs === '' || availableTabs === 'none'
-        ? chalk.yellow('No tabs available')
-        : chalk.cyan(availableTabs)
+      chalk.dim('\nRun:'),
+      chalk.cyan('theneo login'),
+      chalk.dim('to re-authenticate')
     );
   } else {
-    spinner.error({ text: chalk.red(`✖ ${errorMsg}`) });
+    spinner.error({ text: chalk.red(`✖ Export failed: ${coreMsg}`) });
   }
 }
 

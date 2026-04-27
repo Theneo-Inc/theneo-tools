@@ -57,25 +57,12 @@ function getImportSpinnerText(
     : `Importing ${importSource}...`;
 }
 
-function handleProjectImportError(
+function handleProjectTabImportError(
   spinner: Spinner,
-  errorMsg: string,
-  tabSlug?: string
+  coreMsg: string,
+  tabSlug: string
 ): void {
-  if (errorMsg.includes('not found') && errorMsg.includes('Available tabs:')) {
-    const availableTabsMatch = errorMsg.match(/Available tabs:\s*([^"}\]]+)/);
-    const availableTabs = availableTabsMatch?.[1]?.trim() || 'none';
-
-    spinner.error({
-      text: chalk.red(`✖ Tab '${chalk.yellow(tabSlug)}' not found!`),
-    });
-    console.log(
-      chalk.dim('\nAvailable tabs:'),
-      availableTabs === '' || availableTabs === 'none'
-        ? chalk.yellow('No tabs found. Import without --tab flag first.')
-        : chalk.cyan(availableTabs)
-    );
-  } else if (errorMsg.includes('has no tabs')) {
+  if (coreMsg.includes('no tabs') || coreMsg.includes('no tabs configured')) {
     spinner.error({
       text: chalk.red('✖ Project has no tabs configured'),
     });
@@ -83,8 +70,61 @@ function handleProjectImportError(
       chalk.dim('\nTip:'),
       chalk.yellow('Import the full project first without --tab flag')
     );
+    return;
+  }
+  const availableTabsMatch = coreMsg.match(/Available tabs:\s*([^\n"}\]]+)/);
+  const availableTabs = availableTabsMatch?.[1]?.trim();
+  const tabLabel = `'${tabSlug}'`;
+  spinner.error({
+    text: chalk.red(`✖ Tab ${chalk.yellow(tabLabel)} not found in project`),
+  });
+  if (availableTabs && availableTabs.length > 0) {
+    console.log(chalk.dim('\nAvailable tabs:'), chalk.cyan(availableTabs));
   } else {
-    spinner.error({ text: chalk.red(`✖ ${errorMsg}`) });
+    console.log(
+      chalk.dim('\nTip:'),
+      chalk.yellow(
+        'Import the full project first without --tab flag to create tabs'
+      )
+    );
+  }
+}
+
+function handleProjectImportError(
+  spinner: Spinner,
+  errorMsg: string,
+  tabSlug?: string
+): void {
+  // Strip common server-side prefix wrappers to get the core message
+  const coreMsg = errorMsg
+    .replace(/^"?(Error while importing markdown files:\s*)/i, '')
+    .replace(/^"|"$/g, '')
+    .trim();
+
+  if (
+    tabSlug &&
+    (coreMsg.includes('not found') || coreMsg.includes('no tabs'))
+  ) {
+    handleProjectTabImportError(spinner, coreMsg, tabSlug);
+  } else if (
+    coreMsg.toLowerCase().includes('unauthorized') ||
+    coreMsg.includes('401')
+  ) {
+    spinner.error({
+      text: chalk.red('✖ Unauthorized: invalid or expired API key'),
+    });
+    console.log(
+      chalk.dim('\nRun:'),
+      chalk.cyan('theneo login'),
+      chalk.dim('to re-authenticate')
+    );
+  } else if (
+    coreMsg.toLowerCase().includes('not found') ||
+    coreMsg.includes('404')
+  ) {
+    spinner.error({ text: chalk.red(`✖ Resource not found: ${coreMsg}`) });
+  } else {
+    spinner.error({ text: chalk.red(`✖ Import failed: ${coreMsg}`) });
   }
 }
 

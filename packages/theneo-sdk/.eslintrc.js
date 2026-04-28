@@ -29,6 +29,7 @@ module.exports = {
     'node/no-empty-function': 'off',
     'node/no-unsupported-features/es-syntax': 'off',
     'node/no-missing-require': 'off',
+    'node/no-extraneous-import': 'off',
     'node/shebang': 'off',
     'require-await':'error',
     'no-return-await':'error',

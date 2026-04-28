@@ -95,9 +95,10 @@ function handleProjectImportError(
   errorMsg: string,
   tabSlug?: string
 ): void {
-  // Strip common server-side prefix wrappers to get the core message
-  const coreMsg = errorMsg
+  // Strip stack trace lines (everything after the first newline) and common prefixes
+  const coreMsg = (errorMsg.split('\n')[0] ?? errorMsg)
     .replace(/^"?(Error while importing markdown files:\s*)/i, '')
+    .replace(/^Error:\s*/i, '')
     .replace(/^"|"$/g, '')
     .trim();
 
@@ -123,6 +124,11 @@ function handleProjectImportError(
     coreMsg.includes('404')
   ) {
     spinner.error({ text: chalk.red(`✖ Resource not found: ${coreMsg}`) });
+  } else if (
+    coreMsg.toLowerCase().includes('permission') ||
+    coreMsg.includes('403')
+  ) {
+    spinner.error({ text: chalk.red(`✖ ${coreMsg}`) });
   } else {
     spinner.error({ text: chalk.red(`✖ Import failed: ${coreMsg}`) });
   }

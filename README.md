@@ -29,6 +29,12 @@ into your applications, abstracting away the complexities of API requests and er
 
 For more, see [this](packages/theneo-sdk/README.md)
 
+### @theneo/mcp
+
+`@theneo/mcp` provides a lightweight MCP server implementation for serving your project's OpenAPI spec.
+
+For more, see [this](packages/theneo-mcp/README.md)
+
 ## Getting Started
 
 ### Prerequisites
@@ -50,6 +56,14 @@ Before you begin, ensure you have met the following requirements:
    ```shell
    npm run cli
    ```
+
+### Development Setup
+
+Before running lint or build tasks make sure to install all workspace dependencies:
+
+```bash
+npm install
+```
 
 ### Usage
 

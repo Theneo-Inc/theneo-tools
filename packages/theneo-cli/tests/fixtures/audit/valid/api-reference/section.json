@@ -1,0 +1,13 @@
+{
+  "endpoints": { "method": "", "path": "" },
+  "request": null,
+  "responses": [],
+  "showBaseUrl": false,
+  "showLanguageBox": false,
+  "showRequestDescription": true,
+  "showResponseDescription": true,
+  "errorCodes": [],
+  "statusCodes": [],
+  "dataExample": [],
+  "endpointSummary": []
+}

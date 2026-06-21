@@ -1,0 +1,10 @@
+{
+  "id": "proj_missing_section_json",
+  "name": "Missing Section JSON",
+  "sections": [
+    { "name": "Introduction", "slug": "introduction", "children": [] }
+  ],
+  "tabs": [
+    { "title": "Guides", "slug": "guides", "sections": ["introduction"], "iconUrl": "", "svgCode": "" }
+  ]
+}

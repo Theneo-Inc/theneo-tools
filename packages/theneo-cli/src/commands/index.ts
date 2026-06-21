@@ -8,6 +8,7 @@ import { initExportCommand } from './export';
 import { initCreateCommand } from './create';
 import { initImportCommand } from './import';
 import { initProjectVersionCommand } from './version';
+import { initAuditCommand } from './audit';
 
 export function createProgram(): Command {
   const program = new Command();
@@ -31,6 +32,7 @@ export function initializeProgram(): Command {
   initExportCommand(program);
   initCreateCommand(program);
   initImportCommand(program);
+  initAuditCommand(program);
   initProjectVersionCommand(program);
   return program;
 }

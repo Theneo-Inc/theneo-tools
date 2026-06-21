@@ -1,0 +1,10 @@
+{
+  "id": "proj_slug_mismatch",
+  "name": "Slug Mismatch",
+  "sections": [
+    { "name": "Introduction", "slug": "introduction", "children": [] }
+  ],
+  "tabs": [
+    { "title": "Guides", "slug": "guides", "sections": ["introduction"], "iconUrl": "", "svgCode": "" }
+  ]
+}

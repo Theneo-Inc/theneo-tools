@@ -1,0 +1,43 @@
+{
+  "id": "proj_valid",
+  "name": "Valid Docs",
+  "sections": [
+    {
+      "name": "Introduction",
+      "slug": "introduction",
+      "children": [],
+      "icon": null,
+      "isHeader": false,
+      "externalPageLink": "",
+      "isNewTab": false
+    },
+    {
+      "name": "API Reference",
+      "slug": "api-reference",
+      "children": [
+        {
+          "name": "Create Customer",
+          "slug": "create-customer",
+          "children": [],
+          "icon": null,
+          "isHeader": false,
+          "externalPageLink": "",
+          "isNewTab": false
+        }
+      ],
+      "icon": null,
+      "isHeader": false,
+      "externalPageLink": "",
+      "isNewTab": false
+    }
+  ],
+  "tabs": [
+    {
+      "title": "Guides",
+      "slug": "guides",
+      "sections": ["introduction", "api-reference", "create-customer"],
+      "iconUrl": "",
+      "svgCode": ""
+    }
+  ]
+}

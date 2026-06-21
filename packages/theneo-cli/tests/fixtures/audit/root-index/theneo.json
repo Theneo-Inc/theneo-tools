@@ -1,0 +1,10 @@
+{
+  "id": "proj_root_index",
+  "name": "Root Index",
+  "sections": [
+    { "name": "Introduction", "slug": "introduction", "children": [] }
+  ],
+  "tabs": [
+    { "title": "Guides", "slug": "guides", "sections": ["introduction"], "iconUrl": "", "svgCode": "" }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "id": "proj_bad_tab",
+  "name": "Bad Tab Marker",
+  "sections": [
+    { "name": "Introduction", "slug": "introduction", "children": [] }
+  ],
+  "tabs": [
+    { "title": "Guides", "slug": "guides", "sections": ["introduction"], "iconUrl": "", "svgCode": "" }
+  ]
+}

@@ -32,6 +32,7 @@ Commands:
   project <action>    Project related commands
   workspace <action>  Workspace related commands
   version <action>    Project Version related commands
+  audit [options]     Validate a Theneo markdown project on disk
   help [command]      display help for command
 ```
 
@@ -343,6 +344,34 @@ theneo import --project <project-slug> --tab tab-2 --dir <directory>
 ```
 
 **Note on Tabs**: When using the `--tab` flag, only the specified tab will be updated during import, while other tabs remain unchanged. During export, only the sections belonging to the specified tab will be exported. Markdown files exported with tabs contain a `<!-- tab:tab-slug -->` marker at the beginning to indicate which tab they belong to.
+
+## Audit project data before import
+
+Use `theneo audit` to validate exported or hand-edited markdown project data before importing it back into Theneo.
+
+```bash
+Usage: theneo audit [options]
+
+Validate a Theneo markdown project on disk
+
+Options:
+  --dir <directory>  Project directory to audit (default: ".")
+  --json             Emit machine-readable JSON instead of human-readable output (default: false)
+  -h, --help         display help for command
+```
+
+```shell
+# Audit the current directory
+theneo audit
+
+# Audit a docs directory
+theneo audit --dir ./docs
+
+# Emit JSON for CI or scripts
+theneo audit --dir ./docs --json
+```
+
+The audit checks that `theneo.json` exists and contains the expected root fields, each declared section folder has both `index.md` and `section.json`, section metadata contains the expected keys and valid HTTP methods, section folders and manifest entries agree, tab section membership is consistent, and tab markers in markdown files are present before page headings.
 
 
 ### Create a new project from markdown files

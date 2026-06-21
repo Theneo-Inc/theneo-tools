@@ -1,0 +1,10 @@
+{
+  "id": "proj_orphan",
+  "name": "Orphaned Section",
+  "sections": [
+    { "name": "Introduction", "slug": "introduction", "children": [] }
+  ],
+  "tabs": [
+    { "title": "Guides", "slug": "guides", "sections": ["introduction"], "iconUrl": "", "svgCode": "" }
+  ]
+}

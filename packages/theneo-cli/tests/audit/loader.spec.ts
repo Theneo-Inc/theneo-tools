@@ -3,42 +3,65 @@ import os from 'os';
 import path from 'path';
 import { loadProject } from '../../src/core/audit/loader';
 
+const THENEO_JSON = 'theneo.json';
+
 function tempDir(): string {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'theneo-audit-'));
 }
 
+function writeTheneoJson(dir: string, contents: string): void {
+  fs.writeFileSync(path.join(dir, THENEO_JSON), contents);
+}
+
 describe('loadProject', () => {
-  it('returns theneoJson null when the file is missing', () => {
+  it('reports the directory as missing when it does not exist', () => {
+    const model = loadProject('/tmp/theneo-audit-does-not-exist-xyz-123');
+
+    expect(model.dirExists).toBe(false);
+  });
+
+  it('marks theneo.json missing when the file is absent', () => {
     const model = loadProject(tempDir());
 
-    expect(model.theneoJson).toBeNull();
+    expect(model.dirExists).toBe(true);
+    expect(model.theneoJson.status).toBe('missing');
     expect(model.sections).toEqual([]);
   });
 
-  it('parses theneo.json when it is present and valid', () => {
+  it('parses theneo.json when it is a valid object', () => {
     const dir = tempDir();
-    fs.writeFileSync(
-      path.join(dir, 'theneo.json'),
-      JSON.stringify({ name: 'demo' })
-    );
+    writeTheneoJson(dir, JSON.stringify({ name: 'demo' }));
 
     const model = loadProject(dir);
 
-    expect(model.theneoJson).toEqual({ name: 'demo' });
+    expect(model.theneoJson).toEqual({
+      status: 'ok',
+      value: { name: 'demo' },
+    });
   });
 
-  it('returns null when theneo.json is malformed JSON', () => {
+  it('marks theneo.json invalid when it is malformed JSON', () => {
     const dir = tempDir();
-    fs.writeFileSync(path.join(dir, 'theneo.json'), '{ not valid json');
+    writeTheneoJson(dir, '{ not valid json');
 
-    const model = loadProject(dir);
+    expect(loadProject(dir).theneoJson.status).toBe('invalid');
+  });
 
-    expect(model.theneoJson).toBeNull();
+  it('marks theneo.json not-object when it is valid JSON but not an object', () => {
+    const dir = tempDir();
+    writeTheneoJson(dir, '[]');
+
+    expect(loadProject(dir).theneoJson.status).toBe('not-object');
+  });
+
+  it('treats a literal null theneo.json as not-object, not missing', () => {
+    const dir = tempDir();
+    writeTheneoJson(dir, 'null');
+
+    expect(loadProject(dir).theneoJson.status).toBe('not-object');
   });
 
   it('resolves the root to an absolute path', () => {
-    const model = loadProject('.');
-
-    expect(path.isAbsolute(model.root)).toBe(true);
+    expect(path.isAbsolute(loadProject('.').root)).toBe(true);
   });
 });

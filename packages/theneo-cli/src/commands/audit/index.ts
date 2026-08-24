@@ -1,6 +1,6 @@
 import { Command } from 'commander';
-import { allRules, hasErrors, runRules } from '../../core/audit';
-import { loadProject } from '../../core/audit/loader';
+import { exitCode } from '../../core/audit';
+import { runAudit } from '../../core/audit/runAudit';
 import { printHuman, printJson } from '../../core/audit/report';
 
 interface AuditOptions {
@@ -17,8 +17,7 @@ export function initAuditCommand(program: Command): Command {
     .option('--dir <directory>', 'Project directory to validate', process.cwd())
     .option('--json', 'Output findings as a JSON array (pipeable)')
     .action((options: AuditOptions) => {
-      const model = loadProject(options.dir);
-      const findings = runRules(model, allRules);
+      const findings = runAudit(options.dir);
 
       if (options.json) {
         printJson(findings);
@@ -26,8 +25,6 @@ export function initAuditCommand(program: Command): Command {
         printHuman(findings);
       }
 
-      if (hasErrors(findings)) {
-        process.exit(1);
-      }
+      process.exitCode = exitCode(findings);
     });
 }

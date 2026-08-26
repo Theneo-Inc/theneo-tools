@@ -1,0 +1,10 @@
+{
+  "name": "Demo API",
+  "sections": [
+    { "name": "Introduction", "slug": "introduction", "children": [] },
+    { "name": "Guides", "slug": "guides", "children": [
+      { "name": "Auth", "slug": "guides/auth", "children": [] }
+    ] }
+  ],
+  "tabs": []
+}

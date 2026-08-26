@@ -361,3 +361,34 @@ Options:
 ```shell
 theneo create --dir <directory> --name <project-name>
 ```
+
+
+### Audit a project
+
+Validate a Theneo documentation project on disk and report structural problems, so mistakes are caught locally or in CI instead of at import or publish time. No Theneo account or API key is required.
+
+```bash
+Usage: theneo audit [options]
+
+Validate a Theneo documentation project on disk and report structural problems
+
+Options:
+  --dir <directory>  Project directory to validate (default: current directory)
+  --json             Output findings as a JSON array (pipeable)
+  -h, --help         display help for command
+```
+
+Findings have two severities: `error` (the project is broken) and `warning` (a smell). The command **exits with code 1 if any error-level finding exists**, and `0` otherwise (warnings alone still exit `0`), which makes it suitable for CI gating.
+
+```shell
+# Audit the current directory
+theneo audit
+
+# Audit a specific project directory
+theneo audit --dir ./my-project
+
+# Machine-readable output for scripts/CI
+theneo audit --dir ./my-project --json
+```
+
+Each finding names the file it relates to (relative path), what is wrong, and how to fix it. With `--json`, the command prints only a findings array (`{ severity, file, line?, rule, message }`).

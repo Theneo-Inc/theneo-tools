@@ -4,14 +4,32 @@ export type TheneoJsonState =
   | { status: 'invalid' }
   | { status: 'not-object' };
 
-export interface SectionEntry {
+export interface SectionDir {
+  relPath: string;
+  exact: boolean;
+}
+
+export interface DeclaredSection {
   slug: string;
-  dirRelativePath: string;
+  name?: string;
+  hasChildren: boolean;
+  dir?: SectionDir;
+  hasIndexMd: boolean;
+  hasSectionJson: boolean;
+}
+
+export interface DiskSection {
+  relPath: string;
+  hasIndexMd: boolean;
+  hasSectionJson: boolean;
+  sectionJson: TheneoJsonState;
 }
 
 export interface ProjectModel {
   root: string;
   dirExists: boolean;
   theneoJson: TheneoJsonState;
-  sections: SectionEntry[];
+  rootHasIndexMd: boolean;
+  declaredSections: DeclaredSection[];
+  diskSections: DiskSection[];
 }

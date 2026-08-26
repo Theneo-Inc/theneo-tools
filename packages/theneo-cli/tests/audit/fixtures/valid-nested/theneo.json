@@ -1,0 +1,9 @@
+{
+  "name": "Nested Demo",
+  "sections": [
+    { "name": "Group", "slug": "group", "children": [
+      { "name": "Overview", "slug": "group/overview", "children": [] }
+    ] }
+  ],
+  "tabs": []
+}

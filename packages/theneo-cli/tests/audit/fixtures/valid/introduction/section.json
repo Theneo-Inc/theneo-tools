@@ -1,0 +1,1 @@
+{ "endpoints": { "method": "GET", "path": "/intro" }, "type": "endpoint" }

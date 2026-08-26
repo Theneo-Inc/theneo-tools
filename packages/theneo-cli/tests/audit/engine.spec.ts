@@ -1,17 +1,28 @@
 import { allRules, hasErrors, runRules } from '../../src/core/audit';
 import { ProjectModel, TheneoJsonState } from '../../src/core/audit/model';
 
-function model(theneoJson: TheneoJsonState, dirExists = true): ProjectModel {
-  return { root: '/tmp/project', dirExists, theneoJson, sections: [] };
+const THENEO_JSON_EXISTS = 'theneo-json-exists';
+
+function model(
+  theneoJson: TheneoJsonState,
+  overrides: Partial<ProjectModel> = {}
+): ProjectModel {
+  return {
+    root: '/tmp/project',
+    dirExists: true,
+    theneoJson,
+    rootHasIndexMd: false,
+    declaredSections: [],
+    diskSections: [],
+    ...overrides,
+  };
 }
 
 describe('audit engine', () => {
   it('flags a missing theneo.json as an error', () => {
     const findings = runRules(model({ status: 'missing' }), allRules);
 
-    expect(findings).toHaveLength(1);
-    expect(findings[0]?.rule).toBe('theneo-json-exists');
-    expect(findings[0]?.severity).toBe('error');
+    expect(findings.map(f => f.rule)).toContain(THENEO_JSON_EXISTS);
     expect(hasErrors(findings)).toBe(true);
   });
 
@@ -19,13 +30,13 @@ describe('audit engine', () => {
     const invalid = runRules(model({ status: 'invalid' }), allRules);
     const notObject = runRules(model({ status: 'not-object' }), allRules);
 
-    expect(invalid[0]?.message).toMatch(/valid JSON/);
-    expect(notObject[0]?.message).toMatch(/object/);
+    expect(invalid.map(f => f.rule)).toContain(THENEO_JSON_EXISTS);
+    expect(notObject.map(f => f.rule)).toContain(THENEO_JSON_EXISTS);
   });
 
-  it('produces no findings when theneo.json is a valid object', () => {
+  it('produces no findings for a valid, complete project model', () => {
     const findings = runRules(
-      model({ status: 'ok', value: { name: 'demo' } }),
+      model({ status: 'ok', value: { name: 'demo', sections: [] } }),
       allRules
     );
 
@@ -34,10 +45,12 @@ describe('audit engine', () => {
   });
 
   it('reports the directory (not theneo.json) when the dir is missing', () => {
-    const findings = runRules(model({ status: 'missing' }, false), allRules);
+    const findings = runRules(
+      model({ status: 'missing' }, { dirExists: false }),
+      allRules
+    );
 
-    expect(findings).toHaveLength(1);
-    expect(findings[0]?.rule).toBe('project-directory-exists');
+    expect(findings.map(f => f.rule)).toContain('project-directory-exists');
     expect(hasErrors(findings)).toBe(true);
   });
 

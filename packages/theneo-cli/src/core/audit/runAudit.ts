@@ -1,8 +1,8 @@
 import { runRules } from './engine';
-import { Finding } from './finding';
+import { dedupeFindings, Finding, sortFindings } from './finding';
 import { loadProject } from './loader';
 import { allRules } from './rules';
 
 export function runAudit(dir: string): Finding[] {
-  return runRules(loadProject(dir), allRules);
+  return sortFindings(dedupeFindings(runRules(loadProject(dir), allRules)));
 }

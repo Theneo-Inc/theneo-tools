@@ -25,18 +25,18 @@ describe('loadProject', () => {
 
     expect(model.dirExists).toBe(true);
     expect(model.theneoJson.status).toBe('missing');
-    expect(model.sections).toEqual([]);
+    expect(model.declaredSections).toEqual([]);
   });
 
   it('parses theneo.json when it is a valid object', () => {
     const dir = tempDir();
-    writeTheneoJson(dir, JSON.stringify({ name: 'demo' }));
+    writeTheneoJson(dir, JSON.stringify({ name: 'demo', sections: [] }));
 
     const model = loadProject(dir);
 
     expect(model.theneoJson).toEqual({
       status: 'ok',
-      value: { name: 'demo' },
+      value: { name: 'demo', sections: [] },
     });
   });
 
@@ -59,6 +59,40 @@ describe('loadProject', () => {
     writeTheneoJson(dir, 'null');
 
     expect(loadProject(dir).theneoJson.status).toBe('not-object');
+  });
+
+  it('flattens nested declared sections with full-path slugs', () => {
+    const dir = tempDir();
+    writeTheneoJson(
+      dir,
+      JSON.stringify({
+        name: 'demo',
+        sections: [
+          {
+            name: 'Guides',
+            slug: 'guides',
+            children: [{ name: 'Auth', slug: 'guides/auth' }],
+          },
+        ],
+      })
+    );
+
+    const slugs = loadProject(dir).declaredSections.map(s => s.slug);
+
+    expect(slugs).toEqual(['guides', 'guides/auth']);
+  });
+
+  it('discovers on-disk section folders that contain index.md or section.json', () => {
+    const dir = tempDir();
+    fs.mkdirSync(path.join(dir, 'intro'));
+    fs.writeFileSync(path.join(dir, 'intro', 'index.md'), '# Intro');
+    fs.writeFileSync(path.join(dir, 'intro', 'section.json'), '{}');
+    fs.mkdirSync(path.join(dir, 'assets'));
+    fs.writeFileSync(path.join(dir, 'assets', 'logo.png'), 'x');
+
+    const disk = loadProject(dir).diskSections.map(d => d.relPath);
+
+    expect(disk).toEqual(['intro']);
   });
 
   it('resolves the root to an absolute path', () => {

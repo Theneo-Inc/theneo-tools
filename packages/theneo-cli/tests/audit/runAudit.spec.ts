@@ -14,7 +14,7 @@ function projectDir(theneoJson?: string): string {
 
 describe('runAudit + exitCode', () => {
   it('valid project produces no findings and exit code 0', () => {
-    const findings = runAudit(projectDir('{"name":"demo"}'));
+    const findings = runAudit(projectDir('{"name":"demo","sections":[]}'));
 
     expect(findings).toHaveLength(0);
     expect(exitCode(findings)).toBe(0);

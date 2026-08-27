@@ -9,6 +9,7 @@ import { initCreateCommand } from './create';
 import { initImportCommand } from './import';
 import { initProjectVersionCommand } from './version';
 import { initAuditCommand } from './audit';
+import { initInfoCommand } from './info';
 
 export function createProgram(): Command {
   const program = new Command();
@@ -34,5 +35,6 @@ export function initializeProgram(): Command {
   initImportCommand(program);
   initProjectVersionCommand(program);
   initAuditCommand(program);
+  initInfoCommand(program);
   return program;
 }

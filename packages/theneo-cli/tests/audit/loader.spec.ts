@@ -84,6 +84,7 @@ describe('loadProject', () => {
 
   it('discovers on-disk section folders that contain index.md or section.json', () => {
     const dir = tempDir();
+    writeTheneoJson(dir, JSON.stringify({ name: 'demo', sections: [] }));
     fs.mkdirSync(path.join(dir, 'intro'));
     fs.writeFileSync(path.join(dir, 'intro', 'index.md'), '# Intro');
     fs.writeFileSync(path.join(dir, 'intro', 'section.json'), '{}');
@@ -93,6 +94,14 @@ describe('loadProject', () => {
     const disk = loadProject(dir).diskSections.map(d => d.relPath);
 
     expect(disk).toEqual(['intro']);
+  });
+
+  it('does not walk the tree when theneo.json is missing', () => {
+    const dir = tempDir();
+    fs.mkdirSync(path.join(dir, 'intro'));
+    fs.writeFileSync(path.join(dir, 'intro', 'section.json'), '{}');
+
+    expect(loadProject(dir).diskSections).toEqual([]);
   });
 
   it('resolves the root to an absolute path', () => {

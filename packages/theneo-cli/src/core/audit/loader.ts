@@ -30,7 +30,7 @@ export function loadProject(dir: string): ProjectModel {
       theneoJson.status === 'ok'
         ? flattenDeclaredSections(root, theneoJson.value)
         : [],
-    diskSections: dirExists ? walkDiskSections(root) : [],
+    diskSections: theneoJson.status === 'ok' ? walkDiskSections(root) : [],
   };
 }
 

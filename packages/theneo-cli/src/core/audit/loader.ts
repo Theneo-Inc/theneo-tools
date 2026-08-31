@@ -1,11 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import { isJsonObject } from './json';
+import { parseIndexMarker } from './marker';
 import {
   DeclaredSection,
   DiskSection,
+  IndexMarker,
   ProjectModel,
   SectionDir,
+  TabModel,
   TheneoJsonState,
 } from './model';
 
@@ -31,6 +34,7 @@ export function loadProject(dir: string): ProjectModel {
         ? flattenDeclaredSections(root, theneoJson.value)
         : [],
     diskSections: theneoJson.status === 'ok' ? walkDiskSections(root) : [],
+    tabs: theneoJson.status === 'ok' ? parseTabs(theneoJson.value) : [],
   };
 }
 
@@ -67,7 +71,7 @@ function flattenDeclaredSections(
   const sections = config['sections'];
   const result: DeclaredSection[] = [];
   if (Array.isArray(sections)) {
-    collectSections(root, sections, result);
+    collectSections(root, sections, result, true);
   }
   return result;
 }
@@ -75,7 +79,8 @@ function flattenDeclaredSections(
 function collectSections(
   root: string,
   nodes: unknown[],
-  result: DeclaredSection[]
+  result: DeclaredSection[],
+  topLevel: boolean
 ): void {
   for (const node of nodes) {
     if (!isJsonObject(node)) {
@@ -85,10 +90,12 @@ function collectSections(
     const slug = node['slug'];
     if (typeof slug === 'string' && slug.trim() !== '') {
       const hasChildren = Array.isArray(children) && children.length > 0;
-      result.push(buildDeclaredSection(root, slug, node['name'], hasChildren));
+      result.push(
+        buildDeclaredSection(root, slug, node['name'], hasChildren, topLevel)
+      );
     }
     if (Array.isArray(children)) {
-      collectSections(root, children, result);
+      collectSections(root, children, result, false);
     }
   }
 }
@@ -97,19 +104,63 @@ function buildDeclaredSection(
   root: string,
   slug: string,
   name: unknown,
-  hasChildren: boolean
+  hasChildren: boolean,
+  topLevel: boolean
 ): DeclaredSection {
   const dir = resolveSectionDir(root, slug);
   const base = dir ? path.join(root, ...dir.relPath.split('/')) : undefined;
+  const indexPath = base ? path.join(base, INDEX_MD) : undefined;
+  const hasIndexMd = indexPath !== undefined && fs.existsSync(indexPath);
   return {
     slug,
     ...(typeof name === 'string' ? { name } : {}),
     hasChildren,
+    topLevel,
     dir,
-    hasIndexMd: base !== undefined && fs.existsSync(path.join(base, INDEX_MD)),
+    hasIndexMd,
     hasSectionJson:
       base !== undefined && fs.existsSync(path.join(base, SECTION_JSON)),
+    ...(hasIndexMd && indexPath
+      ? { indexMarker: readIndexMarker(indexPath) }
+      : {}),
   };
+}
+
+function readIndexMarker(indexPath: string): IndexMarker {
+  try {
+    return parseIndexMarker(fs.readFileSync(indexPath, 'utf8'));
+  } catch {
+    return { present: false, atTop: false };
+  }
+}
+
+function parseTabs(config: Record<string, unknown>): TabModel[] {
+  const tabs = config['tabs'];
+  if (!Array.isArray(tabs)) {
+    return [];
+  }
+  return tabs.map((tab, index) => buildTab(tab, index));
+}
+
+function buildTab(raw: unknown, index: number): TabModel {
+  const tab = isJsonObject(raw) ? raw : {};
+  const title = tab['title'];
+  const slug = tab['slug'];
+  const sections = Array.isArray(tab['sections'])
+    ? tab['sections'].filter((s): s is string => typeof s === 'string')
+    : [];
+  return {
+    index,
+    ...(typeof title === 'string' && title.trim() !== '' ? { title } : {}),
+    ...(typeof slug === 'string' && slug.trim() !== '' ? { slug } : {}),
+    hasIconUrl: isNonEmptyString(tab['iconUrl']),
+    hasSvgCode: isNonEmptyString(tab['svgCode']),
+    sections,
+  };
+}
+
+function isNonEmptyString(value: unknown): boolean {
+  return typeof value === 'string' && value.trim() !== '';
 }
 
 function resolveSectionDir(root: string, slug: string): SectionDir | undefined {

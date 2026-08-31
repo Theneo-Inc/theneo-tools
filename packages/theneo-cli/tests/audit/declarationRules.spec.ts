@@ -13,11 +13,18 @@ function model(
     rootHasIndexMd: false,
     declaredSections: declared,
     diskSections: [],
+    tabs: [],
   };
 }
 
 function leaf(slug: string): DeclaredSection {
-  return { slug, hasChildren: false, hasIndexMd: true, hasSectionJson: true };
+  return {
+    slug,
+    hasChildren: false,
+    topLevel: true,
+    hasIndexMd: true,
+    hasSectionJson: true,
+  };
 }
 
 describe('section-declaration-valid rule', () => {

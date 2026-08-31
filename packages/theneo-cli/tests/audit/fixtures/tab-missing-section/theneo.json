@@ -1,0 +1,5 @@
+{
+  "name": "Missing Section",
+  "sections": [{ "name": "Intro", "slug": "intro", "children": [] }],
+  "tabs": [{ "title": "Docs", "slug": "docs", "iconUrl": "https://x/i.png", "sections": ["intro", "ghost"] }]
+}

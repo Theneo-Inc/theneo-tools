@@ -14,6 +14,7 @@ function model(
     rootHasIndexMd: false,
     declaredSections: [],
     diskSections: [],
+    tabs: [],
     ...overrides,
   };
 }

@@ -1,0 +1,8 @@
+{
+  "name": "Two Tabs",
+  "sections": [{ "name": "Intro", "slug": "intro", "children": [] }],
+  "tabs": [
+    { "title": "A", "slug": "a", "iconUrl": "https://x/a.png", "sections": ["intro"] },
+    { "title": "B", "slug": "b", "iconUrl": "https://x/b.png", "sections": ["intro"] }
+  ]
+}

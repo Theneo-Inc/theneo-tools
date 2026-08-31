@@ -177,11 +177,18 @@ commands/audit/  Commander command (thin wrapper)
 
 | Rule id | Severity | `needsDisk` |
 | --- | --- | --- |
+| `tabs-declaration-valid` | error | false |
 | `tab-fields-required` | error | false |
+| `duplicate-tab-slug` | error | false |
 | `tab-icon-xor-svg` | warning | false |
 | `section-in-exactly-one-tab` | error (zero or two-plus) | false |
 | `tab-sections-resolve` | error | false |
 | `index-tab-marker` | error (missing/unknown) · warning (not at top) | true |
+
+The marker scan (`marker.ts`) skips leading YAML frontmatter and fenced code
+blocks, so a marker shown as example content inside a code block is not mistaken
+for the section's real marker, and a marker placed right after frontmatter still
+counts as "at the top".
 
 Findings are sorted deterministically (by `file`, then `line`, `rule`, `message`)
 so output order is stable across machines and filesystems.
@@ -215,11 +222,34 @@ review pass:
   `withFileTypes`), which prevents walk cycles but means content reached only
   through a symlink is not audited.
 
+Tier 2 specific (surfaced by an adversarial review pass; the first two below were
+fixed, the rest are accepted limitations):
+
+- **Fixed — malformed `tabs` reports clean.** A `tabs` value that is not an array
+  used to be silently ignored (exit 0 on a broken project). Now
+  `tabs-declaration-valid` flags it.
+- **Fixed — example markers in code blocks / frontmatter.** The context-free
+  marker scan used to treat a `<!-- tab:… -->` inside a code fence as the real
+  marker and to warn when YAML frontmatter preceded the marker. The scanner now
+  skips fences and frontmatter.
+- **A malformed tab cascades into the marker rule.** A tab missing its `slug`
+  produces the correct `tab-fields-required` error *and* an `index-tab-marker`
+  error on every section whose marker referenced the intended slug. The root
+  cause is reported; the extra errors are noise. Not short-circuited (unlike the
+  `theneo.json` case) to avoid hiding a genuine marker typo.
+- **`tab-icon-xor-svg` checks presence, not validity** (decision #14): any
+  non-empty `iconUrl` passes, even a non-image link.
+- **`isSinglePage` is not consulted.** A single-page project that still carries a
+  `tabs` array would be held to the tab/marker rules.
+- **Tab membership assumes tabs list top-level slugs.** Putting a child slug in a
+  tab's `sections` passes `tab-sections-resolve` but does not satisfy the parent's
+  membership, so the two rules can disagree on unusual configs.
+
 ---
 
 ## How it was verified
 
-- **Automated tests (77).** Engine, loader, and every rule via committed
+- **Automated tests (87).** Engine, loader, and every rule via committed
   fixtures under `tests/audit/fixtures/` (a valid project + one broken case per
   rule + a nested-container regression fixture) plus unit tests for the verb,
   declaration, duplicate-slug, and sorting logic. Exit codes and `--json` output
@@ -227,13 +257,14 @@ review pass:
   watching the matching test go red).
 - **Tier 2 specifically.** The shared `valid` fixture was *extended* (not
   duplicated) with real tabs + `<!-- tab:docs -->` markers and still produces zero
-  findings — the no-false-positives guarantee. Four broken tab fixtures
-  (`tab-marker-bad`, `slug-in-two-tabs`, `tab-missing-section`, `tab-icon-xor`)
-  each assert their one expected finding. The pure `marker.ts` parser and every
-  tab rule branch not covered by a fixture (empty title/slug, both-icons, zero-tab
-  membership, missing marker, marker-not-at-top warning) are unit-tested against
-  hand-built models. A single combined project was also audited by hand to confirm
-  Tier 1 and Tier 2 rules fire together in one pass.
+  findings — the no-false-positives guarantee. Six broken tab fixtures
+  (`tab-marker-bad`, `slug-in-two-tabs`, `tab-missing-section`, `tab-icon-xor`,
+  `tabs-not-array`, `duplicate-tab-slug`) each assert their one expected finding.
+  The pure `marker.ts` parser (including the frontmatter and code-fence cases) and
+  every tab rule branch not covered by a fixture (empty title/slug, both-icons,
+  zero-tab membership, missing marker, marker-not-at-top warning) are unit-tested
+  against hand-built models. A single combined project was also audited by hand to
+  confirm Tier 1 and Tier 2 rules fire together in one pass.
 - **Real project data.** Exported the official Theneo sample project and audited
   it. This surfaced the two false positives above (parent containers, empty
   methods), which were then fixed and locked in with a regression fixture.

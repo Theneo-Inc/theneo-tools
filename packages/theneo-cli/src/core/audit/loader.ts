@@ -151,15 +151,15 @@ function buildTab(raw: unknown, index: number): TabModel {
     : [];
   return {
     index,
-    ...(typeof title === 'string' && title.trim() !== '' ? { title } : {}),
-    ...(typeof slug === 'string' && slug.trim() !== '' ? { slug } : {}),
+    ...(isNonEmptyString(title) ? { title } : {}),
+    ...(isNonEmptyString(slug) ? { slug } : {}),
     hasIconUrl: isNonEmptyString(tab['iconUrl']),
     hasSvgCode: isNonEmptyString(tab['svgCode']),
     sections,
   };
 }
 
-function isNonEmptyString(value: unknown): boolean {
+function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim() !== '';
 }
 

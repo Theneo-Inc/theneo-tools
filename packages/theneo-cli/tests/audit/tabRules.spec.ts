@@ -4,11 +4,13 @@ import {
   ProjectModel,
   TabModel,
 } from '../../src/core/audit/model';
+import { duplicateTabSlugRule } from '../../src/core/audit/rules/duplicateTabSlug';
 import { indexTabMarkerRule } from '../../src/core/audit/rules/indexTabMarker';
 import { sectionInOneTabRule } from '../../src/core/audit/rules/sectionInOneTab';
 import { tabFieldsRequiredRule } from '../../src/core/audit/rules/tabFieldsRequired';
 import { tabIconXorSvgRule } from '../../src/core/audit/rules/tabIconXorSvg';
 import { tabSectionsResolveRule } from '../../src/core/audit/rules/tabSectionsResolve';
+import { tabsDeclarationValidRule } from '../../src/core/audit/rules/tabsDeclarationValid';
 
 function tab(overrides: Partial<TabModel> & { index: number }): TabModel {
   return {
@@ -59,6 +61,66 @@ describe('tab-fields-required rule', () => {
   it('passes when title and slug are present', () => {
     const findings = tabFieldsRequiredRule.run(
       model({ tabs: [tab({ index: 0, title: 'Docs', slug: 'docs' })] })
+    );
+
+    expect(findings).toEqual([]);
+  });
+});
+
+describe('tabs-declaration-valid rule', () => {
+  function withTabsValue(tabs: unknown): ProjectModel {
+    return model({
+      theneoJson: { status: 'ok', value: { name: 'd', sections: [], tabs } },
+    });
+  }
+
+  it('errors when tabs is present but not an array', () => {
+    const findings = tabsDeclarationValidRule.run(withTabsValue('oops'));
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.severity).toBe('error');
+  });
+
+  it('passes when tabs is an array', () => {
+    expect(tabsDeclarationValidRule.run(withTabsValue([]))).toEqual([]);
+  });
+
+  it('passes when tabs is absent', () => {
+    const findings = tabsDeclarationValidRule.run(
+      model({
+        theneoJson: { status: 'ok', value: { name: 'd', sections: [] } },
+      })
+    );
+
+    expect(findings).toEqual([]);
+  });
+});
+
+describe('duplicate-tab-slug rule', () => {
+  it('errors once when two tabs share a slug', () => {
+    const findings = duplicateTabSlugRule.run(
+      model({
+        tabs: [
+          tab({ index: 0, slug: 'docs' }),
+          tab({ index: 1, slug: 'docs' }),
+          tab({ index: 2, slug: 'docs' }),
+        ],
+      })
+    );
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.severity).toBe('error');
+  });
+
+  it('ignores tabs with no slug and passes on unique slugs', () => {
+    const findings = duplicateTabSlugRule.run(
+      model({
+        tabs: [
+          tab({ index: 0, slug: 'a' }),
+          tab({ index: 1 }),
+          tab({ index: 2, slug: 'b' }),
+        ],
+      })
     );
 
     expect(findings).toEqual([]);

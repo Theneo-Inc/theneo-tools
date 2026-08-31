@@ -406,8 +406,10 @@ Each finding names the file it relates to (relative path), what is wrong, and ho
 
 **Tier 2 — tabs**
 
+- `tabs`, when present, is an array (`error`).
 - Every tab has a non-empty `title` and `slug` (`error`).
+- Tab slugs are unique across tabs (`error`).
 - A tab sets exactly one of `iconUrl` or `svgCode` — flagged when it has both or neither (`warning`).
 - When tabs exist, every top-level section is claimed by exactly one tab — flagged when it appears in zero or in two-or-more tabs (`error`).
 - Every slug listed under a tab's `sections` resolves to a real declared section (`error`).
-- Each section's `index.md` starts with a `<!-- tab:slug -->` marker matching a declared tab: missing or unknown slug is an `error`; present but not at the very top is a `warning` (reported with a line number).
+- Each section's `index.md` starts with a `<!-- tab:slug -->` marker matching a declared tab: missing or unknown slug is an `error`; present but not at the very top is a `warning` (reported with a line number). The scan ignores YAML frontmatter and fenced code blocks, so an example marker inside a code block is not mistaken for the real one.

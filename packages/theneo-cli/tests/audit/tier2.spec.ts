@@ -24,6 +24,8 @@ describe('Tier 2 tab rules (fixtures)', () => {
     ['tab-marker-bad', 'index-tab-marker'],
     ['slug-in-two-tabs', 'section-in-exactly-one-tab'],
     ['tab-missing-section', 'tab-sections-resolve'],
+    ['tabs-not-array', 'tabs-declaration-valid'],
+    ['duplicate-tab-slug', 'duplicate-tab-slug'],
   ];
 
   it.each(errorCases)('%s reports error %s and exits 1', (fixture, rule) => {

@@ -2,10 +2,12 @@ import fs from 'fs';
 import path from 'path';
 import { isJsonObject } from './json';
 import { parseIndexMarker } from './marker';
+import { parseMdx } from './mdx';
 import {
   DeclaredSection,
   DiskSection,
   IndexMarker,
+  MdxAnalysis,
   ProjectModel,
   SectionDir,
   TabModel,
@@ -110,28 +112,38 @@ function buildDeclaredSection(
   const dir = resolveSectionDir(root, slug);
   const base = dir ? path.join(root, ...dir.relPath.split('/')) : undefined;
   const indexPath = base ? path.join(base, INDEX_MD) : undefined;
-  const hasIndexMd = indexPath !== undefined && fs.existsSync(indexPath);
+  const content =
+    indexPath !== undefined ? readFileOrUndefined(indexPath) : undefined;
+  const analysis = content !== undefined ? analyzeIndexMd(content) : undefined;
   return {
     slug,
     ...(typeof name === 'string' ? { name } : {}),
     hasChildren,
     topLevel,
     dir,
-    hasIndexMd,
+    hasIndexMd: content !== undefined,
     hasSectionJson:
       base !== undefined && fs.existsSync(path.join(base, SECTION_JSON)),
-    ...(hasIndexMd && indexPath
-      ? { indexMarker: readIndexMarker(indexPath) }
-      : {}),
+    ...(analysis ?? {}),
   };
 }
 
-function readIndexMarker(indexPath: string): IndexMarker {
+function readFileOrUndefined(filePath: string): string | undefined {
   try {
-    return parseIndexMarker(fs.readFileSync(indexPath, 'utf8'));
+    return fs.readFileSync(filePath, 'utf8');
   } catch {
-    return { present: false, atTop: false };
+    return undefined;
   }
+}
+
+function analyzeIndexMd(content: string): {
+  indexMarker: IndexMarker;
+  indexMdx: MdxAnalysis;
+} {
+  return {
+    indexMarker: parseIndexMarker(content),
+    indexMdx: parseMdx(content),
+  };
 }
 
 function parseTabs(config: Record<string, unknown>): TabModel[] {

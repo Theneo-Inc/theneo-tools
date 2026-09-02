@@ -16,6 +16,26 @@ export interface IndexMarker {
   line?: number;
 }
 
+export interface MdxTag {
+  name: string;
+  line: number;
+  selfClosing: boolean;
+  props: Record<string, string>;
+  depth: number;
+  parentIndex?: number;
+}
+
+export interface MdxUnbalanced {
+  name: string;
+  line: number;
+  kind: 'unclosed' | 'unexpected-close';
+}
+
+export interface MdxAnalysis {
+  tags: MdxTag[];
+  unbalanced: MdxUnbalanced[];
+}
+
 export interface DeclaredSection {
   slug: string;
   name?: string;
@@ -25,6 +45,7 @@ export interface DeclaredSection {
   hasIndexMd: boolean;
   hasSectionJson: boolean;
   indexMarker?: IndexMarker;
+  indexMdx?: MdxAnalysis;
 }
 
 export interface TabModel {

@@ -1,0 +1,8 @@
+{
+  "name": "Dup Tab Slug",
+  "sections": [{ "name": "Intro", "slug": "intro", "children": [] }],
+  "tabs": [
+    { "title": "One", "slug": "docs", "iconUrl": "https://x/a.png", "sections": ["intro"] },
+    { "title": "Two", "slug": "docs", "iconUrl": "https://x/b.png", "sections": [] }
+  ]
+}

@@ -6,5 +6,12 @@
       { "name": "Auth", "slug": "guides/auth", "children": [] }
     ] }
   ],
-  "tabs": []
+  "tabs": [
+    {
+      "title": "Docs",
+      "slug": "docs",
+      "iconUrl": "https://example.com/icon.png",
+      "sections": ["introduction", "guides"]
+    }
+  ]
 }

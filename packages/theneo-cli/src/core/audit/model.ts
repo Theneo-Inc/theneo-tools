@@ -9,13 +9,31 @@ export interface SectionDir {
   exact: boolean;
 }
 
+export interface IndexMarker {
+  present: boolean;
+  slug?: string;
+  atTop: boolean;
+  line?: number;
+}
+
 export interface DeclaredSection {
   slug: string;
   name?: string;
   hasChildren: boolean;
+  topLevel: boolean;
   dir?: SectionDir;
   hasIndexMd: boolean;
   hasSectionJson: boolean;
+  indexMarker?: IndexMarker;
+}
+
+export interface TabModel {
+  index: number;
+  title?: string;
+  slug?: string;
+  hasIconUrl: boolean;
+  hasSvgCode: boolean;
+  sections: string[];
 }
 
 export interface DiskSection {
@@ -32,4 +50,5 @@ export interface ProjectModel {
   rootHasIndexMd: boolean;
   declaredSections: DeclaredSection[];
   diskSections: DiskSection[];
+  tabs: TabModel[];
 }

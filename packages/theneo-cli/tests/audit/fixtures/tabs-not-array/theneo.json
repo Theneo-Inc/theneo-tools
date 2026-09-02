@@ -1,0 +1,5 @@
+{
+  "name": "Tabs Not Array",
+  "sections": [{ "name": "Intro", "slug": "intro", "children": [] }],
+  "tabs": "oops"
+}

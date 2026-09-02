@@ -1,0 +1,5 @@
+{
+  "name": "Icon XOR",
+  "sections": [{ "name": "Intro", "slug": "intro", "children": [] }],
+  "tabs": [{ "title": "Docs", "slug": "docs", "sections": ["intro"] }]
+}

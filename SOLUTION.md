@@ -15,8 +15,8 @@ theneo audit [--dir <path>] [--json]
   so it is pipeable.
 - No Theneo account / API key required.
 
-This document covers **Tier 1 (structure)**, which is complete. Tier 2 (tabs) and
-Tier 3 (MDX) are follow-ups.
+This document covers **Tier 1 (structure)** and **Tier 2 (tabs)**, both complete.
+Tier 3 (MDX) is a follow-up.
 
 ---
 
@@ -31,6 +31,7 @@ src/core/audit/
   model.ts       ProjectModel (the in-memory shape rules read)
   rule.ts        Rule interface (id, needsDisk, run(model))
   engine.ts      runRules(model, rules) -> Finding[]   (pure, no I/O)
+  marker.ts      parse an index.md tab marker          (pure, no I/O)
   rules/         one file per rule
   loader.ts      filesystem -> ProjectModel            (the fs adapter)
   report.ts      Finding[] -> human text / JSON        (the output adapter)
@@ -110,6 +111,50 @@ commands/audit/  Commander command (thin wrapper)
 
 ---
 
+## Key decisions (Tier 2 — tabs)
+
+10. **The tab rules run on the content model, not the disk layout.** Four of the
+    five tab rules are `needsDisk: false` — they read only `theneo.json`. This is
+    the reuse seam the ticket asked for: a future server-side pre-save checker can
+    run them against an in-memory project with no filesystem. Only
+    `index-tab-marker` is `needsDisk: true`, because it must read `index.md`
+    content; even so, the *parsing* is isolated in a pure `marker.ts`, so the rule
+    itself stays a pure function of the model.
+
+11. **"Exactly one tab" applies to top-level sections only.** Tabs group top-level
+    sections (`getting-started`); children (`getting-started/introduction`) inherit
+    their parent's tab and are never listed in a tab's `sections`. Applying the
+    membership rule to every declared section would flag every child as "in zero
+    tabs" — a flood of false positives. So the rule iterates only sections marked
+    `topLevel` (declared directly in the root `sections` array), a flag the loader
+    now records. This is the single most important semantic call in Tier 2.
+
+12. **Tab rules are gated on `tabs` being non-empty.** A project may legitimately
+    have no tabs (`"tabs": []`). The membership and marker rules only run when at
+    least one tab is declared — otherwise a tab-less project (and the existing
+    Tier-1 `valid`/`valid-nested` fixtures, which have empty tabs and no markers)
+    would be flagged. This is what keeps Tier 2 from producing false positives on
+    the pre-existing valid fixtures.
+
+13. **`title`/`slug` are normalized to "present only when a non-empty string".**
+    The loader stores a tab's `title`/`slug` only when they are non-empty strings,
+    so `undefined` is exactly the "missing or empty" case `tab-fields-required`
+    flags — the rule needs no re-validation of the raw JSON.
+
+14. **The icon rule checks presence, not validity.** `tab-icon-xor-svg` warns when
+    a tab has both `iconUrl` and `svgCode`, or neither — it does **not** verify the
+    URL points at a real image or that the SVG is well-formed. **Trade-off:** this
+    keeps the rule cheap and offline (no network), at the cost of passing a tab
+    whose `iconUrl` is a non-image link. A stricter "looks like an image URL" check
+    is a possible future enhancement (noted below).
+
+15. **The marker "at top" check ignores leading blank lines.** A marker is "at the
+    top" when it is the *first non-blank line* — so a file that opens with a blank
+    line then the marker still passes, but a heading or prose before the marker is
+    a warning. Missing marker or a slug that matches no declared tab is an error.
+
+---
+
 ## Rules (Tier 1)
 
 | Rule id | Severity | `needsDisk` |
@@ -127,6 +172,23 @@ commands/audit/  Commander command (thin wrapper)
 | `orphan-on-disk-undeclared` | warning | true |
 | `section-json-valid` | error | true |
 | `section-json-http-verb` | error | false |
+
+## Rules (Tier 2 — tabs)
+
+| Rule id | Severity | `needsDisk` |
+| --- | --- | --- |
+| `tabs-declaration-valid` | error | false |
+| `tab-fields-required` | error | false |
+| `duplicate-tab-slug` | error | false |
+| `tab-icon-xor-svg` | warning | false |
+| `section-in-exactly-one-tab` | error (zero or two-plus) | false |
+| `tab-sections-resolve` | error | false |
+| `index-tab-marker` | error (missing/unknown) · warning (not at top) | true |
+
+The marker scan (`marker.ts`) skips leading YAML frontmatter and fenced code
+blocks, so a marker shown as example content inside a code block is not mistaken
+for the section's real marker, and a marker placed right after frontmatter still
+counts as "at the top".
 
 Findings are sorted deterministically (by `file`, then `line`, `rule`, `message`)
 so output order is stable across machines and filesystems.
@@ -160,15 +222,49 @@ review pass:
   `withFileTypes`), which prevents walk cycles but means content reached only
   through a symlink is not audited.
 
+Tier 2 specific (surfaced by an adversarial review pass; the first two below were
+fixed, the rest are accepted limitations):
+
+- **Fixed — malformed `tabs` reports clean.** A `tabs` value that is not an array
+  used to be silently ignored (exit 0 on a broken project). Now
+  `tabs-declaration-valid` flags it.
+- **Fixed — example markers in code blocks / frontmatter.** The context-free
+  marker scan used to treat a `<!-- tab:… -->` inside a code fence as the real
+  marker and to warn when YAML frontmatter preceded the marker. The scanner now
+  skips fences and frontmatter.
+- **A malformed tab cascades into the marker rule.** A tab missing its `slug`
+  produces the correct `tab-fields-required` error *and* an `index-tab-marker`
+  error on every section whose marker referenced the intended slug. The root
+  cause is reported; the extra errors are noise. Not short-circuited (unlike the
+  `theneo.json` case) to avoid hiding a genuine marker typo.
+- **`tab-icon-xor-svg` checks presence, not validity** (decision #14): any
+  non-empty `iconUrl` passes, even a non-image link.
+- **`isSinglePage` is not consulted.** A single-page project that still carries a
+  `tabs` array would be held to the tab/marker rules.
+- **Tab membership assumes tabs list top-level slugs.** Putting a child slug in a
+  tab's `sections` passes `tab-sections-resolve` but does not satisfy the parent's
+  membership, so the two rules can disagree on unusual configs.
+
 ---
 
 ## How it was verified
 
-- **Automated tests (48).** Engine, loader, and every rule via committed
+- **Automated tests (87).** Engine, loader, and every rule via committed
   fixtures under `tests/audit/fixtures/` (a valid project + one broken case per
   rule + a nested-container regression fixture) plus unit tests for the verb,
   declaration, duplicate-slug, and sorting logic. Exit codes and `--json` output
-  are asserted. Tests fail if a rule is broken.
+  are asserted. Tests fail if a rule is broken (proven by breaking a rule and
+  watching the matching test go red).
+- **Tier 2 specifically.** The shared `valid` fixture was *extended* (not
+  duplicated) with real tabs + `<!-- tab:docs -->` markers and still produces zero
+  findings — the no-false-positives guarantee. Six broken tab fixtures
+  (`tab-marker-bad`, `slug-in-two-tabs`, `tab-missing-section`, `tab-icon-xor`,
+  `tabs-not-array`, `duplicate-tab-slug`) each assert their one expected finding.
+  The pure `marker.ts` parser (including the frontmatter and code-fence cases) and
+  every tab rule branch not covered by a fixture (empty title/slug, both-icons,
+  zero-tab membership, missing marker, marker-not-at-top warning) are unit-tested
+  against hand-built models. A single combined project was also audited by hand to
+  confirm Tier 1 and Tier 2 rules fire together in one pass.
 - **Real project data.** Exported the official Theneo sample project and audited
   it. This surfaced the two false positives above (parent containers, empty
   methods), which were then fixed and locked in with a regression fixture.
@@ -187,11 +283,14 @@ strict TypeScript throughout, no unjustified `any`.
 
 ## What I'd do with more time
 
-- **Tier 2 (tabs)** and **Tier 3 (MDX)** — the next tickets.
+- **Tier 3 (MDX)** — the remaining (bonus) ticket.
 - **Extract `audit-core` into a shared published package** so the platform can
   reuse the content rules for a server-side pre-save / AI-editor guardrail.
 - **Optional `empty-folder` info-level rule** (decision #7).
-- **Line numbers** for `section.json`/MDX findings where practical.
+- **Stricter tab-icon check** (decision #14): warn when `iconUrl` is not a
+  plausible image URL, so a non-image link like a chat-app URL is caught.
+- **Line numbers** for `section.json`/MDX findings where practical (the marker
+  rule already reports one).
 - **Configurable required fields**, if projects vary.
 
 ---
@@ -221,3 +320,8 @@ behavior) that should never hard-block a user who knows their project is fine.
 - Used it to run a critical test pass against real exported project data, which
   is what surfaced the parent-container and empty-method false positives; those
   were diagnosed with an independent reconciliation oracle and fixed.
+- For Tier 2, used it to extend the model/loader with tabs + marker parsing,
+  implement the five tab rules, and build the fixtures and unit tests. Validated
+  end-to-end against real exported projects (`diva`, `diva2`) — including watching
+  the icon warning clear once a real `iconUrl` was added — and against a purpose-
+  built broken project that fires all five tab rules plus Tier 1 rules in one run.

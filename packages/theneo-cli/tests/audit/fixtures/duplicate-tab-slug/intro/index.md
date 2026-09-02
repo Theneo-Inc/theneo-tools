@@ -1,3 +1,3 @@
 <!-- tab:docs -->
 
-# Auth
+# Intro

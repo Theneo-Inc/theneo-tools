@@ -15,8 +15,8 @@ theneo audit [--dir <path>] [--json]
   so it is pipeable.
 - No Theneo account / API key required.
 
-This document covers **Tier 1 (structure)** and **Tier 2 (tabs)**, both complete.
-Tier 3 (MDX) is a follow-up.
+This document covers **Tier 1 (structure)**, **Tier 2 (tabs)**, and
+**Tier 3 (MDX widgets)** — all complete.
 
 ---
 
@@ -32,6 +32,7 @@ src/core/audit/
   rule.ts        Rule interface (id, needsDisk, run(model))
   engine.ts      runRules(model, rules) -> Finding[]   (pure, no I/O)
   marker.ts      parse an index.md tab marker          (pure, no I/O)
+  mdx.ts         parse index.md widget tags + nesting  (pure, no I/O)
   rules/         one file per rule
   loader.ts      filesystem -> ProjectModel            (the fs adapter)
   report.ts      Finding[] -> human text / JSON        (the output adapter)
@@ -155,6 +156,73 @@ commands/audit/  Commander command (thin wrapper)
 
 ---
 
+## Key decisions (Tier 3 — MDX widgets)
+
+16. **A small purpose-built tag scanner, not a full MDX/AST parser.** Real Theneo
+    `index.md` bodies are HTML-ish, not clean JSX: Callouts wrap raw `<p>`, code
+    lines contain literal `<`/`{`/quotes, and an `attributes` value can contain
+    `>` (e.g. a Mermaid `-->`). A pure `mdx.ts` scans tags **quote-aware** (a `>`
+    inside a quoted prop does not end the tag) and **skips fenced code blocks**, so
+    it handles the real content without pulling in an MDX toolchain. Tag openers
+    are assumed single-line (true across all real exports).
+
+17. **The parser matches a known set of Theneo widget names, not "any capitalized
+    tag."** This started out generic (any `<Capitalized>` tag), but real API docs
+    contain literal prose like `Authorization: <Bearer Token>` inside a `<span>` —
+    which a generic parser reads as an unclosed `<Bearer>` widget and then cascades
+    into bogus nesting warnings. So `mdx.ts` only treats a curated `WIDGET_NAMES`
+    set as widgets; unknown `<Capitalized>` text is ignored. **Trade-off:** a
+    brand-new Theneo widget is skipped until added to the set — but that is a false
+    *negative* (miss), which is far safer for a validator than a false *positive*
+    (crying wolf on valid content). Lowercase tags (`<p>`, `<table-row>`) are
+    content, never widgets.
+
+18. **`attributes` is a single-quoted JSON string, and `dataType` lives inside it.**
+    Confirmed from real exports: `attributes='{"dataType":"info",…}'`. So the JSON
+    rule parses the quoted string, and the Callout rule reads `dataType` out of the
+    parsed object (not a separate prop).
+
+19. **Valid Callout `dataType` = `info`, `warning`, `error`, `success`.** Real data
+    proves the first three; `success` was added as a known valid green style. The
+    platform does not expose the list in this repo, so — like the HTTP-verb set in
+    Tier 1 — this is a curated constant to revisit if the platform adds types.
+
+20. **`TabPanel` is checked two ways.** It must sit *directly* inside a `<Tabs>`,
+    and its `tabTitle` must be one of the titles the parent Tabs declares in its
+    `attributes.tabs` array (real syntax: `<Tabs attributes='{"tabs":["Tab 1",…]}'>`
+    with `<TabPanel tabTitle="Tab 1">`). Both are errors.
+
+21. **Nesting depth is generic and a warning.** Depth counts only widget ancestors;
+    one level of widget-in-widget is allowed (this covers every real pattern —
+    `CardGroup>Card`, `Tabs>TabPanel`, `CodeBlock>CodeLine`), and a widget two or
+    more deep is a `warning` (never blocks CI). This needs no widget classification
+    and produced **zero findings on a real 15-widget document**. **Trade-off:** a
+    legitimately deep-but-intentional structure (say a CodeBlock inside a TabPanel)
+    is warned about; a warning, not an error, is the deliberately soft answer.
+    The rule also **stands down entirely for a file with unbalanced tags** — an
+    unclosed tag makes every downstream depth wrong, so it would otherwise flood a
+    single balance error with dozens of bogus nesting warnings. Fix the balance,
+    re-run, and real nesting surfaces (same "root cause, not cascade" principle as
+    the `theneo.json` short-circuit).
+
+22. **Code-widget bodies are opaque.** `<CodeBlock>` and `<CodeLine>` hold literal
+    code, and API docs routinely show widget syntax there as examples
+    (`<CodeLine>Use <Callout> like this</CodeLine>`). Scanning that content would
+    read the example `<Callout>` as a real (unclosed) widget and cascade into fake
+    balance errors, so the scanner treats everything between a code-widget open and
+    its matching close as raw text — no tags parsed inside (the same way HTML
+    parsers treat `<script>`). The code widget's own `attributes` and balance are
+    still checked.
+
+23. **Remaining scanner blind spots** (accepted for a bonus tier, not seen in real
+    exports): a widget tag that spans multiple lines is not recognized, a single
+    quote inside an `attributes` value (`"it's"`) breaks the quoted-string parse,
+    and a *known* widget name typed as prose in angle brackets outside any code is
+    read as a tag. A full AST-based MDX parser would close these if Tier 3
+    graduates from bonus; they are documented rather than papered over.
+
+---
+
 ## Rules (Tier 1)
 
 | Rule id | Severity | `needsDisk` |
@@ -189,6 +257,20 @@ The marker scan (`marker.ts`) skips leading YAML frontmatter and fenced code
 blocks, so a marker shown as example content inside a code block is not mistaken
 for the section's real marker, and a marker placed right after frontmatter still
 counts as "at the top".
+
+## Rules (Tier 3 — MDX widgets)
+
+| Rule id | Severity | `needsDisk` |
+| --- | --- | --- |
+| `mdx-attributes-json` | error | true |
+| `mdx-tags-balanced` | error | true |
+| `mdx-tabpanel-parent` | error | true |
+| `mdx-callout-datatype` | error | true |
+| `mdx-nesting-depth` | warning | true |
+
+All five carry a **line number**. They are `needsDisk: true` only because they read
+`index.md` content; the parsing itself is a pure function (`mdx.ts`), so a future
+content-model caller can reuse the rules by supplying a parsed document.
 
 Findings are sorted deterministically (by `file`, then `line`, `rule`, `message`)
 so output order is stable across machines and filesystems.
@@ -249,7 +331,7 @@ fixed, the rest are accepted limitations):
 
 ## How it was verified
 
-- **Automated tests (87).** Engine, loader, and every rule via committed
+- **Automated tests (116).** Engine, loader, and every rule via committed
   fixtures under `tests/audit/fixtures/` (a valid project + one broken case per
   rule + a nested-container regression fixture) plus unit tests for the verb,
   declaration, duplicate-slug, and sorting logic. Exit codes and `--json` output
@@ -265,6 +347,14 @@ fixed, the rest are accepted limitations):
   zero-tab membership, missing marker, marker-not-at-top warning) are unit-tested
   against hand-built models. A single combined project was also audited by hand to
   confirm Tier 1 and Tier 2 rules fire together in one pass.
+- **Tier 3 specifically.** The **valid fixture is a real, widget-rich exported
+  page** (`valid-widgets`, all 15 widget types) and produces **zero findings** —
+  the strongest no-false-positives check. Five broken fixtures (`mdx-bad-json`,
+  `mdx-unbalanced`, `mdx-tabpanel-orphan`, `mdx-callout-datatype`, `mdx-nesting`)
+  each assert their one expected finding and line number. The pure `mdx.ts` parser
+  is unit-tested for the hard cases (a `>` inside an `attributes` value, self-
+  closing tags, fenced-code skipping, nesting depth, parent linking, unbalanced
+  detection), and every MDX rule branch has a hand-built-model unit test.
 - **Real project data.** Exported the official Theneo sample project and audited
   it. This surfaced the two false positives above (parent containers, empty
   methods), which were then fixed and locked in with a regression fixture.
@@ -283,9 +373,12 @@ strict TypeScript throughout, no unjustified `any`.
 
 ## What I'd do with more time
 
-- **Tier 3 (MDX)** — the remaining (bonus) ticket.
 - **Extract `audit-core` into a shared published package** so the platform can
   reuse the content rules for a server-side pre-save / AI-editor guardrail.
+- **Confirm the MDX blind spots** (decision #22) with a real AST-based MDX parser
+  if Tier 3 graduates from bonus — multi-line tags and `<Capitalized>` tokens in
+  code text.
+- **Verify the full Callout `dataType` set** (decision #19) against the platform.
 - **Optional `empty-folder` info-level rule** (decision #7).
 - **Stricter tab-icon check** (decision #14): warn when `iconUrl` is not a
   plausible image URL, so a non-image link like a chat-app URL is caught.
@@ -325,3 +418,9 @@ behavior) that should never hard-block a user who knows their project is fine.
   end-to-end against real exported projects (`diva`, `diva2`) — including watching
   the icon warning clear once a real `iconUrl` was added — and against a purpose-
   built broken project that fires all five tab rules plus Tier 1 rules in one run.
+- For Tier 3, used it to research the real widget/MDX format from exported pages
+  (the `attributes='…JSON…'` shape, `dataType` inside it, the real `Tabs`/`TabPanel`
+  syntax), design the quote- and fence-aware `mdx.ts` scanner, implement the five
+  rules, and build fixtures from a real 15-widget page plus broken variants.
+  Validated that the real page produces zero findings and each broken case fires
+  with the right line number.

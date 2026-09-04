@@ -2,6 +2,11 @@ import { Rule } from '../rule';
 import { duplicateSectionSlugRule } from './duplicateSectionSlug';
 import { duplicateTabSlugRule } from './duplicateTabSlug';
 import { indexTabMarkerRule } from './indexTabMarker';
+import { mdxAttributesJsonRule } from './mdxAttributesJson';
+import { mdxCalloutDataTypeRule } from './mdxCalloutDataType';
+import { mdxNestingDepthRule } from './mdxNestingDepth';
+import { mdxTabPanelParentRule } from './mdxTabPanelParent';
+import { mdxTagsBalancedRule } from './mdxTagsBalanced';
 import { noRootIndexMdRule } from './noRootIndexMd';
 import { orphanDeclaredMissingRule } from './orphanDeclaredMissing';
 import { orphanOnDiskUndeclaredRule } from './orphanOnDiskUndeclared';
@@ -41,4 +46,9 @@ export const allRules: readonly Rule[] = [
   sectionInOneTabRule,
   tabSectionsResolveRule,
   indexTabMarkerRule,
+  mdxAttributesJsonRule,
+  mdxTagsBalancedRule,
+  mdxTabPanelParentRule,
+  mdxCalloutDataTypeRule,
+  mdxNestingDepthRule,
 ];

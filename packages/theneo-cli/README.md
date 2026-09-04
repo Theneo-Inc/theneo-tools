@@ -413,3 +413,13 @@ Each finding names the file it relates to (relative path), what is wrong, and ho
 - When tabs exist, every top-level section is claimed by exactly one tab — flagged when it appears in zero or in two-or-more tabs (`error`).
 - Every slug listed under a tab's `sections` resolves to a real declared section (`error`).
 - Each section's `index.md` starts with a `<!-- tab:slug -->` marker matching a declared tab: missing or unknown slug is an `error`; present but not at the very top is a `warning` (reported with a line number). The scan ignores YAML frontmatter and fenced code blocks, so an example marker inside a code block is not mistaken for the real one.
+
+**Tier 3 — MDX widgets** (findings include a line number)
+
+- Every widget's `attributes` prop is valid JSON (`error`).
+- Paired widget tags are balanced — every opening tag has a matching close, correctly nested (`error`).
+- A `<TabPanel>` is nested directly inside a `<Tabs>`, and its `tabTitle` is one of the parent's declared tabs (`error`).
+- A `<Callout>`'s `dataType` is one of `info`, `warning`, `error`, `success` (`error`).
+- A widget nested more than one level deep is flagged (`warning`).
+
+The structural checks (valid JSON, balance, nesting) apply to Theneo's known widget tags, so prose that contains angle-bracket text (e.g. `<Bearer Token>` in an auth example) is not mistaken for a widget. Tag scanning is quote-aware (so `>` inside an `attributes` value is handled) and skips fenced code blocks.

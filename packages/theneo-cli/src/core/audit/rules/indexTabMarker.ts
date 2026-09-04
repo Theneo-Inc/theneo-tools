@@ -1,6 +1,7 @@
 import { RuleFinding } from '../finding';
-import { DeclaredSection, IndexMarker, ProjectModel } from '../model';
+import { IndexMarker, ProjectModel } from '../model';
 import { Rule } from '../rule';
+import { indexPath } from './indexPath';
 
 export const indexTabMarkerRule: Rule = {
   id: 'index-tab-marker',
@@ -69,9 +70,4 @@ function checkMarker(
   }
 
   return undefined;
-}
-
-function indexPath(section: DeclaredSection): string {
-  const base = section.dir?.relPath ?? section.slug;
-  return `${base}/index.md`;
 }

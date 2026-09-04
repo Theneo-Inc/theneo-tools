@@ -13,6 +13,62 @@ export const THENEO_API_CLIENT_VERSION_HEADER_NAME =
 const UNKNOWN_ERROR_MESSAGE = 'Unknown error';
 const EMPTY_DATA_ERROR_MESSAGE = 'No data returned from API';
 
+const STATUS_ERROR_MESSAGES = new Map<number, string>([
+  [
+    413,
+    'File or directory size exceeds the allowed upload limit. Please reduce the payload size or split the import into smaller sections.',
+  ],
+  [429, 'Too many requests. Please wait a moment and try again.'],
+  [500, 'The server encountered an internal error. Please try again later.'],
+  [502, 'The server is unreachable (bad gateway). Please try again later.'],
+  [
+    503,
+    'Service is temporarily unavailable. Please try again later or check server status.',
+  ],
+  [
+    504,
+    'The server took too long to respond (gateway timeout). Please try again later.',
+  ],
+]);
+
+function looksLikeHtml(value: unknown): boolean {
+  return (
+    typeof value === 'string' &&
+    /^\s*<(?:!doctype|html|head|body|center|h1|pre)/i.test(value)
+  );
+}
+
+function messageFromErrorResponse(response: {
+  status?: number;
+  statusText?: string;
+  data?: unknown;
+}): string {
+  const { status, statusText, data } = response;
+
+  const bodyMessage =
+    typeof data === 'object' && data !== null
+      ? (data as Record<string, unknown>).message ||
+        (data as Record<string, unknown>).error
+      : null;
+  if (typeof bodyMessage === 'string' && bodyMessage.trim() !== '') {
+    return bodyMessage;
+  }
+
+  const mapped =
+    typeof status === 'number' ? STATUS_ERROR_MESSAGES.get(status) : undefined;
+  if (mapped) {
+    return mapped;
+  }
+
+  if (typeof data === 'string' && data.trim() !== '' && !looksLikeHtml(data)) {
+    return data;
+  }
+
+  return `Request failed with status code ${status}${
+    statusText ? ` (${statusText})` : ''
+  }`;
+}
+
 function addQueryParameters(url: URL, queryParams: ApiQueryParams): void {
   Object.keys(queryParams).forEach(key => {
     const queryParam = queryParams[String(key)];
@@ -25,19 +81,7 @@ function addQueryParameters(url: URL, queryParams: ApiQueryParams): void {
 export function handleApiThrownError(error: unknown): Result<never> {
   if (axios.isAxiosError(error)) {
     if (error.response) {
-      const data = error.response.data;
-      const rawMessage =
-        (typeof data === 'object' && data !== null
-          ? (data as Record<string, unknown>).message ||
-            (data as Record<string, unknown>).error
-          : null) ?? data;
-
-      const message =
-        typeof rawMessage === 'string'
-          ? rawMessage
-          : JSON.stringify(rawMessage);
-
-      return Err(new Error(message));
+      return Err(new Error(messageFromErrorResponse(error.response)));
     }
     return Err(error);
   }

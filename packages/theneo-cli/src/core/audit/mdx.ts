@@ -1,4 +1,4 @@
-import { MdxAnalysis, MdxTag, MdxUnbalanced } from './model';
+import { MdxAnalysis, MdxMalformed, MdxTag, MdxUnbalanced } from './model';
 
 interface RawTag {
   kind: 'open' | 'close' | 'self';
@@ -29,7 +29,8 @@ const WIDGET_NAMES = new Set([
 ]);
 
 export function parseMdx(content: string): MdxAnalysis {
-  const raw = scanTags(content.split(/\r?\n/));
+  const lines = content.split(/\r?\n/);
+  const raw = scanTags(lines);
   const tags: MdxTag[] = [];
   const unbalanced: MdxUnbalanced[] = [];
   const stack: number[] = [];
@@ -71,13 +72,19 @@ export function parseMdx(content: string): MdxAnalysis {
     }
   }
 
-  return { tags, unbalanced };
+  return { tags, unbalanced, malformed: scanMalformed(lines) };
 }
 
 const RAW_WIDGETS = new Set(['CodeBlock', 'CodeLine']);
 
-function scanTags(lines: string[]): RawTag[] {
-  const tags: RawTag[] = [];
+function scanContentLines(
+  lines: string[],
+  onLine: (
+    line: string,
+    lineNo: number,
+    rawCloser: string | undefined
+  ) => string | undefined
+): void {
   let inFence = false;
   let rawCloser: string | undefined;
   for (const [i, line] of lines.entries()) {
@@ -90,8 +97,15 @@ function scanTags(lines: string[]): RawTag[] {
         continue;
       }
     }
-    rawCloser = scanLine(line, i + 1, tags, rawCloser);
+    rawCloser = onLine(line, i + 1, rawCloser);
   }
+}
+
+function scanTags(lines: string[]): RawTag[] {
+  const tags: RawTag[] = [];
+  scanContentLines(lines, (line, lineNo, closer) =>
+    scanLine(line, lineNo, tags, closer)
+  );
   return tags;
 }
 
@@ -230,4 +244,186 @@ function parseProps(text: string): Record<string, string> {
 function isFence(line: string): boolean {
   const trimmed = line.trim();
   return trimmed.startsWith('```') || trimmed.startsWith('~~~');
+}
+
+const STRUCTURAL_TAGS = new Set([
+  'table-row',
+  'table-cell',
+  'title',
+  'description',
+]);
+const TAG_NAME_RE = /^[A-Za-z][\w-]*/;
+
+function isRecognizedTag(name: string): boolean {
+  return WIDGET_NAMES.has(name) || STRUCTURAL_TAGS.has(name);
+}
+
+function scanMalformed(lines: string[]): MdxMalformed[] {
+  const out: MdxMalformed[] = [];
+  scanContentLines(lines, (line, lineNo, closer) =>
+    scanMalformedLine(line, lineNo, out, closer)
+  );
+  return out;
+}
+
+function scanMalformedLine(
+  line: string,
+  lineNo: number,
+  out: MdxMalformed[],
+  rawCloser: string | undefined
+): string | undefined {
+  let i = 0;
+  let closer = rawCloser;
+  while (i < line.length) {
+    if (closer !== undefined) {
+      const closeTag = `</${closer}>`;
+      const idx = line.indexOf(closeTag, i);
+      if (idx === -1) {
+        return closer;
+      }
+      i = idx + closeTag.length;
+      closer = undefined;
+      continue;
+    }
+    const lt = line.indexOf('<', i);
+    if (lt === -1) {
+      return undefined;
+    }
+    const scan = inspectMalformed(line, lt, lineNo);
+    if (scan.malformed) {
+      out.push(scan.malformed);
+    }
+    i = Math.max(scan.next, lt + 1);
+    if (scan.rawOpen !== undefined) {
+      closer = scan.rawOpen;
+    }
+  }
+  return closer;
+}
+
+interface MalformedScan {
+  next: number;
+  malformed?: MdxMalformed;
+  rawOpen?: string;
+}
+
+function inspectMalformed(
+  line: string,
+  lt: number,
+  lineNo: number
+): MalformedScan {
+  const isClose = line.charAt(lt + 1) === '/';
+  const nameStart = lt + (isClose ? 2 : 1);
+  const nameMatch = TAG_NAME_RE.exec(line.slice(nameStart));
+  const name = nameMatch ? nameMatch[0] : '';
+  if (!isRecognizedTag(name)) {
+    return { next: nameStart + name.length };
+  }
+
+  const contentStart = nameStart + name.length;
+  const term = scanToTerminator(line, contentStart);
+  if (term.kind === 'gt') {
+    const rawOpen = !isClose && RAW_WIDGETS.has(name) ? name : undefined;
+    return { next: term.at + 1, ...(rawOpen !== undefined ? { rawOpen } : {}) };
+  }
+  const stop = term.kind === 'lt' ? term.at : line.length;
+  if (!isTagRemainder(line.slice(contentStart, term.at))) {
+    return { next: stop };
+  }
+  return {
+    next: stop,
+    malformed: openKind(name, lineNo, isClose, term.inQuote),
+  };
+}
+
+const WS_RE = /\s/;
+
+function isTagRemainder(remainder: string): boolean {
+  let i = 0;
+  while (i < remainder.length) {
+    while (i < remainder.length && WS_RE.test(remainder.charAt(i))) {
+      i++;
+    }
+    if (i >= remainder.length) {
+      break;
+    }
+    if (remainder.charAt(i) === '/') {
+      i++;
+      continue;
+    }
+    const next = consumeAttribute(remainder, i);
+    if (next === undefined) {
+      return false;
+    }
+    i = next;
+  }
+  return true;
+}
+
+function consumeAttribute(
+  remainder: string,
+  start: number
+): number | undefined {
+  const nameMatch = TAG_NAME_RE.exec(remainder.slice(start));
+  if (!nameMatch) {
+    return undefined;
+  }
+  let i = start + nameMatch[0].length;
+  while (i < remainder.length && WS_RE.test(remainder.charAt(i))) {
+    i++;
+  }
+  if (remainder.charAt(i) !== '=') {
+    return undefined;
+  }
+  i++;
+  while (i < remainder.length && WS_RE.test(remainder.charAt(i))) {
+    i++;
+  }
+  const quote = remainder.charAt(i);
+  if (quote !== '"' && quote !== "'") {
+    return i >= remainder.length ? i : undefined;
+  }
+  const close = remainder.indexOf(quote, i + 1);
+  return close === -1 ? remainder.length : close + 1;
+}
+
+interface Terminator {
+  kind: 'gt' | 'lt' | 'eol';
+  at: number;
+  inQuote: boolean;
+}
+
+function scanToTerminator(line: string, from: number): Terminator {
+  let quote = '';
+  for (let j = from; j < line.length; j++) {
+    const c = line.charAt(j);
+    if (quote) {
+      if (c === quote) {
+        quote = '';
+      }
+    } else if (c === '"' || c === "'") {
+      quote = c;
+    } else if (c === '>') {
+      return { kind: 'gt', at: j, inQuote: false };
+    } else if (c === '<') {
+      return { kind: 'lt', at: j, inQuote: false };
+    }
+  }
+  return { kind: 'eol', at: line.length, inQuote: quote !== '' };
+}
+
+function openKind(
+  name: string,
+  line: number,
+  isClose: boolean,
+  inQuote: boolean
+): MdxMalformed {
+  if (inQuote) {
+    return { name, line, kind: 'unterminated-quote' };
+  }
+  return {
+    name,
+    line,
+    kind: isClose ? 'unterminated-close' : 'unterminated-open',
+  };
 }

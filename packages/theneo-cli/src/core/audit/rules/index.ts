@@ -4,6 +4,7 @@ import { duplicateTabSlugRule } from './duplicateTabSlug';
 import { indexTabMarkerRule } from './indexTabMarker';
 import { mdxAttributesJsonRule } from './mdxAttributesJson';
 import { mdxCalloutDataTypeRule } from './mdxCalloutDataType';
+import { mdxMalformedTagRule } from './mdxMalformedTag';
 import { mdxNestingDepthRule } from './mdxNestingDepth';
 import { mdxTabPanelParentRule } from './mdxTabPanelParent';
 import { mdxTagsBalancedRule } from './mdxTagsBalanced';
@@ -51,4 +52,5 @@ export const allRules: readonly Rule[] = [
   mdxTabPanelParentRule,
   mdxCalloutDataTypeRule,
   mdxNestingDepthRule,
+  mdxMalformedTagRule,
 ];

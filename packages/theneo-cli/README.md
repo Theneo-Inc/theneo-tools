@@ -421,5 +421,6 @@ Each finding names the file it relates to (relative path), what is wrong, and ho
 - A `<TabPanel>` is nested directly inside a `<Tabs>`, and its `tabTitle` is one of the parent's declared tabs (`error`).
 - A `<Callout>`'s `dataType` is one of `info`, `warning`, `error`, `success` (`error`).
 - A widget nested more than one level deep is flagged (`warning`).
+- A malformed tag — an opening tag missing its `>` (`<table-cell<p …>`), a closing tag missing its `>` (`</Callout` …), or an `attributes` value with an unterminated quote — is flagged (`error`).
 
-The structural checks (valid JSON, balance, nesting) apply to Theneo's known widget tags, so prose that contains angle-bracket text (e.g. `<Bearer Token>` in an auth example) is not mistaken for a widget. Tag scanning is quote-aware (so `>` inside an `attributes` value is handled) and skips fenced code blocks.
+The structural checks (valid JSON, balance, nesting) apply to Theneo's known widget tags, so prose that contains angle-bracket text (e.g. `<Bearer Token>` in an auth example) is not mistaken for a widget. Tag scanning is quote-aware (so `>` inside an `attributes` value is handled) and skips fenced code blocks. Malformed-tag detection covers the known widgets plus their structural tags (`table-row`, `table-cell`, `title`, `description`); it never flags `<`/`>` in code (`Map<String>`), math (`a<b`), or prose, and it does not check malformed tags inside code blocks or a `>` that merges a tag name into adjacent text (`<CodeLinecurl…`).

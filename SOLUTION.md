@@ -267,10 +267,33 @@ counts as "at the top".
 | `mdx-tabpanel-parent` | error | true |
 | `mdx-callout-datatype` | error | true |
 | `mdx-nesting-depth` | warning | true |
+| `mdx-malformed-tag` | error | true |
 
-All five carry a **line number**. They are `needsDisk: true` only because they read
+All carry a **line number**. They are `needsDisk: true` only because they read
 `index.md` content; the parsing itself is a pure function (`mdx.ts`), so a future
 content-model caller can reuse the rules by supplying a parsed document.
+
+`mdx-malformed-tag` (a Tier 3 follow-up) flags broken tag *syntax* — an opening
+tag missing its `>` (`<table-cell<p …>`), a closing tag missing its `>`, or an
+unterminated `attributes` quote. It runs as a **separate, additive scan**
+(`scanMalformed`) with its own finding list, so the existing balance/nesting logic
+is untouched. Recognized tags for this rule are the widgets **plus** the structural
+sub-tags (`table-row`, `table-cell`, `title`, `description`) — kept in a
+detection-only set so they never enter the balance/nesting stacks (which would
+false-flag nesting on a normal `<Table>`/`<Card>`). Because several recognized
+names are ordinary words (`title`, `description`, `Table`, `Card`, `Step`…), a
+malformation is only reported when the text between the tag name and the
+terminator is genuinely **tag-like** — whitespace plus real `key="value"`
+attributes. This is what keeps prose such as "the `<title` element and
+`<description` field" or "use the `<Table` below" from being read as broken tags,
+while a real `<table-cell<p …>` or `<Callout attributes='…'` (missing `>`) is
+still flagged. **Out of scope** (documented to
+avoid false positives): general HTML well-formedness; malformed tags inside code
+blocks / `<CodeLine>` bodies; a missing `>` that merges the tag name into
+adjacent text (`<CodeLinecurl…`), which is unsafe to detect because prefix-matching
+would misfire on real widgets sharing a prefix (`Step`/`Steps`, `Card`/`CardGroup`);
+and a single recognized tag deliberately split across multiple lines (not produced
+by the exporter), which is read as unterminated on its first line.
 
 Findings are sorted deterministically (by `file`, then `line`, `rule`, `message`)
 so output order is stable across machines and filesystems.

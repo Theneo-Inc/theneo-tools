@@ -31,9 +31,16 @@ export interface MdxUnbalanced {
   kind: 'unclosed' | 'unexpected-close';
 }
 
+export interface MdxMalformed {
+  name: string;
+  line: number;
+  kind: 'unterminated-open' | 'unterminated-close' | 'unterminated-quote';
+}
+
 export interface MdxAnalysis {
   tags: MdxTag[];
   unbalanced: MdxUnbalanced[];
+  malformed: MdxMalformed[];
 }
 
 export interface DeclaredSection {

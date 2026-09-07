@@ -85,3 +85,72 @@ describe('parseMdx', () => {
     expect(tags[0]?.name).toBe('Tabs');
   });
 });
+
+describe('parseMdx malformed detection', () => {
+  it('flags an opening tag missing ">" before the next "<"', () => {
+    const { malformed } = parseMdx('<table-cell<p>hi</p></table-cell>');
+
+    expect(malformed).toEqual([
+      { name: 'table-cell', line: 1, kind: 'unterminated-open' },
+    ]);
+  });
+
+  it('flags a closing tag missing ">"', () => {
+    const { malformed } = parseMdx('</Callout');
+
+    expect(malformed).toEqual([
+      { name: 'Callout', line: 1, kind: 'unterminated-close' },
+    ]);
+  });
+
+  it('flags an unterminated attribute quote', () => {
+    const { malformed } = parseMdx("<Callout attributes='{");
+
+    expect(malformed).toEqual([
+      { name: 'Callout', line: 1, kind: 'unterminated-quote' },
+    ]);
+  });
+
+  it('does not flag generics or comparisons in prose', () => {
+    const { malformed } = parseMdx(
+      'Use Map<String,List<Int>> and a<b<c and x < y'
+    );
+
+    expect(malformed).toEqual([]);
+  });
+
+  it('does not scan inside a code block', () => {
+    const { malformed } = parseMdx(
+      "<CodeBlock attributes='{}'>\n<CodeLine>Map<String> a<b</CodeLine>\n</CodeBlock>"
+    );
+
+    expect(malformed).toEqual([]);
+  });
+
+  it('does not flag a well-formed structural tag', () => {
+    const { malformed } = parseMdx('<table-cell><p>hi</p></table-cell>');
+
+    expect(malformed).toEqual([]);
+  });
+
+  it('does not flag recognized tag names written as prose', () => {
+    const prose = [
+      'The <title element sets the page title.',
+      'The <title and <description tags are required.',
+      'Use the <Table below for reference.',
+      "Check the <title's length here.",
+    ];
+
+    for (const line of prose) {
+      expect(parseMdx(line).malformed).toEqual([]);
+    }
+  });
+
+  it('still flags a real broken tag with valid attributes at end of line', () => {
+    const { malformed } = parseMdx("<Callout attributes='{}'");
+
+    expect(malformed).toEqual([
+      { name: 'Callout', line: 1, kind: 'unterminated-open' },
+    ]);
+  });
+});

@@ -2,6 +2,7 @@ import { parseMdx } from '../../src/core/audit/mdx';
 import { DeclaredSection, ProjectModel } from '../../src/core/audit/model';
 import { mdxAttributesJsonRule } from '../../src/core/audit/rules/mdxAttributesJson';
 import { mdxCalloutDataTypeRule } from '../../src/core/audit/rules/mdxCalloutDataType';
+import { mdxMalformedTagRule } from '../../src/core/audit/rules/mdxMalformedTag';
 import { mdxNestingDepthRule } from '../../src/core/audit/rules/mdxNestingDepth';
 import { mdxTabPanelParentRule } from '../../src/core/audit/rules/mdxTabPanelParent';
 import { mdxTagsBalancedRule } from '../../src/core/audit/rules/mdxTagsBalanced';
@@ -151,5 +152,25 @@ describe('mdx-tags-balanced rule', () => {
 
     expect(findings).toHaveLength(1);
     expect(findings[0]?.severity).toBe('error');
+  });
+});
+
+describe('mdx-malformed-tag rule', () => {
+  it('errors with a line number on a malformed tag', () => {
+    const findings = mdxMalformedTagRule.run(
+      modelWith('<Table>\n<table-cell<p>x</p></table-cell>\n</Table>')
+    );
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.severity).toBe('error');
+    expect(findings[0]?.line).toBe(2);
+  });
+
+  it('passes on well-formed markup', () => {
+    expect(
+      mdxMalformedTagRule.run(
+        modelWith("<Callout attributes='{}'>\n</Callout>")
+      )
+    ).toEqual([]);
   });
 });

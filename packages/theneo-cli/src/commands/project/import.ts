@@ -129,6 +129,16 @@ function handleProjectImportError(
     coreMsg.includes('403')
   ) {
     spinner.error({ text: chalk.red(`✖ ${coreMsg}`) });
+  } else if (
+    coreMsg.toLowerCase().includes('upload limit') ||
+    coreMsg.includes('413')
+  ) {
+    spinner.error({
+      text: chalk.red(
+        '✖ Import failed: File or directory size exceeds the allowed upload limit. ' +
+          'Please reduce the payload size or split the import into smaller sections.'
+      ),
+    });
   } else {
     spinner.error({ text: chalk.red(`✖ Import failed: ${coreMsg}`) });
   }

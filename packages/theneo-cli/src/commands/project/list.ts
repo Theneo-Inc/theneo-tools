@@ -20,7 +20,9 @@ export function initProjectListCommand(): Command {
           const theneo = createTheneo(profile);
           const projectsResult = await theneo.listProjects();
           if (projectsResult.err) {
-            console.error(projectsResult.error.message);
+            console.error(
+              `Failed to fetch projects: ${projectsResult.error.message}`
+            );
             process.exit(1);
           }
 

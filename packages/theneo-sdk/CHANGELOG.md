@@ -1,5 +1,11 @@
 # @theneo/sdk
 
+## 0.16.2
+
+### Patch Changes
+
+- b2b67a2: Show friendly, readable messages for gateway errors instead of raw HTML. `413 Request Entity Too Large` on import now explains the upload-size limit, and `503 Service Temporarily Unavailable` when fetching projects now reports that the service is temporarily unavailable. Any other HTML error body is mapped to a clean status message rather than being printed verbatim.
+
 ## 0.16.0
 
 ### Minor Changes

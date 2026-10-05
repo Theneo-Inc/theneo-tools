@@ -10,6 +10,8 @@ import { initImportCommand } from './import';
 import { initProjectVersionCommand } from './version';
 import { initAuditCommand } from './audit';
 import { initInfoCommand } from './info';
+import { initBranchCommand } from './branch';
+import { initPreviewCommand } from './preview';
 
 export function createProgram(): Command {
   const program = new Command();
@@ -36,5 +38,7 @@ export function initializeProgram(): Command {
   initProjectVersionCommand(program);
   initAuditCommand(program);
   initInfoCommand(program);
+  initBranchCommand(program);
+  initPreviewCommand(program);
   return program;
 }

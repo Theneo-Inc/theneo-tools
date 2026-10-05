@@ -249,6 +249,9 @@ export function callImportProjectFromDirectoryApi(
   if (options.tabSlug) {
     bodyFormData.append('tabSlug', options.tabSlug);
   }
+  if (options.branchId) {
+    bodyFormData.append('branchId', options.branchId);
+  }
   options.files.map(fileInfo => {
     bodyFormData.append('files', fs.createReadStream(fileInfo.filePath), {
       filepath: fileInfo.convertedFilename,

@@ -1,21 +1,28 @@
 # Theneo CLI
+
 The Theneo CLI (Command Line Interface) is s a command-line tool for effortless management of the Theneo platform from your terminal.
 Create, manage, and publish API documentation with ease, all without leaving your terminal.
 
 You can find the npm package [here](https://www.npmjs.com/package/@theneo/cli)
+
 ## Pre-requisites
+
 - Node.js v18 or higher
 
 ## Install
+
 To install the Theneo CLI, use the following command:
 
 ```bash
 npm install -g @theneo/cli@latest
 ```
+
 This command installs the Theneo CLI globally on your machine, allowing it to be run from any directory.
 
 ## Usage
+
 To get started with Theneo CLI, you can use the help command:
+
 ```bash
 theneo help
 
@@ -24,33 +31,41 @@ Usage: theneo [options] [command]
 A CLI for the Theneo application
 
 Options:
-  -V, --version       output the version number
+  -v, --version       Output the current version of the CLI
   -h, --help          display help for command
 
 Commands:
   login [options]     Login in theneo cli
   project <action>    Project related commands
   workspace <action>  Workspace related commands
-  version <action>    Project Version related commands
+  export [options]
+  version <action>    Project version related commands
+  audit [options]     Validate a Theneo documentation project on disk and
+                      report structural problems
+  info                Display Theneo CLI information and logo
+  branch <action>     Documentation branch related commands
+  preview [options]   Publish a markdown directory to a temporary branch and
+                      get a preview link that expires (24h by default)
   help [command]      display help for command
 ```
 
 ## Examples
 
 ### Login
+
 Standard Login:
+
 ```bash
 theneo login
 ```
 
-
 Login with an API Key:
+
 ```bash
 theneo login --token <theneo-api-key>
 ```
 
 You can also set the `THENEO_API_KEY` environment variable.
-
 
 ### Create new project
 
@@ -97,6 +112,7 @@ Options:
    ```
 
 ### Update api documentation from api spec file
+
 Import updated documentation into Theneo using file, link or postman collection
 
 Note: Published document link has this pattern: https://app.theneo.io/<workspace-slug>/<project-slug>/<version-slug>
@@ -172,11 +188,11 @@ theneo project import --project <project-slug> \
 
 ##### AI Description Generation Modes
 
-| Mode | What it does |
-|------|-------------|
-| `fill` | Generate AI descriptions only for empty parameters |
-| `overwrite` | Regenerate all descriptions with AI |
-| `no_generation` | No AI processing (default, current behavior) |
+| Mode            | What it does                                       |
+| --------------- | -------------------------------------------------- |
+| `fill`          | Generate AI descriptions only for empty parameters |
+| `overwrite`     | Regenerate all descriptions with AI                |
+| `no_generation` | No AI processing (default, current behavior)       |
 
 **Note:** AI description generation is only available when `--import-type overwrite` is used. Attempting to use `--generate-description` with other import types will result in an error.
 
@@ -229,6 +245,7 @@ Options:
 ```bash
 theneo version create
 ```
+
 ### Add ChangeLog subscriber
 
 ```bash
@@ -245,9 +262,69 @@ Options:
   -h, --help                                display help for command
 ```
 
+## Branches and preview deployments
+
+Documentation branches need the document review feature to be enabled for the workspace.
+
+```bash
+theneo branch --help
+Usage: theneo branch [options] [command] <action>
+
+Documentation branch related commands
+
+Options:
+  -h, --help         display help for command
+
+Commands:
+  list [options]     List open branches of a project
+  create [options]   Create a branch from a project version
+  delete [options]   Abandon a branch and discard its draft content
+  rebase [options]   Pull the latest base changes into a branch
+  publish [options]  Merge a branch into its base version and publish it
+                     (workspace admins only)
+  link [options]     Create a read-only preview link for a branch
+  help [command]     display help for command
+```
+
+```shell
+theneo branch list --project <project-slug>
+theneo branch create --project <project-slug> --name my-change
+theneo import --project <project-slug> --dir <directory> --branch <branch-id>
+theneo branch link --branch <branch-id> --expiresIn 48
+theneo branch publish --branch <branch-id>
+theneo branch delete --branch <branch-id>
+```
+
+### Preview a markdown directory before publishing
+
+```bash
+Usage: theneo preview [options]
+
+Publish a markdown directory to a temporary branch and get a preview link that expires (24h by default)
+
+Options:
+  --project <project-slug>         Project slug
+  --workspace <workspace-slug>     Workspace slug
+  --projectVersion <version-slug>  Version to preview against (default version if omitted)
+  --dir <directory>                Generated theneo project directory
+  --expiresIn <hours>              Lifetime of the preview in hours (default 24, max 168)
+  --name <branch-name>             Custom name for the preview branch
+  --tab <tab-slug>                 Import into a specific tab only (optional)
+  --json                           Output as JSON (default: false)
+  --profile <string>               Use a specific profile from your config file.
+  -h, --help                       display help for command
+```
+
+```shell
+theneo preview --project <project-slug> --dir ./docs
+```
+
+The command creates a preview branch named like `preview_dep_sep26_113045_4f2a`, imports the directory into it and prints a preview URL. The link needs no login, only works for that branch and stops working when the branch expires. Expired preview branches are removed automatically, so they do not pile up in the project. To keep the content, publish the branch with `theneo branch publish`; to drop it early, run `theneo branch delete`.
+
 ### Use the main branch changes
 
 #### Clone the repository
+
 ```bash
 git clone git@github.com:Theneo-Inc/theneo-tools.git
 ```
@@ -255,7 +332,7 @@ git clone git@github.com:Theneo-Inc/theneo-tools.git
 #### install packages
 
 ```bash
-nvm use 
+nvm use
 npm install
 ```
 
@@ -264,6 +341,7 @@ npm install
 ```bash
 npm run cli
 ```
+
 #### Run the cli
 
 ```bash
@@ -272,18 +350,18 @@ theneo help
 
 ### Change theneo API endpoint
 
-* Using environment variable
+- Using environment variable
+
   ```bash
   THENEO_API_KEY=<theneo-api-key> THENEO_API_URL=https://api.theneo.io THENEO_APP_URL=https://app.theneo.io \
   theneo <command>
   ```
 
-* Using theneo config file and profile
+- Using theneo config file and profile
   ```bash
   theneo login --profile <profile-name> --token <theneo-api-key> --api-url https://api.theneo.io --app-url https://app.theneo.io
   ```
   check the config file at `.config/theneo/config`
-
 
 ## Export and Import project data in Markdown format
 
@@ -344,7 +422,6 @@ theneo import --project <project-slug> --tab tab-2 --dir <directory>
 
 **Note on Tabs**: When using the `--tab` flag, only the specified tab will be updated during import, while other tabs remain unchanged. During export, only the sections belonging to the specified tab will be exported. Markdown files exported with tabs contain a `<!-- tab:tab-slug -->` marker at the beginning to indicate which tab they belong to.
 
-
 ### Create a new project from markdown files
 
 ```bash
@@ -352,7 +429,7 @@ Usage: theneo create [options]
 
 Options:
   --dir <directory>             directory location where the project will be exported
-  --name <project-name>         project name 
+  --name <project-name>         project name
   --workspace <workspace-slug>  Enter workspace slug where the project should be created in, if not present uses default workspace
   --profile <string>            Use a specific profile from your config file.
   -h, --help                    display help for command
@@ -361,7 +438,6 @@ Options:
 ```shell
 theneo create --dir <directory> --name <project-name>
 ```
-
 
 ### Audit a project
 

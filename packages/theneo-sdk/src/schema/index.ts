@@ -4,3 +4,4 @@ export * from './publish';
 export * from './workspace';
 export * from './postman';
 export * from './version';
+export * from './branch';

@@ -57,6 +57,11 @@ export function importProjectFromDirectory(
   if (filesInfo.length === 0) {
     return Err(`${options.data.directory} - Directory is empty`);
   }
+  if (options.branchId && options.publish) {
+    return Err(
+      'Publishing is not supported when importing into a branch; publish the branch instead'
+    );
+  }
   const createInput: ImportProjectFromDirectoryInput = {
     filePathSeparator: FILE_SEPARATOR,
     files: filesInfo,
@@ -64,6 +69,7 @@ export function importProjectFromDirectory(
     importOption: options.importOption,
     importMetadata: options.importMetadata,
     tabSlug: options.tabSlug,
+    branchId: options.branchId,
   };
 
   return callImportProjectFromDirectoryApi(
@@ -80,6 +86,11 @@ export function importProject(
   headers: ApiHeaders,
   options: ImportProjectOptions
 ): Promise<Result<ImportResponse>> {
+  if (options.branchId) {
+    return Promise.resolve(
+      Err('Branch imports are only supported for markdown directories')
+    );
+  }
   const importInput: ImportProjectInput = {
     publish: options.publish ?? false,
   };

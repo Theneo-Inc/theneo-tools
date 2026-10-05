@@ -7,7 +7,7 @@ import {
   getShouldPublish,
 } from '../../core/cli/project/project';
 import { getInputDirectoryLocation } from '../../core/cli/project';
-import { ImportOption } from '@theneo/sdk';
+import { Branch, ImportOption, Theneo } from '@theneo/sdk';
 import { createSpinner, Spinner } from 'nanospinner';
 import { isInteractiveFlow } from '../../utils';
 import { tryCatch } from '../../utils/exception';
@@ -127,6 +127,22 @@ function handleImportSuccess(
   }
 }
 
+async function resolveBranch(
+  theneo: Theneo,
+  branchId: string
+): Promise<Branch> {
+  const result = await theneo.getBranch(branchId);
+  if (result.err) {
+    console.error(
+      chalk.red(
+        `✖ Branch ${chalk.yellow(branchId)} not found: ${result.error.message}`
+      )
+    );
+    process.exit(1);
+  }
+  return result.value;
+}
+
 function getDirectory(
   dir: string | undefined,
   isInteractive: boolean
@@ -159,6 +175,10 @@ export function initImportCommand(program: Command): Command {
       'Use a specific profile from your config file.'
     )
     .option('--tab <tab-slug>', 'Import into specific tab only (optional)')
+    .option(
+      '--branch <branch-id>',
+      'Import into an existing branch instead of the base version (cannot be combined with --publish)'
+    )
     .action(
       tryCatch(
         async (options: {
@@ -172,8 +192,14 @@ export function initImportCommand(program: Command): Command {
           publish: boolean;
           profile: string | undefined;
           tab: string | undefined;
+          branch: string | undefined;
         }) => {
           const isInteractive = isInteractiveFlow(options);
+          if (options.branch && options.publish) {
+            throw new Error(
+              'Publishing is not supported when importing into a branch; run theneo branch publish instead'
+            );
+          }
           const profile = getProfile(options.profile);
           const theneo = createTheneo(profile);
           const project = await getProject(theneo, {
@@ -181,25 +207,34 @@ export function initImportCommand(program: Command): Command {
             workspaceKey: options.workspace,
           });
           const projectVersion = options.versionSlug || options.projectVersion;
-          const version = await getProjectVersion(
-            theneo,
-            project,
-            projectVersion,
-            isInteractive
-          );
-          const projectVersionId = await createNewProjectVersion(
-            theneo,
-            project.id,
-            version,
-            projectVersion
-          );
+          const branch = options.branch
+            ? await resolveBranch(theneo, options.branch)
+            : null;
+          const version = branch
+            ? null
+            : await getProjectVersion(
+                theneo,
+                project,
+                projectVersion,
+                isInteractive
+              );
+          const projectVersionId = branch
+            ? branch.versionId
+            : await createNewProjectVersion(
+                theneo,
+                project.id,
+                version,
+                projectVersion
+              );
 
           const directory = await getDirectory(options.dir, isInteractive);
           // const importOption: ImportOption = await getImportOption(
           //   options,
           //   isInteractive
           // );
-          const shouldPublish = await getShouldPublish(options, isInteractive);
+          const shouldPublish = options.branch
+            ? false
+            : await getShouldPublish(options, isInteractive);
 
           // Enhanced spinner with context
           const spinnerText = options.tab
@@ -216,6 +251,7 @@ export function initImportCommand(program: Command): Command {
             },
             importOption: ImportOption.OVERWRITE,
             tabSlug: options.tab,
+            branchId: options.branch,
           });
 
           if (res.err) {
@@ -223,7 +259,9 @@ export function initImportCommand(program: Command): Command {
             process.exit(1);
           }
 
-          const editorLink = `${profile.appUrl}/editor/${project.id}`;
+          const editorLink = options.branch
+            ? `${profile.appUrl}/editor/${project.id}/${projectVersionId}?branch=${options.branch}`
+            : `${profile.appUrl}/editor/${project.id}`;
           handleImportSuccess(
             spinner,
             res.value.publishData,

@@ -27,8 +27,26 @@ import {
   createProjectVersion,
   deleteProjectVersion,
   addSubscriberToProjectVersion,
+  callListBranchesApi,
+  callCreateBranchApi,
+  callGetBranchApi,
+  callDeleteBranchApi,
+  callRebaseBranchApi,
+  callPublishBranchApi,
+  callCreateBranchPreviewLinkApi,
+  callCreatePreviewDeploymentApi,
 } from './requests';
+import {
+  Branch,
+  BranchListResponse,
+  BranchPreviewLink,
+  CreateBranchOptions,
+  CreatePreviewDeploymentOptions,
+  ListBranchesOptions,
+  PreviewDeployment,
+} from './schema/branch';
 import { SDK_VERSION } from './utils/version';
+import * as fs from 'fs';
 
 import { createProject } from './core/project/create';
 import { sleep } from './utils';
@@ -45,7 +63,11 @@ import {
 } from 'theneo/requests/base';
 import { ExportProjectInput } from 'theneo/models';
 import { ExportedProject } from 'theneo/schema/export';
-import { createFiles } from 'theneo/utils/file';
+import {
+  createFiles,
+  FILE_SEPARATOR,
+  getAllFilesFromDirectory,
+} from 'theneo/utils/file';
 import { ProjectVersion } from 'theneo/schema/version';
 
 export interface ApiClientMetadata {
@@ -171,6 +193,90 @@ export class Theneo {
 
   public getPreviewProjectLink(projectId: string): string {
     return `${this.baseAppUrl}/preview/${projectId}?github=${this.apiKey}`;
+  }
+
+  /**
+   * Lists documentation branches of a project (open branches unless a status filter is given)
+   */
+  public listBranches(
+    options: ListBranchesOptions
+  ): Promise<Result<BranchListResponse>> {
+    return callListBranchesApi(this.baseApiUrl, this.getHeaders(), options);
+  }
+
+  /**
+   * Creates a documentation branch from a project version.
+   * Requires document review to be enabled for the workspace.
+   */
+  public createBranch(options: CreateBranchOptions): Promise<Result<Branch>> {
+    return callCreateBranchApi(this.baseApiUrl, this.getHeaders(), options);
+  }
+
+  public getBranch(branchId: string): Promise<Result<Branch>> {
+    return callGetBranchApi(this.baseApiUrl, this.getHeaders(), branchId);
+  }
+
+  /**
+   * Abandons a branch and discards its draft content
+   */
+  public deleteBranch(branchId: string): Promise<Result<Branch>> {
+    return callDeleteBranchApi(this.baseApiUrl, this.getHeaders(), branchId);
+  }
+
+  /**
+   * Pulls the latest base changes into the branch, keeping the branch version on conflicts
+   */
+  public rebaseBranch(branchId: string): Promise<Result<Branch>> {
+    return callRebaseBranchApi(this.baseApiUrl, this.getHeaders(), branchId);
+  }
+
+  /**
+   * Merges the branch into its base version and publishes it (workspace admins only)
+   */
+  public publishBranch(branchId: string): Promise<Result<unknown>> {
+    return callPublishBranchApi(this.baseApiUrl, this.getHeaders(), branchId);
+  }
+
+  /**
+   * Returns a read-only preview link for the branch, valid for `expiresInHours` (default 24)
+   */
+  public createBranchPreviewLink(
+    branchId: string,
+    expiresInHours?: number
+  ): Promise<Result<BranchPreviewLink>> {
+    return callCreateBranchPreviewLinkApi(
+      this.baseApiUrl,
+      this.getHeaders(),
+      branchId,
+      expiresInHours
+    );
+  }
+
+  /**
+   * Imports a markdown directory into a temporary preview branch and returns
+   * a preview link. Branch and link expire together (24 hours by default).
+   */
+  public createPreviewDeployment(
+    options: CreatePreviewDeploymentOptions
+  ): Promise<Result<PreviewDeployment>> {
+    if (!fs.existsSync(options.directory)) {
+      return Promise.resolve(
+        Err(`${options.directory} - Directory does not exist`)
+      );
+    }
+    const files = getAllFilesFromDirectory(options.directory);
+    if (files.length === 0) {
+      return Promise.resolve(Err(`${options.directory} - Directory is empty`));
+    }
+    return callCreatePreviewDeploymentApi(this.baseApiUrl, this.getHeaders(), {
+      projectId: options.projectId,
+      versionId: options.versionId,
+      name: options.name,
+      expiresInHours: options.expiresInHours,
+      tabSlug: options.tabSlug,
+      filePathSeparator: FILE_SEPARATOR,
+      files,
+    });
   }
 
   /**

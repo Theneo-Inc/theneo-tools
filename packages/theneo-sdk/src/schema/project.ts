@@ -247,6 +247,12 @@ export interface ImportProjectOptions {
   tabSlug?: string;
 
   /**
+   * Import the markdown directory into an existing branch instead of the base version.
+   * Only supported for directory imports; publishing is refused for branch imports.
+   */
+  branchId?: string;
+
+  /**
    * Used to generate descriptions using AI
    * Specify `fill` if you want to generate description for params that does not have descriptions already.
    * Specify `overwrite` if you want to overwrite descriptions for params that does not have descriptions already.

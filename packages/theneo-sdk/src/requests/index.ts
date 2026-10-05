@@ -3,3 +3,4 @@ export * from './publish';
 export * from './workspace';
 export * from './export';
 export * from './version';
+export * from './branch';

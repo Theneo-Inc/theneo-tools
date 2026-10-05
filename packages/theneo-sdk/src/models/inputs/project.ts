@@ -31,6 +31,8 @@ export interface ImportProjectFromDirectoryInput
   extends ImportProjectBaseInput {
   files: FileInfo[];
   filePathSeparator: string;
+  /** Import into this branch instead of the base version; publish is not allowed then */
+  branchId?: string | undefined;
   publish: boolean;
   importOption?: ImportOption | undefined;
   importOptionAdditionalData?: ImportOptionAdditionalData | undefined;

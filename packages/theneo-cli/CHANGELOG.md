@@ -1,5 +1,16 @@
 # @theneo/cli
 
+## 0.24.0
+
+### Minor Changes
+
+- be3f75d: Add documentation branches and preview deployments. `theneo branch list|create|delete|rebase|publish|link` manage branches from the terminal, `theneo import --branch <id>` imports a markdown directory into an existing branch, and `theneo preview --dir <dir>` publishes the directory to a temporary preview branch and prints a read-only preview link that expires (24 hours by default) together with the branch. The SDK gains `listBranches`, `createBranch`, `getBranch`, `deleteBranch`, `rebaseBranch`, `publishBranch`, `createBranchPreviewLink` and `createPreviewDeployment`.
+
+### Patch Changes
+
+- Updated dependencies [be3f75d]
+  - @theneo/sdk@0.17.0
+
 ## 0.23.1
 
 ### Patch Changes

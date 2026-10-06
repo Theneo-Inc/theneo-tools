@@ -5,7 +5,7 @@ import { getProject, getProjectVersion } from '../../core/cli/project/project';
 import { isInteractiveFlow } from '../../utils';
 import { tryCatch } from '../../utils/exception';
 import { confirm } from '@inquirer/prompts';
-import { isDirectoryEmpty } from '../../utils/file';
+import { isDirectoryEmpty, pruneStaleExportFiles } from '../../utils/file';
 import { ProjectVersion } from '@theneo/sdk';
 import { saveOpenapiSpec } from '../../core/cli/export/openAPISpecConvertor';
 import { createSpinner, Spinner } from 'nanospinner';
@@ -70,6 +70,27 @@ function handleExportError(
   }
 }
 
+export function removePreviousExportFiles(
+  options: { dir: string; clean: boolean; tab: string | undefined },
+  sectionContents: { fileName: string }[]
+): string[] {
+  if (!options.clean || options.tab) {
+    return [];
+  }
+  return pruneStaleExportFiles(
+    options.dir,
+    sectionContents.map(section => section.fileName)
+  );
+}
+
+function reportRemovedFiles(removed: string[]): void {
+  if (removed.length === 0) {
+    return;
+  }
+  const label = `${removed.length} file${removed.length === 1 ? '' : 's'}`;
+  console.log(chalk.dim('Removed from a previous export:'), chalk.cyan(label));
+}
+
 export function initExportCommand(program: Command): Command {
   return program
     .command('export')
@@ -99,6 +120,10 @@ export function initExportCommand(program: Command): Command {
       false
     )
     .option('--force', 'Overwrite existing files without prompting', false)
+    .option(
+      '--no-clean',
+      'Keep files from a previous export that this one no longer produces'
+    )
     .option('--openapi', 'Export as OpenAPI spec')
     .option(
       '--format <format>',
@@ -118,6 +143,7 @@ export function initExportCommand(program: Command): Command {
           projectVersion: string | undefined;
           publishedView: boolean | undefined;
           force: boolean | undefined;
+          clean: boolean;
           openapi: boolean | undefined;
           format: 'yaml' | 'json';
           tab: string | undefined;
@@ -176,9 +202,14 @@ export function initExportCommand(program: Command): Command {
             process.exit(1);
           }
 
+          let pruned: string[] = [];
           if (options.openapi) {
-            const openapiResponse = res.unwrap();
-            saveOpenapiSpec(openapiResponse, options.dir, options.format);
+            saveOpenapiSpec(res.unwrap(), options.dir, options.format);
+          } else {
+            pruned = removePreviousExportFiles(
+              options,
+              res.unwrap().sectionContents
+            );
           }
 
           const successMsg = options.tab
@@ -190,6 +221,7 @@ export function initExportCommand(program: Command): Command {
           });
 
           console.log(chalk.dim('Export location:'), chalk.cyan(options.dir));
+          reportRemovedFiles(pruned);
           if (options.openapi) {
             console.log(
               chalk.dim('Format:'),

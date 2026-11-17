@@ -1,0 +1,134 @@
+{
+  "id": "684156cc12a444703e4bd570",
+  "name": "parsing",
+  "lastExport": "2025-06-08T14:29:25.533Z",
+  "baseUrl": "https://petstore3.swagger.io/api/v3",
+  "sections": [
+    {
+      "name": "Swagger Petstore - OpenAPI 3.0",
+      "slug": "swagger-petstore-openapi-3-0",
+      "children": [],
+      "externalPageLink": "",
+      "isNewTab": false
+    },
+    {
+      "name": "pet",
+      "slug": "pet",
+      "children": [
+        {
+          "name": "Update an existing pet",
+          "slug": "pet/update-an-existing-pet",
+          "children": []
+        },
+        {
+          "name": "Add a new pet to the store",
+          "slug": "pet/add-a-new-pet-to-the-store",
+          "children": []
+        },
+        {
+          "name": "Finds Pets by status",
+          "slug": "pet/finds-pets-by-status",
+          "children": []
+        },
+        {
+          "name": "Finds Pets by tags",
+          "slug": "pet/finds-pets-by-tags",
+          "children": []
+        },
+        {
+          "name": "Find pet by ID",
+          "slug": "pet/find-pet-by-id",
+          "children": []
+        },
+        {
+          "name": "Updates a pet in the store with form data",
+          "slug": "pet/updates-a-pet-in-the-store-with-form-data",
+          "children": []
+        },
+        {
+          "name": "Deletes a pet",
+          "slug": "pet/deletes-a-pet",
+          "children": []
+        },
+        {
+          "name": "uploads an image",
+          "slug": "pet/uploads-an-image",
+          "children": []
+        }
+      ],
+      "externalPageLink": "",
+      "isNewTab": false
+    },
+    {
+      "name": "store",
+      "slug": "store",
+      "children": [
+        {
+          "name": "Returns pet inventories by status",
+          "slug": "store/returns-pet-inventories-by-status",
+          "children": []
+        },
+        {
+          "name": "Place an order for a pet",
+          "slug": "store/place-an-order-for-a-pet",
+          "children": []
+        },
+        {
+          "name": "Find purchase order by ID",
+          "slug": "store/find-purchase-order-by-id",
+          "children": []
+        },
+        {
+          "name": "Delete purchase order by ID",
+          "slug": "store/delete-purchase-order-by-id",
+          "children": []
+        }
+      ],
+      "externalPageLink": "",
+      "isNewTab": false
+    },
+    {
+      "name": "user",
+      "slug": "user",
+      "children": [
+        {
+          "name": "Create user",
+          "slug": "user/create-user",
+          "children": []
+        },
+        {
+          "name": "Creates list of users with given input array",
+          "slug": "user/creates-list-of-users-with-given-input-array",
+          "children": []
+        },
+        {
+          "name": "Logs user into the system",
+          "slug": "user/logs-user-into-the-system",
+          "children": []
+        },
+        {
+          "name": "Logs out current logged in user session",
+          "slug": "user/logs-out-current-logged-in-user-session",
+          "children": []
+        },
+        {
+          "name": "Get user by user name",
+          "slug": "user/get-user-by-user-name",
+          "children": []
+        },
+        {
+          "name": "Update user",
+          "slug": "user/update-user",
+          "children": []
+        },
+        {
+          "name": "Delete user",
+          "slug": "user/delete-user",
+          "children": []
+        }
+      ],
+      "externalPageLink": "",
+      "isNewTab": false
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "endpoints": {
+    "method": "post",
+    "path": "/pet/{petId}"
+  },
+  "request": {
+    "query": [
+      {
+        "name": "name",
+        "description": "Name of pet that needs to be updated",
+        "isRequired": false,
+        "value": "",
+        "valueType": "string",
+        "items": [],
+        "options": {
+          "xml": {
+            "prefix": null
+          }
+        }
+      },
+      {
+        "name": "status",
+        "description": "Status of pet that needs to be updated",
+        "isRequired": false,
+        "value": "",
+        "valueType": "string",
+        "items": [],
+        "options": {
+          "xml": {
+            "prefix": null
+          }
+        }
+      }
+    ],
+    "body": [],
+    "header": [],
+    "path": [
+      {
+        "name": "petId",
+        "description": "ID of pet that needs to be updated",
+        "isRequired": true,
+        "value": "",
+        "valueType": "integer",
+        "items": [],
+        "options": {
+          "format": "int64",
+          "xml": {
+            "prefix": null
+          }
+        }
+      }
+    ],
+    "contentType": "",
+    "graphqlQuery": "",
+    "codeExamples": [],
+    "_id": "6841fa7f68995b72e33bc82c"
+  },
+  "responses": [
+    {
+      "name": "Invalid input",
+      "status": "Bad Request",
+      "body": [],
+      "statusCode": 400,
+      "description": "Invalid input",
+      "contentType": "application/json"
+    }
+  ],
+  "showBaseUrl": false,
+  "showLanguageBox": false,
+  "showRequestDescription": true,
+  "showResponseDescription": true,
+  "errorCodes": [],
+  "statusCodes": [],
+  "dataExample": [],
+  "endpointSummary": []
+}

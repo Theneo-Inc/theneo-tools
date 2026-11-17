@@ -1,0 +1,40 @@
+{
+  "endpoints": {
+    "method": "GET",
+    "path": ""
+  },
+  "request": null,
+  "showBaseUrl": false,
+  "showLanguageBox": false,
+  "showRequestDescription": true,
+  "showResponseDescription": true,
+  "errorCodes": [],
+  "statusCodes": [],
+  "dataExample": [],
+  "endpointSummary": [
+    {
+      "method": "POST",
+      "path": "/user"
+    },
+    {
+      "method": "POST",
+      "path": "/user/createWithList"
+    },
+    {
+      "method": "GET",
+      "path": "/user/login?username=&password="
+    },
+    {
+      "method": "GET",
+      "path": "/user/{username}"
+    },
+    {
+      "method": "PUT",
+      "path": "/user/{username}"
+    },
+    {
+      "method": "DELETE",
+      "path": "/user/{username}"
+    }
+  ]
+}

@@ -27,7 +27,8 @@
   },
   "files": [
     "dist/**/*",
-    "bin/**/*"
+    "bin/**/*",
+    "skills/**/*"
   ],
   "scripts": {
     "build": "tsc",

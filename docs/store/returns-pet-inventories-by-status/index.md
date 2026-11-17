@@ -1,0 +1,1 @@
+Returns a map of status codes to quantities

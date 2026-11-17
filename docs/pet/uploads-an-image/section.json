@@ -1,0 +1,118 @@
+{
+  "endpoints": {
+    "method": "post",
+    "path": "/pet/{petId}/uploadImage"
+  },
+  "request": {
+    "query": [
+      {
+        "name": "additionalMetadata",
+        "description": "Additional Metadata",
+        "isRequired": false,
+        "value": "",
+        "valueType": "string",
+        "items": [],
+        "options": {
+          "xml": {
+            "prefix": null
+          }
+        }
+      }
+    ],
+    "body": [
+      {
+        "name": "File",
+        "description": "",
+        "isRequired": false,
+        "value": "/path/to/the/file",
+        "valueType": "binary",
+        "items": [],
+        "options": {
+          "xml": {
+            "prefix": null
+          }
+        }
+      }
+    ],
+    "header": [],
+    "path": [
+      {
+        "name": "petId",
+        "description": "ID of pet to update",
+        "isRequired": true,
+        "value": "",
+        "valueType": "integer",
+        "items": [],
+        "options": {
+          "format": "int64",
+          "xml": {
+            "prefix": null
+          }
+        }
+      }
+    ],
+    "contentType": "file",
+    "graphqlQuery": "",
+    "codeExamples": [],
+    "_id": "6841fa7f68995b72e33bc838"
+  },
+  "responses": [
+    {
+      "name": "200",
+      "status": "OK",
+      "body": [
+        {
+          "name": "code",
+          "description": "",
+          "isRequired": false,
+          "value": "",
+          "valueType": "integer",
+          "items": [],
+          "options": {
+            "format": "int32",
+            "xml": {
+              "prefix": null
+            }
+          }
+        },
+        {
+          "name": "type",
+          "description": "",
+          "isRequired": false,
+          "value": "",
+          "valueType": "string",
+          "items": [],
+          "options": {
+            "xml": {
+              "prefix": null
+            }
+          }
+        },
+        {
+          "name": "message",
+          "description": "",
+          "isRequired": false,
+          "value": "",
+          "valueType": "string",
+          "items": [],
+          "options": {
+            "xml": {
+              "prefix": null
+            }
+          }
+        }
+      ],
+      "statusCode": 200,
+      "description": "successful operation",
+      "contentType": "application/json"
+    }
+  ],
+  "showBaseUrl": false,
+  "showLanguageBox": false,
+  "showRequestDescription": true,
+  "showResponseDescription": true,
+  "errorCodes": [],
+  "statusCodes": [],
+  "dataExample": [],
+  "endpointSummary": []
+}

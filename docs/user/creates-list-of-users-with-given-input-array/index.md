@@ -1,0 +1,1 @@
+Creates list of users with given input array

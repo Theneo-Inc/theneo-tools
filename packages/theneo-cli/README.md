@@ -46,6 +46,9 @@ Commands:
   branch <action>     Documentation branch related commands
   preview [options]   Publish a markdown directory to a temporary branch and
                       get a preview link that expires (24h by default)
+  migrate [options]   Convert existing docs (GitBook, Mintlify, Docusaurus,
+                      MkDocs, Markdown) into a Theneo project with your AI
+                      coding agent
   help [command]      display help for command
 ```
 
@@ -438,6 +441,67 @@ Options:
 ```shell
 theneo create --dir <directory> --name <project-name>
 ```
+
+### Migrate existing docs
+
+Convert the docs you already have (GitBook, Mintlify, Docusaurus, MkDocs, ReadMe, or plain Markdown) into a Theneo project, using the AI coding agent you already work with. Run it in the folder that holds your docs. No Theneo account or API key is required.
+
+```bash
+Usage: theneo migrate [options]
+
+Convert existing docs (GitBook, Mintlify, Docusaurus, MkDocs, Markdown) into a
+Theneo project with your AI coding agent
+
+Options:
+  --dir <directory>  Folder that holds your current docs (default: current
+                     directory)
+  --out <directory>  Folder the agent writes the Theneo project to (default:
+                     "converted_for_theneo")
+  --agent <agent>    Coding agent to set up (choices: "claude-code", "cursor",
+                     "codex", "gemini", "copilot", "windsurf", "other")
+  --no-launch        Install the skill and print the prompt only
+  --force            Replace an installed skill that differs, and allow a
+                     non-empty output folder
+  -h, --help         display help for command
+```
+
+```shell
+# Pick your agent from a list, then let it convert the current folder
+theneo migrate
+
+# Set up a specific agent and print the prompt without starting it
+theneo migrate --agent cursor --no-launch
+
+# Convert docs that live in another folder
+theneo migrate --dir ./website/docs
+```
+
+What it does:
+
+1. Looks at the folder to see which platform the docs were written for and how many pages there are. Nothing is changed.
+2. Asks which coding agent you use and installs the `docs-to-theneo` skill where that agent finds skills. The skill ships with the CLI, so it matches the version you run.
+3. Prints a ready prompt. If the agent has a terminal command on your `PATH` (`claude`, `codex`, `gemini`, `cursor-agent`), it offers to start the agent with that prompt. On Windows, and for editor agents, you paste the prompt yourself.
+
+| `--agent`     | Skill is installed to              | Started by the CLI |
+| ------------- | ---------------------------------- | ------------------ |
+| `claude-code` | `.claude/skills/docs-to-theneo/`   | `claude`           |
+| `cursor`      | `.cursor/skills/docs-to-theneo/`   | `cursor-agent`     |
+| `codex`       | `.agents/skills/docs-to-theneo/`   | `codex`            |
+| `gemini`      | `.gemini/skills/docs-to-theneo/`   | `gemini`           |
+| `copilot`     | `.github/skills/docs-to-theneo/`   | no, paste          |
+| `windsurf`    | `.windsurf/skills/docs-to-theneo/` | no, paste          |
+| `other`       | `.agents/skills/docs-to-theneo/`   | no, paste          |
+
+The agent writes the Theneo project to `converted_for_theneo/` and keeps its converter script, redirects and a report in `theneo_migration/`. Your existing files are not modified.
+
+When `theneo audit` reports no errors, the agent asks which Theneo project the docs should go into (this needs `theneo login`). It tries `theneo preview` for that project first, which leaves the project's content unchanged. Preview needs the document review feature, so if it is not available for the project, the agent asks before importing into the project instead. It never publishes unless you ask. To run the checks yourself:
+
+```shell
+theneo audit --dir ./converted_for_theneo
+theneo preview --project <project-slug> --dir ./converted_for_theneo
+```
+
+Without a terminal (CI, or piped output) `--agent` is required and the agent is never started. `theneo migrate` stops if the output folder is not empty and is not an earlier conversion; pass `--out` to choose another folder.
 
 ### Audit a project
 

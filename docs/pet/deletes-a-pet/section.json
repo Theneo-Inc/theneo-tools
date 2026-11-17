@@ -1,0 +1,63 @@
+{
+  "endpoints": {
+    "method": "delete",
+    "path": "/pet/{petId}"
+  },
+  "request": {
+    "query": [],
+    "body": [],
+    "header": [
+      {
+        "name": "api_key",
+        "description": "",
+        "isRequired": false,
+        "value": "",
+        "valueType": "string",
+        "items": [],
+        "options": {
+          "xml": {
+            "prefix": null
+          }
+        }
+      }
+    ],
+    "path": [
+      {
+        "name": "petId",
+        "description": "Pet id to delete",
+        "isRequired": true,
+        "value": "",
+        "valueType": "integer",
+        "items": [],
+        "options": {
+          "format": "int64",
+          "xml": {
+            "prefix": null
+          }
+        }
+      }
+    ],
+    "contentType": "",
+    "graphqlQuery": "",
+    "codeExamples": [],
+    "_id": "6841fa7f68995b72e33bc831"
+  },
+  "responses": [
+    {
+      "name": "Invalid pet value",
+      "status": "Bad Request",
+      "body": [],
+      "statusCode": 400,
+      "description": "Invalid pet value",
+      "contentType": "application/json"
+    }
+  ],
+  "showBaseUrl": false,
+  "showLanguageBox": false,
+  "showRequestDescription": true,
+  "showResponseDescription": true,
+  "errorCodes": [],
+  "statusCodes": [],
+  "dataExample": [],
+  "endpointSummary": []
+}

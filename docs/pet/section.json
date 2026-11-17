@@ -1,0 +1,48 @@
+{
+  "endpoints": {
+    "method": "GET",
+    "path": ""
+  },
+  "request": null,
+  "showBaseUrl": false,
+  "showLanguageBox": false,
+  "showRequestDescription": true,
+  "showResponseDescription": true,
+  "errorCodes": [],
+  "statusCodes": [],
+  "dataExample": [],
+  "endpointSummary": [
+    {
+      "method": "PUT",
+      "path": "/pet"
+    },
+    {
+      "method": "POST",
+      "path": "/pet"
+    },
+    {
+      "method": "GET",
+      "path": "/pet/findByStatus?status=available"
+    },
+    {
+      "method": "GET",
+      "path": "/pet/findByTags?tags="
+    },
+    {
+      "method": "GET",
+      "path": "/pet/{petId}"
+    },
+    {
+      "method": "POST",
+      "path": "/pet/{petId}?name=&status="
+    },
+    {
+      "method": "DELETE",
+      "path": "/pet/{petId}"
+    },
+    {
+      "method": "POST",
+      "path": "/pet/{petId}/uploadImage?additionalMetadata="
+    }
+  ]
+}

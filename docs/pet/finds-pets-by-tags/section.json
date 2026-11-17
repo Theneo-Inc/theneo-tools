@@ -1,0 +1,254 @@
+{
+  "endpoints": {
+    "method": "get",
+    "path": "/pet/findByTags"
+  },
+  "request": {
+    "query": [
+      {
+        "name": "tags",
+        "description": "Tags to filter by",
+        "isRequired": false,
+        "value": "",
+        "valueType": "array",
+        "items": [],
+        "options": {
+          "xml": {
+            "prefix": null
+          }
+        }
+      }
+    ],
+    "body": [],
+    "header": [],
+    "path": [],
+    "contentType": "",
+    "graphqlQuery": "",
+    "codeExamples": [],
+    "_id": "6841fa7f68995b72e33bc817"
+  },
+  "responses": [
+    {
+      "name": "200",
+      "status": "OK",
+      "body": [
+        {
+          "name": "0",
+          "description": "",
+          "isRequired": false,
+          "value": "",
+          "valueType": "array",
+          "items": [
+            {
+              "name": "id",
+              "description": "",
+              "isRequired": false,
+              "value": "10",
+              "valueType": "integer",
+              "items": [],
+              "options": {
+                "format": "int64",
+                "example": "10",
+                "xml": {
+                  "prefix": null
+                }
+              }
+            },
+            {
+              "name": "name",
+              "description": "",
+              "isRequired": true,
+              "value": "doggie",
+              "valueType": "string",
+              "items": [],
+              "options": {
+                "example": "doggie",
+                "xml": {
+                  "prefix": null
+                }
+              }
+            },
+            {
+              "name": "category",
+              "description": "",
+              "isRequired": false,
+              "value": "",
+              "valueType": "object",
+              "items": [
+                {
+                  "name": "id",
+                  "description": "",
+                  "isRequired": false,
+                  "value": "1",
+                  "valueType": "integer",
+                  "items": [],
+                  "options": {
+                    "format": "int64",
+                    "example": "1",
+                    "xml": {
+                      "prefix": null
+                    }
+                  }
+                },
+                {
+                  "name": "name",
+                  "description": "",
+                  "isRequired": false,
+                  "value": "Dogs",
+                  "valueType": "string",
+                  "items": [],
+                  "options": {
+                    "example": "Dogs",
+                    "xml": {
+                      "prefix": null
+                    }
+                  }
+                }
+              ],
+              "options": {
+                "xml": {
+                  "name": "category",
+                  "prefix": null
+                }
+              }
+            },
+            {
+              "name": "photoUrls",
+              "description": "",
+              "isRequired": true,
+              "value": "",
+              "valueType": "array",
+              "items": [
+                {
+                  "name": "0",
+                  "description": "",
+                  "isRequired": false,
+                  "value": "",
+                  "valueType": "array",
+                  "items": [],
+                  "options": {
+                    "xml": {
+                      "wrapped": true,
+                      "prefix": null
+                    }
+                  }
+                }
+              ],
+              "options": {
+                "xml": {
+                  "wrapped": true,
+                  "prefix": null
+                }
+              }
+            },
+            {
+              "name": "tags",
+              "description": "",
+              "isRequired": false,
+              "value": "",
+              "valueType": "array",
+              "items": [
+                {
+                  "name": "0",
+                  "description": "",
+                  "isRequired": false,
+                  "value": "",
+                  "valueType": "array",
+                  "items": [
+                    {
+                      "name": "id",
+                      "description": "",
+                      "isRequired": false,
+                      "value": "",
+                      "valueType": "integer",
+                      "items": [],
+                      "options": {
+                        "format": "int64",
+                        "xml": {
+                          "prefix": null
+                        }
+                      }
+                    },
+                    {
+                      "name": "name",
+                      "description": "",
+                      "isRequired": false,
+                      "value": "",
+                      "valueType": "string",
+                      "items": [],
+                      "options": {
+                        "xml": {
+                          "prefix": null
+                        }
+                      }
+                    }
+                  ],
+                  "options": {
+                    "xml": {
+                      "wrapped": true,
+                      "prefix": null
+                    }
+                  }
+                }
+              ],
+              "options": {
+                "xml": {
+                  "wrapped": true,
+                  "prefix": null
+                }
+              }
+            },
+            {
+              "name": "status",
+              "description": "pet status in the store",
+              "isRequired": false,
+              "value": "available",
+              "valueType": "string",
+              "items": [],
+              "options": {
+                "enumValue": [
+                  {
+                    "value": "available"
+                  },
+                  {
+                    "value": "pending"
+                  },
+                  {
+                    "value": "sold"
+                  }
+                ],
+                "xml": {
+                  "prefix": null
+                }
+              }
+            }
+          ],
+          "options": {
+            "xml": {
+              "prefix": null
+            }
+          }
+        }
+      ],
+      "statusCode": 200,
+      "description": "successful operation",
+      "contentType": "application/json"
+    },
+    {
+      "name": "Invalid tag value",
+      "status": "Bad Request",
+      "body": [],
+      "statusCode": 400,
+      "description": "Invalid tag value",
+      "contentType": "application/json"
+    }
+  ],
+  "showBaseUrl": false,
+  "showLanguageBox": false,
+  "showRequestDescription": true,
+  "showResponseDescription": true,
+  "errorCodes": [],
+  "statusCodes": [],
+  "dataExample": [],
+  "endpointSummary": []
+}

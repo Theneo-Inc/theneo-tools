@@ -1,0 +1,163 @@
+{
+  "endpoints": {
+    "method": "put",
+    "path": "/user/{username}"
+  },
+  "request": {
+    "query": [],
+    "body": [
+      {
+        "name": "id",
+        "description": "",
+        "isRequired": false,
+        "value": "10",
+        "valueType": "integer",
+        "items": [],
+        "options": {
+          "format": "int64",
+          "example": "10",
+          "xml": {
+            "prefix": null
+          }
+        }
+      },
+      {
+        "name": "username",
+        "description": "",
+        "isRequired": false,
+        "value": "theUser",
+        "valueType": "string",
+        "items": [],
+        "options": {
+          "example": "theUser",
+          "xml": {
+            "prefix": null
+          }
+        }
+      },
+      {
+        "name": "firstName",
+        "description": "",
+        "isRequired": false,
+        "value": "John",
+        "valueType": "string",
+        "items": [],
+        "options": {
+          "example": "John",
+          "xml": {
+            "prefix": null
+          }
+        }
+      },
+      {
+        "name": "lastName",
+        "description": "",
+        "isRequired": false,
+        "value": "James",
+        "valueType": "string",
+        "items": [],
+        "options": {
+          "example": "James",
+          "xml": {
+            "prefix": null
+          }
+        }
+      },
+      {
+        "name": "email",
+        "description": "",
+        "isRequired": false,
+        "value": "john@email.com",
+        "valueType": "string",
+        "items": [],
+        "options": {
+          "example": "john@email.com",
+          "xml": {
+            "prefix": null
+          }
+        }
+      },
+      {
+        "name": "password",
+        "description": "",
+        "isRequired": false,
+        "value": "12345",
+        "valueType": "string",
+        "items": [],
+        "options": {
+          "example": "12345",
+          "xml": {
+            "prefix": null
+          }
+        }
+      },
+      {
+        "name": "phone",
+        "description": "",
+        "isRequired": false,
+        "value": "12345",
+        "valueType": "string",
+        "items": [],
+        "options": {
+          "example": "12345",
+          "xml": {
+            "prefix": null
+          }
+        }
+      },
+      {
+        "name": "userStatus",
+        "description": "User Status",
+        "isRequired": false,
+        "value": "1",
+        "valueType": "integer",
+        "items": [],
+        "options": {
+          "format": "int32",
+          "example": "1",
+          "xml": {
+            "prefix": null
+          }
+        }
+      }
+    ],
+    "header": [],
+    "path": [
+      {
+        "name": "username",
+        "description": "name that need to be deleted",
+        "isRequired": true,
+        "value": "",
+        "valueType": "string",
+        "items": [],
+        "options": {
+          "xml": {
+            "prefix": null
+          }
+        }
+      }
+    ],
+    "contentType": "application/json",
+    "graphqlQuery": "",
+    "codeExamples": [],
+    "_id": "6841fa7f68995b72e33bc899"
+  },
+  "responses": [
+    {
+      "name": "successful operation",
+      "status": "default",
+      "body": [],
+      "statusCode": 200,
+      "description": "successful operation",
+      "contentType": "application/json"
+    }
+  ],
+  "showBaseUrl": false,
+  "showLanguageBox": false,
+  "showRequestDescription": true,
+  "showResponseDescription": true,
+  "errorCodes": [],
+  "statusCodes": [],
+  "dataExample": [],
+  "endpointSummary": []
+}

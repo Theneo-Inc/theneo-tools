@@ -1,0 +1,32 @@
+{
+  "endpoints": {
+    "method": "GET",
+    "path": ""
+  },
+  "request": null,
+  "showBaseUrl": false,
+  "showLanguageBox": false,
+  "showRequestDescription": true,
+  "showResponseDescription": true,
+  "errorCodes": [],
+  "statusCodes": [],
+  "dataExample": [],
+  "endpointSummary": [
+    {
+      "method": "GET",
+      "path": "/store/inventory"
+    },
+    {
+      "method": "POST",
+      "path": "/store/order"
+    },
+    {
+      "method": "GET",
+      "path": "/store/order/{orderId}"
+    },
+    {
+      "method": "DELETE",
+      "path": "/store/order/{orderId}"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "endpoints": {
+    "method": "get",
+    "path": "/user/logout"
+  },
+  "request": {
+    "query": [],
+    "body": [],
+    "header": [],
+    "path": [],
+    "contentType": "",
+    "graphqlQuery": "",
+    "codeExamples": [],
+    "_id": "6841fa7f68995b72e33bc88a"
+  },
+  "responses": [
+    {
+      "name": "successful operation",
+      "status": "default",
+      "body": [],
+      "statusCode": 200,
+      "description": "successful operation",
+      "contentType": "application/json"
+    }
+  ],
+  "showBaseUrl": false,
+  "showLanguageBox": false,
+  "showRequestDescription": true,
+  "showResponseDescription": true,
+  "errorCodes": [],
+  "statusCodes": [],
+  "dataExample": [],
+  "endpointSummary": []
+}

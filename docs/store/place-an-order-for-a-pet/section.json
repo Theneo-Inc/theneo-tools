@@ -1,0 +1,246 @@
+{
+  "endpoints": {
+    "method": "post",
+    "path": "/store/order"
+  },
+  "request": {
+    "query": [],
+    "body": [
+      {
+        "name": "id",
+        "description": "",
+        "isRequired": false,
+        "value": "10",
+        "valueType": "integer",
+        "items": [],
+        "options": {
+          "format": "int64",
+          "example": "10",
+          "xml": {
+            "prefix": null
+          }
+        }
+      },
+      {
+        "name": "petId",
+        "description": "",
+        "isRequired": false,
+        "value": "198772",
+        "valueType": "integer",
+        "items": [],
+        "options": {
+          "format": "int64",
+          "example": "198772",
+          "xml": {
+            "prefix": null
+          }
+        }
+      },
+      {
+        "name": "quantity",
+        "description": "",
+        "isRequired": false,
+        "value": "7",
+        "valueType": "integer",
+        "items": [],
+        "options": {
+          "format": "int32",
+          "example": "7",
+          "xml": {
+            "prefix": null
+          }
+        }
+      },
+      {
+        "name": "shipDate",
+        "description": "",
+        "isRequired": false,
+        "value": "",
+        "valueType": "string",
+        "items": [],
+        "options": {
+          "format": "date-time",
+          "xml": {
+            "prefix": null
+          }
+        }
+      },
+      {
+        "name": "status",
+        "description": "Order Status",
+        "isRequired": false,
+        "value": "approved",
+        "valueType": "string",
+        "items": [],
+        "options": {
+          "enumValue": [
+            {
+              "value": "placed"
+            },
+            {
+              "value": "approved"
+            },
+            {
+              "value": "delivered"
+            }
+          ],
+          "example": "approved",
+          "xml": {
+            "prefix": null
+          }
+        }
+      },
+      {
+        "name": "complete",
+        "description": "",
+        "isRequired": false,
+        "value": "",
+        "valueType": "boolean",
+        "items": [],
+        "options": {
+          "xml": {
+            "prefix": null
+          }
+        }
+      }
+    ],
+    "header": [],
+    "path": [],
+    "contentType": "application/json",
+    "graphqlQuery": "",
+    "codeExamples": [],
+    "_id": "6841fa7f68995b72e33bc848"
+  },
+  "responses": [
+    {
+      "name": "200",
+      "status": "OK",
+      "body": [
+        {
+          "name": "id",
+          "description": "",
+          "isRequired": false,
+          "value": "10",
+          "valueType": "integer",
+          "items": [],
+          "options": {
+            "format": "int64",
+            "example": "10",
+            "xml": {
+              "prefix": null
+            }
+          }
+        },
+        {
+          "name": "petId",
+          "description": "",
+          "isRequired": false,
+          "value": "198772",
+          "valueType": "integer",
+          "items": [],
+          "options": {
+            "format": "int64",
+            "example": "198772",
+            "xml": {
+              "prefix": null
+            }
+          }
+        },
+        {
+          "name": "quantity",
+          "description": "",
+          "isRequired": false,
+          "value": "7",
+          "valueType": "integer",
+          "items": [],
+          "options": {
+            "format": "int32",
+            "example": "7",
+            "xml": {
+              "prefix": null
+            }
+          }
+        },
+        {
+          "name": "shipDate",
+          "description": "",
+          "isRequired": false,
+          "value": "",
+          "valueType": "string",
+          "items": [],
+          "options": {
+            "format": "date-time",
+            "xml": {
+              "prefix": null
+            }
+          }
+        },
+        {
+          "name": "status",
+          "description": "Order Status",
+          "isRequired": false,
+          "value": "approved",
+          "valueType": "string",
+          "items": [],
+          "options": {
+            "enumValue": [
+              {
+                "value": "placed"
+              },
+              {
+                "value": "approved"
+              },
+              {
+                "value": "delivered"
+              }
+            ],
+            "example": "approved",
+            "xml": {
+              "prefix": null
+            }
+          }
+        },
+        {
+          "name": "complete",
+          "description": "",
+          "isRequired": false,
+          "value": "",
+          "valueType": "boolean",
+          "items": [],
+          "options": {
+            "xml": {
+              "prefix": null
+            }
+          }
+        }
+      ],
+      "statusCode": 200,
+      "description": "successful operation",
+      "contentType": "application/json"
+    },
+    {
+      "name": "Invalid input",
+      "status": "Bad Request",
+      "body": [],
+      "statusCode": 400,
+      "description": "Invalid input",
+      "contentType": "application/json"
+    },
+    {
+      "name": "Validation exception",
+      "status": "422",
+      "body": [],
+      "statusCode": 422,
+      "description": "Validation exception",
+      "contentType": "application/json"
+    }
+  ],
+  "showBaseUrl": false,
+  "showLanguageBox": false,
+  "showRequestDescription": true,
+  "showResponseDescription": true,
+  "errorCodes": [],
+  "statusCodes": [],
+  "dataExample": [],
+  "endpointSummary": []
+}

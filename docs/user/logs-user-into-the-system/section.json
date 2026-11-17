@@ -1,0 +1,69 @@
+{
+  "endpoints": {
+    "method": "get",
+    "path": "/user/login"
+  },
+  "request": {
+    "query": [
+      {
+        "name": "username",
+        "description": "The user name for login",
+        "isRequired": false,
+        "value": "",
+        "valueType": "string",
+        "items": [],
+        "options": {
+          "xml": {
+            "prefix": null
+          }
+        }
+      },
+      {
+        "name": "password",
+        "description": "The password for login in clear text",
+        "isRequired": false,
+        "value": "",
+        "valueType": "string",
+        "items": [],
+        "options": {
+          "xml": {
+            "prefix": null
+          }
+        }
+      }
+    ],
+    "body": [],
+    "header": [],
+    "path": [],
+    "contentType": "",
+    "graphqlQuery": "",
+    "codeExamples": [],
+    "_id": "6841fa7f68995b72e33bc886"
+  },
+  "responses": [
+    {
+      "name": "200",
+      "status": "OK",
+      "body": [],
+      "statusCode": 200,
+      "description": "successful operation",
+      "contentType": "application/json"
+    },
+    {
+      "name": "Invalid username/password supplied",
+      "status": "Bad Request",
+      "body": [],
+      "statusCode": 400,
+      "description": "Invalid username/password supplied",
+      "contentType": "application/json"
+    }
+  ],
+  "showBaseUrl": false,
+  "showLanguageBox": false,
+  "showRequestDescription": true,
+  "showResponseDescription": true,
+  "errorCodes": [],
+  "statusCodes": [],
+  "dataExample": [],
+  "endpointSummary": []
+}

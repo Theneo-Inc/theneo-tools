@@ -46,7 +46,7 @@ Before you begin, ensure you have met the following requirements:
    cd theneo-tools
    ```
 
-2. Install cli from the repository
+2. Install the CLI from the repository:
    ```shell
    npm run cli
    ```
